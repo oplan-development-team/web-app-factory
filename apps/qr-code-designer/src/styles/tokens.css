@@ -1,0 +1,90 @@
+/*
+ * Design tokens — "print studio" direction.
+ *
+ * Warm paper ground, deep warm ink, one vermilion accent that is only ever used
+ * to mean "selected" or "attention". Nothing here is decorative-by-default.
+ */
+
+:root {
+  /* --- surfaces ---------------------------------------------------------- */
+  --paper: oklch(97.4% 0.009 85);
+  --paper-raised: oklch(99.4% 0.004 85);
+  --paper-sunk: oklch(93.8% 0.013 82);
+  --paper-deep: oklch(90.5% 0.016 80);
+
+  /* --- ink --------------------------------------------------------------- */
+  --ink: oklch(21% 0.016 55);
+  --ink-soft: oklch(44% 0.014 55);
+  --ink-faint: oklch(60% 0.012 60);
+  --ink-ghost: oklch(72% 0.010 65);
+
+  /* --- lines ------------------------------------------------------------- */
+  --rule: oklch(88.5% 0.011 80);
+  --rule-strong: oklch(80% 0.015 78);
+
+  /* --- accent ------------------------------------------------------------ */
+  --accent: oklch(55% 0.192 32);
+  --accent-hover: oklch(49% 0.19 32);
+  --accent-wash: oklch(95.5% 0.032 40);
+  --accent-line: oklch(80% 0.09 35);
+
+  /* --- semantic status --------------------------------------------------- */
+  --ok: oklch(50% 0.128 155);
+  --ok-wash: oklch(95.5% 0.032 155);
+  --warn: oklch(56% 0.128 72);
+  --warn-wash: oklch(96% 0.045 80);
+  --risk: oklch(52% 0.203 27);
+  --risk-wash: oklch(95.5% 0.036 27);
+
+  /* --- typography -------------------------------------------------------- */
+  --font-display: 'Instrument Serif', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  --font-ui: 'Manrope Variable', 'Manrope', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
+    'Yu Gothic', 'Noto Sans JP', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', monospace;
+
+  --text-micro: 0.6875rem;
+  --text-tiny: 0.75rem;
+  --text-small: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lead: 1.0625rem;
+  --text-title: clamp(1.5rem, 1.1rem + 1.4vw, 2.125rem);
+  --text-display: clamp(2.4rem, 1.4rem + 4vw, 4.5rem);
+
+  --tracking-label: 0.13em;
+  --tracking-tight: -0.015em;
+
+  /* --- rhythm ------------------------------------------------------------
+   * Deliberately non-uniform: sections breathe, controls inside them do not.
+   */
+  --gap-hairline: 0.25rem;
+  --gap-tight: 0.5rem;
+  --gap-control: 0.875rem;
+  --gap-group: 1.5rem;
+  --gap-section: clamp(2rem, 1.4rem + 2vw, 3.25rem);
+  --pad-rail: clamp(1.125rem, 0.6rem + 2vw, 2rem);
+
+  /* --- form ------------------------------------------------------------- */
+  --radius-xs: 4px;
+  --radius-sm: 7px;
+  --radius-md: 11px;
+  --radius-lg: 18px;
+  --control-h: 2.375rem;
+
+  /* --- depth ------------------------------------------------------------- */
+  --shadow-hairline: 0 0 0 1px oklch(20% 0.02 60 / 0.07);
+  --shadow-raised: 0 1px 1px oklch(20% 0.02 60 / 0.04), 0 3px 8px -3px oklch(20% 0.02 60 / 0.1);
+  --shadow-lifted: 0 2px 3px oklch(20% 0.02 60 / 0.05), 0 12px 28px -10px oklch(20% 0.02 60 / 0.18);
+  --shadow-proof: 0 1px 2px oklch(20% 0.02 60 / 0.06), 0 18px 44px -18px oklch(20% 0.02 60 / 0.26);
+
+  /* --- motion ------------------------------------------------------------ */
+  --dur-fast: 120ms;
+  --dur-normal: 220ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 1ms;
+    --dur-normal: 1ms;
+  }
+}

@@ -1,0 +1,223 @@
+/* ---------------------------------------------------------------------------
+ * Shell — a printer's proof sheet on a cutting mat.
+ * ------------------------------------------------------------------------- */
+
+.shell {
+  --shell-inline: clamp(1rem, 0.4rem + 2.6vw, 3.5rem);
+  /* Capped well short of the viewport: a QR proof gains nothing from being
+   * 800px wide, and a narrower measure keeps the rail readable. */
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 1rem + 2vw, 3rem) var(--shell-inline) 4rem;
+}
+
+/* --- masthead ------------------------------------------------------------ */
+
+.masthead {
+  display: grid;
+  gap: var(--gap-group);
+  align-items: end;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--gap-section);
+}
+
+@media (min-width: 900px) {
+  .masthead {
+    grid-template-columns: 1fr auto;
+    gap: 2.5rem;
+  }
+}
+
+.masthead__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-display);
+  line-height: 0.92;
+  letter-spacing: var(--tracking-tight);
+}
+
+.masthead__title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.masthead__tagline {
+  margin-top: 0.75rem;
+  max-width: 34ch;
+  color: var(--ink-soft);
+  font-size: var(--text-lead);
+  text-wrap: balance;
+}
+
+.privacy {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  max-width: 30rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--radius-lg);
+  background: var(--accent-wash);
+  color: var(--ink);
+  font-size: var(--text-small);
+  line-height: 1.45;
+}
+
+.privacy__mark svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke: var(--accent);
+}
+
+/* --- two-column layout --------------------------------------------------- */
+
+.layout {
+  display: grid;
+  gap: var(--gap-section);
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 25rem);
+    gap: clamp(2rem, 1rem + 3vw, 3.5rem);
+  }
+
+  .stage {
+    position: sticky;
+    top: 1.5rem;
+  }
+}
+
+/* --- proof sheet --------------------------------------------------------- */
+
+.stage {
+  margin: 0;
+  display: grid;
+  gap: var(--gap-control);
+}
+
+.proof {
+  position: relative;
+  padding: 15px;
+}
+
+.proof__trim {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  pointer-events: none;
+}
+
+.proof__trim[data-corner='tl'] {
+  top: 0;
+  left: 0;
+  border-top: 1px solid var(--rule-strong);
+  border-left: 1px solid var(--rule-strong);
+}
+
+.proof__trim[data-corner='tr'] {
+  top: 0;
+  right: 0;
+  border-top: 1px solid var(--rule-strong);
+  border-right: 1px solid var(--rule-strong);
+}
+
+.proof__trim[data-corner='bl'] {
+  bottom: 0;
+  left: 0;
+  border-bottom: 1px solid var(--rule-strong);
+  border-left: 1px solid var(--rule-strong);
+}
+
+.proof__trim[data-corner='br'] {
+  bottom: 0;
+  right: 0;
+  border-bottom: 1px solid var(--rule-strong);
+  border-right: 1px solid var(--rule-strong);
+}
+
+.proof__sheet {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-proof);
+  /* Checkerboard so a transparent background reads as transparent. */
+  background-color: var(--paper-raised);
+  background-image:
+    linear-gradient(45deg, var(--paper-deep) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--paper-deep) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--paper-deep) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--paper-deep) 75%);
+  background-size: 18px 18px;
+  background-position:
+    0 0,
+    0 9px,
+    9px -9px,
+    -9px 0;
+}
+
+.proof__qr {
+  width: 100%;
+  height: 100%;
+}
+
+.proof__empty {
+  max-width: 26ch;
+  padding: 2rem;
+  text-align: center;
+  background: var(--paper-raised);
+  border-radius: var(--radius-sm);
+}
+
+.proof__empty-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.proof__empty-body {
+  color: var(--ink-soft);
+  font-size: var(--text-small);
+  line-height: 1.6;
+}
+
+.proof__empty-body + .proof__empty-body {
+  margin-top: 0.5rem;
+}
+
+.stage__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 15px;
+  color: var(--ink-faint);
+  font-size: var(--text-tiny);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.stage__auto {
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+/* --- colophon ------------------------------------------------------------ */
+
+.colophon {
+  margin-top: var(--gap-section);
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  color: var(--ink-faint);
+  font-size: var(--text-tiny);
+}
