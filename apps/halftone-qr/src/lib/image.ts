@@ -20,6 +20,16 @@ export interface LoadedImage {
   width: number;
   height: number;
   name: string;
+  /**
+   * サムネイル表示用の ObjectURL。表示している間は必要なので保持し、
+   * 画像を差し替える・消すタイミングで releaseImage() で解放する（NFR-001.5）。
+   */
+  previewUrl: string;
+}
+
+/** 使い終わった画像の ObjectURL を解放する */
+export function releaseImage(image: LoadedImage | null): void {
+  if (image) URL.revokeObjectURL(image.previewUrl);
 }
 
 export type LoadResult =
@@ -65,11 +75,16 @@ export async function loadImageFile(file: File): Promise<LoadResult> {
 
     const width = element.naturalWidth || SVG_FALLBACK_SIZE;
     const height = element.naturalHeight || SVG_FALLBACK_SIZE;
-    return { ok: true, image: { element, width, height, name: file.name } };
+    return {
+      ok: true,
+      image: { element, width, height, name: file.name, previewUrl: url },
+    };
   } catch {
-    return { ok: false, message: '画像を読み込めませんでした。ファイルが壊れている可能性があります。' };
-  } finally {
     URL.revokeObjectURL(url);
+    return {
+      ok: false,
+      message: '画像を読み込めませんでした。ファイルが壊れている可能性があります。',
+    };
   }
 }
 

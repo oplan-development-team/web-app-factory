@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { halftone, subGridSize, upscalePlain } from '../lib/halftone';
-import { loadImageFile, sampleToGrid, type LoadedImage } from '../lib/image';
+import { loadImageFile, releaseImage, sampleToGrid, type LoadedImage } from '../lib/image';
 import { buildProtectMask, generateMatrix, type QrMatrix } from '../lib/qr';
 import { resolvePreset } from '../lib/export';
 import {
@@ -123,7 +123,10 @@ export function useHalftoneQr(): HalftoneQrModel {
     const result = await loadImageFile(file);
     setLoadingImage(false);
     if (result.ok) {
-      setImage(result.image);
+      setImage((previous) => {
+        releaseImage(previous);
+        return result.image;
+      });
       setImageError(null);
     } else {
       // 読み込みに失敗しても既存の画像は保持する（SPEC E-05）
@@ -132,7 +135,10 @@ export function useHalftoneQr(): HalftoneQrModel {
   }, []);
 
   const clearImage = useCallback(() => {
-    setImage(null);
+    setImage((previous) => {
+      releaseImage(previous);
+      return null;
+    });
     setImageError(null);
   }, []);
 
