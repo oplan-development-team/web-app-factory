@@ -29,7 +29,7 @@
 - [x] **T11** `hooks/useHalftoneQr.ts` / `useDebouncedValue.ts`: 状態管理とパイプライン結線、再計算粒度のメモ化 — FR-007.2, NFR-003.4
 - [x] **T12** `components/ImageDropzone.tsx`: D&D・ファイル選択・キーボード操作・検証エラー — FR-003
 - [x] **T13** 制御レール UI（テキスト入力 / ECC / アライメント / 階調 / λ / 保護レベル） — FR-001, FR-002, FR-004, FR-005, FR-006.6, FR-006.7
-- [ ] **T14** `components/ComparePreview.tsx`: 通常 QR とハーフトーン QR の 2 面比較 — FR-007
+- [x] **T14** `components/ComparePreview.tsx`: 通常 QR とハーフトーン QR の 2 面比較 — FR-007
 - [ ] **T15** `components/ScanPanel.tsx`: 判定結果・条件マトリクス表示・改善助言・実機テスト注意書き — FR-008.4, FR-008.7, FR-008.8, FR-010.2
 - [ ] **T16** `components/ExportPanel.tsx` + プライバシー表記 — FR-009, FR-010.3
 - [ ] **T17** `App.tsx` とレイアウト CSS の統合。レスポンシブ（360/768/1024/1440）と a11y の仕上げ — NFR-004, NFR-005
