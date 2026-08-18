@@ -7,7 +7,7 @@
 
 ## Phase A — 基盤
 
-- [ ] **T01** Vite + React + TS を scaffold。`base: './'`、npm scripts、tsconfig、.gitignore を設定 — NFR-002, NFR-007.3
+- [x] **T01** Vite + React + TS を scaffold。`base: './'`、npm scripts、tsconfig、.gitignore を設定 — NFR-002, NFR-007.3
 - [ ] **T02** デザイントークン（`tokens.css`）とグローバルスタイル（`global.css`）を定義。フォントを同梱 — NFR-006, NFR-005.6
 
 ## Phase B — コアロジック
