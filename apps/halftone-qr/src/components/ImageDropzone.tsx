@@ -88,6 +88,12 @@ export function ImageDropzone({
         className="visually-hidden"
         type="file"
         accept={ACCEPT_ATTRIBUTE}
+        /*
+         * 目に見えない位置にあるので、Tab の順路からは外す。
+         * 操作の入口はドロップゾーンの button 側が担っている。
+         */
+        tabIndex={-1}
+        aria-hidden="true"
         onChange={(event) => {
           handleFiles(event.target.files);
           // 同じファイルを選び直しても change が飛ぶようにする

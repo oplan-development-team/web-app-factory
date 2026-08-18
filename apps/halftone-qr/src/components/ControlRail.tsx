@@ -93,7 +93,32 @@ export function ControlRail(model: HalftoneQrModel) {
         />
       </Section>
 
-      <Section step="03" title="トリミング">
+      {/*
+        ハーフトーンをトリミング・階調より前に置いている。このアプリの主役の
+        操作であり、制御レールが内部スクロールする幅では、後ろに置くと
+        初期表示で見えない位置に落ちてしまうため。
+      */}
+      <Section step="03" title="ハーフトーン">
+        <Slider
+          label="QR らしさ"
+          value={settings.halftone.qrness}
+          min={0}
+          max={1}
+          step={0.01}
+          onChange={(qrness) => model.patchHalftone({ qrness })}
+          format={(value) => `${Math.round(value * 100)}%`}
+          hint="上げるほど元の QR に近づき読み取りが安定します。下げるほど画像がはっきり出ます。"
+        />
+        <SegmentedControl
+          label="機能パターンの保護"
+          value={settings.halftone.protect}
+          options={PROTECT_OPTIONS}
+          onChange={(protect) => model.patchHalftone({ protect })}
+          hint={PROTECT_HINTS[settings.halftone.protect]}
+        />
+      </Section>
+
+      <Section step="04" title="トリミング">
         <Slider
           label="ズーム"
           value={settings.image.zoom}
@@ -126,7 +151,7 @@ export function ControlRail(model: HalftoneQrModel) {
         </button>
       </Section>
 
-      <Section step="04" title="階調">
+      <Section step="05" title="階調">
         <Slider
           label="明度"
           value={settings.image.brightness}
@@ -150,26 +175,6 @@ export function ControlRail(model: HalftoneQrModel) {
           label="白黒を反転"
           checked={settings.image.invert}
           onChange={(invert) => model.patchImageAdjust({ invert })}
-        />
-      </Section>
-
-      <Section step="05" title="ハーフトーン">
-        <Slider
-          label="QR らしさ"
-          value={settings.halftone.qrness}
-          min={0}
-          max={1}
-          step={0.01}
-          onChange={(qrness) => model.patchHalftone({ qrness })}
-          format={(value) => `${Math.round(value * 100)}%`}
-          hint="上げるほど元の QR に近づき読み取りが安定します。下げるほど画像がはっきり出ます。"
-        />
-        <SegmentedControl
-          label="機能パターンの保護"
-          value={settings.halftone.protect}
-          options={PROTECT_OPTIONS}
-          onChange={(protect) => model.patchHalftone({ protect })}
-          hint={PROTECT_HINTS[settings.halftone.protect]}
         />
       </Section>
     </div>
