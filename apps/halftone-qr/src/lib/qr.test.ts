@@ -131,12 +131,17 @@ describe('classifyRoles', () => {
 
   it('assigns a role to every module', () => {
     const known = new Set(Object.values(Role) as number[]);
+    // 要素ごとに expect を呼ぶと 60 万回になり実行時間が跳ねるので、集計してから 1 回だけ判定する
+    const offenders: string[] = [];
     for (let version = 1; version <= 40; version += 2) {
       const size = 4 * version + 17;
       const roles = classifyRoles(size, version);
       expect(roles).toHaveLength(size * size);
-      for (const role of roles) expect(known.has(role)).toBe(true);
+      for (const role of roles) {
+        if (!known.has(role)) offenders.push(`v${version}:${role}`);
+      }
     }
+    expect(offenders).toEqual([]);
   });
 
   it('leaves the majority of a large symbol as data', () => {

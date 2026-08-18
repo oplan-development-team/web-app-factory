@@ -21,7 +21,7 @@
 
 ## Phase C — 読み取り判定
 
-- [ ] **T09** `workers/decode.worker.ts` + `lib/scan.ts`: 9 条件マトリクス、箱ぼかし、ZXing 実デコード、判定グレード算出 — FR-008, PLAN §3.3
+- [x] **T09** `workers/decode.worker.ts` + `lib/scan.ts` + `lib/decodeTrials.ts`: 9 条件マトリクス、箱ぼかし、ZXing 実デコード、判定グレード算出 — FR-008, PLAN §3.3
 - [ ] **T10** `hooks/useScanReport.ts`: Worker ライフサイクル、デバウンス、レース制御、失敗時フォールバック — FR-008.5, FR-008.6, FR-008.9
 
 ## Phase D — UI
