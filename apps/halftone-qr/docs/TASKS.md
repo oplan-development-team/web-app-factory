@@ -36,5 +36,5 @@
 
 ## Phase E — 検証
 
-- [ ] **T18** README 執筆（技術選定理由・使い方・制約） — CLAUDE.md 規約
+- [x] **T18** README 執筆（技術選定理由・使い方・制約） — CLAUDE.md 規約
 - [ ] **T19** 最終検証: `npm test` / `npm run build` / 外部通信コード不在 grep / Playwright 実ブラウザ検証 / 書き出し PNG の独立デコード — AC-05, AC-09〜AC-13
