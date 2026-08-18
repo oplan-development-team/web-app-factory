@@ -13,7 +13,7 @@
 ## Phase B — コアロジック
 
 - [x] **T03** `lib/types.ts`: 設定型・既定値 `DEFAULT_SETTINGS` を定義 — FR-002〜FR-009
-- [ ] **T04** `lib/qr.ts`: `generateMatrix(text, ecc)`（UTF-8・容量超過を Result 型で返す）と機能パターン分類 `roles` を実装 — FR-001.2, FR-001.5, FR-002, PLAN §3.1
+- [x] **T04** `lib/qr.ts`: `generateMatrix(text, ecc)`（UTF-8・容量超過を Result 型で返す）と機能パターン分類 `roles` を実装 — FR-001.2, FR-001.5, FR-002, PLAN §3.1
 - [ ] **T05** `lib/image.ts`: 画像読み込み・cover 配置・zoom/offset・グレースケール・明度/コントラスト/反転・透明の白合成 — FR-003.6, FR-004, FR-005
 - [ ] **T06** `lib/halftone.ts`: 3×3 分解 + λ バイアス + 保護マスク + 蛇行 Floyd–Steinberg。**中央固定の不変条件テストを全数で書く** — FR-006, NFR-007.2
 - [ ] **T07** `lib/render.ts`: サブモジュールグリッド → ImageData / canvas 描画（クワイエットゾーン込み） — FR-007.4, FR-009.4
