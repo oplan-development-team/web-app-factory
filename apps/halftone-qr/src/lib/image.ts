@@ -158,12 +158,16 @@ export function applyTone(
  * 画像を size×size のグリッドへ再サンプリングし、階調調整済みの輝度配列を返す。
  * size は 3N（サブモジュール解像度）で呼ばれる。
  */
+// スライダー操作のたびに呼ばれるので、作業用 canvas は使い回す（NFR-003.2）
+let workCanvas: HTMLCanvasElement | null = null;
+
 export function sampleToGrid(
   image: LoadedImage,
   size: number,
   adjust: ImageAdjust,
 ): Float32Array {
-  const canvas = document.createElement('canvas');
+  workCanvas ??= document.createElement('canvas');
+  const canvas = workCanvas;
   canvas.width = size;
   canvas.height = size;
 
