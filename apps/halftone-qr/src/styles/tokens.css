@@ -1,0 +1,109 @@
+/*
+ * Design tokens — "Darkroom / Print-shop" direction (SPEC NFR-006, PLAN §4).
+ *
+ * ハーフトーンは印刷技術由来の概念なので、製版・刷版の作業台を思わせる方向に寄せている。
+ * 生成りの紙色を地、インク墨を文字、トンボの朱をアクセント 1 色に限定する。
+ * 朱は「現在値・アクティブ・警告」の意味にのみ使い、装飾では使わない。
+ */
+
+:root {
+  /* --- Palette: paper (warm off-white, 生成り) --- */
+  --paper-000: oklch(98.6% 0.006 85);
+  --paper-100: oklch(96.4% 0.009 85);
+  --paper-200: oklch(93.4% 0.012 85);
+  --paper-300: oklch(88.5% 0.014 85);
+
+  /* --- Palette: ink --- */
+  --ink-900: oklch(18% 0.014 265);
+  --ink-800: oklch(24% 0.014 265);
+  --ink-700: oklch(31% 0.012 265);
+  --ink-500: oklch(45% 0.010 265);
+  --ink-300: oklch(64% 0.008 265);
+  --ink-200: oklch(76% 0.006 265);
+
+  /* --- Palette: registration mark vermilion (accent, 1 色のみ) --- */
+  --mark-600: oklch(50% 0.18 32);
+  --mark-500: oklch(57% 0.19 32);
+  --mark-100: oklch(93% 0.045 32);
+
+  /* --- Palette: status --- */
+  --signal-good: oklch(48% 0.12 155);
+  --signal-good-bg: oklch(94% 0.04 155);
+  --signal-warn: oklch(52% 0.12 75);
+  --signal-warn-bg: oklch(94.5% 0.05 85);
+
+  /* --- Semantic --- */
+  --color-bg: var(--paper-100);
+  --color-surface: var(--paper-000);
+  --color-surface-alt: var(--paper-200);
+  --color-stage: oklch(27% 0.016 265);
+  --color-stage-line: oklch(37% 0.016 265);
+  --color-text: var(--ink-900);
+  --color-text-soft: var(--ink-700);
+  --color-text-muted: var(--ink-500);
+  --color-text-on-stage: oklch(88% 0.008 85);
+  --color-text-on-stage-muted: oklch(70% 0.010 85);
+  --color-border: var(--paper-300);
+  --color-border-strong: var(--ink-200);
+  --color-accent: var(--mark-500);
+  --color-accent-strong: var(--mark-600);
+  --color-accent-bg: var(--mark-100);
+  --color-focus: oklch(52% 0.19 255);
+
+  /* --- Typography --- */
+  --font-display: 'Archivo Variable', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic',
+    system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Hiragino Sans', 'Noto Sans JP', ui-monospace,
+    monospace;
+
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1.0625rem;
+  --text-lg: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  --text-xl: clamp(1.75rem, 1.3rem + 2vw, 2.75rem);
+  --text-display: clamp(2.5rem, 1.4rem + 4.6vw, 4.75rem);
+
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.08em;
+  --tracking-caps: 0.14em;
+
+  /* --- Space (4px base, 不均一なリズムを意図して使う) --- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+
+  /* --- Radii: 印刷物らしく浅め。丸っこくしない --- */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 8px;
+
+  /* --- Elevation --- */
+  --shadow-panel: 0 1px 2px oklch(20% 0.02 265 / 0.05),
+    0 8px 24px -12px oklch(20% 0.02 265 / 0.18);
+  --shadow-stage: inset 0 1px 3px oklch(0% 0 0 / 0.5);
+  --shadow-lift: 0 2px 4px oklch(20% 0.02 265 / 0.08),
+    0 12px 32px -16px oklch(20% 0.02 265 / 0.3);
+
+  /* --- Motion --- */
+  --duration-fast: 120ms;
+  --duration-normal: 220ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- Layout --- */
+  --rail-width: 21.25rem;
+  --shell-max: 88rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+  }
+}
