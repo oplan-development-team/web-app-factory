@@ -45,5 +45,8 @@ export const POSTER_CSS = `
 .footer-text { font-family: var(--font-mono); font-size: 11.5px; fill: var(--ink-mid); }
 
 .editable { cursor: text; }
-.editable:hover { fill: var(--red); }
+.editable:hover, .editable:focus { fill: var(--red); }
+.editable:focus { outline: none; }
+
+.skeleton-horizon { fill: none; stroke: var(--ink-faint); stroke-width: 2.2; }
 `;
