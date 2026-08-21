@@ -1,4 +1,5 @@
 import type { PosterInputs } from '../types';
+import { requireElement } from './dom';
 
 export interface FormElements {
   form: HTMLFormElement;
@@ -11,17 +12,16 @@ export interface FormElements {
   constellations: HTMLInputElement;
 }
 
-export function queryFormElements(): FormElements {
-  const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+export function queryFormElements(doc: Document): FormElements {
   return {
-    form: byId<HTMLFormElement>('input-form'),
-    date: byId<HTMLInputElement>('input-date'),
-    time: byId<HTMLInputElement>('input-time'),
-    offset: byId<HTMLInputElement>('input-offset'),
-    lat: byId<HTMLInputElement>('input-lat'),
-    lon: byId<HTMLInputElement>('input-lon'),
-    place: byId<HTMLInputElement>('input-place'),
-    constellations: byId<HTMLInputElement>('input-constellations'),
+    form: requireElement(doc, 'input-form', 'form'),
+    date: requireElement(doc, 'input-date', 'input'),
+    time: requireElement(doc, 'input-time', 'input'),
+    offset: requireElement(doc, 'input-offset', 'input'),
+    lat: requireElement(doc, 'input-lat', 'input'),
+    lon: requireElement(doc, 'input-lon', 'input'),
+    place: requireElement(doc, 'input-place', 'input'),
+    constellations: requireElement(doc, 'input-constellations', 'input'),
   };
 }
 

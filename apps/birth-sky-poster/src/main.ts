@@ -12,17 +12,16 @@ import { EDITABLE_IDS, defaultDateLine, defaultPlaceLine, defaultTitle } from '.
 import { enableInlineEditing } from './render/editableText';
 import { exportPngFile, exportSvgFile } from './render/exportImage';
 import { fillDefaultValues, queryFormElements, readInputs } from './ui/form';
+import { requireElement } from './ui/dom';
 import { requestCurrentPosition } from './ui/geolocation';
 
 const stars = starsData as StarRecord[];
 const constellations = constellationsData as ConstellationRecord[];
 
-const formEl = queryFormElements();
+const formEl = queryFormElements(document);
 fillDefaultValues(formEl);
 
-const mountEl = document.getElementById('poster-mount');
-if (!mountEl) throw new Error('poster-mount element was not found in the document.');
-const mount: HTMLElement = mountEl;
+const mount = requireElement(document, 'poster-mount', 'div');
 
 // Tracks whether the user has manually overridden each editable poster
 // text field; while untouched, the field keeps regenerating from inputs.
@@ -61,8 +60,8 @@ function render(): void {
 formEl.form.addEventListener('input', render);
 formEl.form.addEventListener('change', render);
 
-const geoBtn = document.getElementById('geolocate-btn') as HTMLButtonElement;
-const geoStatus = document.getElementById('geolocate-status') as HTMLElement;
+const geoBtn = requireElement(document, 'geolocate-btn', 'button');
+const geoStatus = requireElement(document, 'geolocate-status', 'p');
 
 geoBtn.addEventListener('click', async () => {
   geoStatus.textContent = '現在地を取得中…';
@@ -80,9 +79,9 @@ geoBtn.addEventListener('click', async () => {
   }
 });
 
-const pngScaleSelect = document.getElementById('png-scale') as HTMLSelectElement;
-const exportPngBtn = document.getElementById('export-png') as HTMLButtonElement;
-const exportSvgBtn = document.getElementById('export-svg') as HTMLButtonElement;
+const pngScaleSelect = requireElement(document, 'png-scale', 'select');
+const exportPngBtn = requireElement(document, 'export-png', 'button');
+const exportSvgBtn = requireElement(document, 'export-svg', 'button');
 
 function exportFilenameBase(): string {
   const slug = (overrides.placeLine || 'chart').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
