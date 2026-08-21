@@ -48,7 +48,10 @@ export const POSTER_CSS = `
 
 .legend-label { font-family: var(--font-sans); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; fill: var(--ink-mid); }
 .legend-value { font-family: var(--font-mono); font-size: 21px; fill: var(--ink); }
-.footer-text { font-family: var(--font-mono); font-size: 11.5px; fill: var(--ink-mid); }
+/* Sans, not mono: the footer is running Japanese prose, and the monospace
+   face carries no CJK glyphs, so half of each sentence fell back to a system
+   font mid-line. */
+.footer-text { font-family: var(--font-sans); font-size: 11.5px; fill: var(--ink-mid); }
 
 .editable { cursor: text; }
 /* An SVG <text> only receives pointer events on its glyph outlines by default,

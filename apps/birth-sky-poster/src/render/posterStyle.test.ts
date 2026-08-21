@@ -71,7 +71,6 @@ describe('typographic split', () => {
     '.star-label',
     '.date-text',
     '.place-text',
-    '.footer-text',
     '.title-subtext',
     '.ring-degree-label',
     '.alt-ring-label',
@@ -79,7 +78,7 @@ describe('typographic split', () => {
     expect(familyVariableOf(selector)).toBe('var(--font-mono)');
   });
 
-  it.each(['.title-text', '.legend-label', '.ring-cardinal-label'])(
+  it.each(['.title-text', '.legend-label', '.ring-cardinal-label', '.footer-text'])(
     'sets %s in the sans face',
     (selector) => {
       expect(familyVariableOf(selector)).toBe('var(--font-sans)');
