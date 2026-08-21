@@ -5,15 +5,11 @@
  * poster's visual system (Swiss/instrument-plate direction: paper ground,
  * near-black ink, one functional red accent).
  */
+import { tokenDeclarations } from './tokens';
+
 export const POSTER_CSS = `
 .poster-root {
-  --paper: #f1efe7;
-  --ink: #17160f;
-  --ink-mid: #58564a;
-  --ink-faint: #c1bdaf;
-  --red: #bd2a26;
-  --font-sans: 'Inter Variable', 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', 'Roboto Mono', ui-monospace, Menlo, Consolas, monospace;
+  ${tokenDeclarations()}
 }
 .poster-bg { fill: var(--paper); }
 .poster-root text { font-family: var(--font-sans); fill: var(--ink); }

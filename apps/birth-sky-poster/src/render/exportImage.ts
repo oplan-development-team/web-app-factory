@@ -1,5 +1,6 @@
 import { getEmbeddedFontCss } from './embedFonts';
 import { POSTER_H, POSTER_W } from './layout';
+import { COLORS } from './tokens';
 
 function triggerDownload(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
@@ -51,7 +52,10 @@ export async function exportPngFile(
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas 2D context is unavailable in this browser.');
 
-    ctx.fillStyle = '#f1efe7';
+    // Paint the paper ground first: PNG output must be opaque for print use
+    // (FR-008.3), and the SVG's own background rect is not guaranteed to have
+    // painted by the time drawImage composites.
+    ctx.fillStyle = COLORS.paper;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
