@@ -27,15 +27,13 @@ const UNIX_EPOCH_JD = 2_440_587.5;
  * instant expressed as milliseconds since the Unix epoch.
  */
 export function toUtcMillis(input: LocalDateTimeInput): number {
-  const wallClockAsUtcMillis = Date.UTC(
-    input.year,
-    input.month - 1,
-    input.day,
-    input.hour,
-    input.minute,
-    0,
-  );
-  return wallClockAsUtcMillis - input.utcOffsetHours * 3_600_000;
+  const wallClock = new Date(0);
+  wallClock.setUTCFullYear(input.year, input.month - 1, input.day);
+  wallClock.setUTCHours(input.hour, input.minute, 0, 0);
+  // setUTCFullYear rather than Date.UTC: the latter maps years 0-99 onto
+  // 1900-1999, which would silently relocate any chart for those years by a
+  // century. The spec accepts years 1-9999 (FR-001.3).
+  return wallClock.getTime() - input.utcOffsetHours * 3_600_000;
 }
 
 /** Julian Date for a given UTC instant. */
