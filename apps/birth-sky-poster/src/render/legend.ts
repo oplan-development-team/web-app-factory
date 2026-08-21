@@ -1,5 +1,6 @@
 import type { ComputedSky } from '../astro/compute';
 import type { PosterInputs, PosterTextOverrides } from '../types';
+import { MAGNITUDE_LIMIT } from '../catalog';
 import { svgEl, svgText } from './svg-utils';
 import {
   FOOTER_TOP,
@@ -15,9 +16,9 @@ import {
   formatDate,
   formatLat,
   formatLon,
+  formatSiderealTime,
   formatUtcOffset,
 } from './format';
-import { formatSiderealTime } from '../astro/time';
 
 export const EDITABLE_IDS = {
   title: 'poster-editable-title',
@@ -82,7 +83,7 @@ function buildFields(inputs: PosterInputs, sky: ComputedSky): LegendField[] {
     { label: 'JULIAN DATE', value: sky.jd.toFixed(5) },
     { label: 'GREENWICH SIDEREAL TIME', value: formatSiderealTime(sky.gstDeg) },
     { label: 'LOCAL SIDEREAL TIME', value: formatSiderealTime(sky.lstDeg) },
-    { label: 'STARS SHOWN (≤ 4.5m)', value: String(sky.stars.length) },
+    { label: `STARS SHOWN (≤ ${MAGNITUDE_LIMIT}m)`, value: String(sky.stars.length) },
   ];
 }
 
@@ -100,11 +101,10 @@ export function buildLegend(inputs: PosterInputs, sky: ComputedSky): SVGGElement
   );
 
   const fields = buildFields(inputs, sky);
-  for (let i = 0; i < fields.length; i++) {
+  for (const [i, field] of fields.entries()) {
     const row = Math.floor(i / LEGEND_COLS);
     const col = i % LEGEND_COLS;
     const cell = legendCell(row, col);
-    const field = fields[i];
 
     g.appendChild(
       svgText(cell.x, cell.y + 26, field.label, { class: 'legend-label' }),

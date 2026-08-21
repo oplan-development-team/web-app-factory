@@ -1,0 +1,48 @@
+/*
+  Design tokens for the app chrome.
+
+  These values are mirrored in src/render/tokens.ts, which supplies the same
+  colours to the poster SVG's embedded stylesheet and to the PNG rasterizer.
+  src/render/tokens.test.ts asserts the two stay in sync, so edit both together.
+*/
+
+:root {
+  --paper: #f1efe7;
+  --paper-raised: #e8e4d8;
+  --ink: #17160f;
+  --ink-mid: #58564a;
+  --ink-faint: #c1bdaf;
+  --red: #bd2a26;
+  --red-dim: rgba(189, 42, 38, 0.14);
+
+  --font-sans: 'Inter Variable', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'Roboto Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  /* Type scale -- four deliberate steps, not a uniform ramp (NFR-006.2). */
+  --text-display: clamp(28px, 3.4vw, 42px);
+  --text-value: 14.5px;
+  --text-label: 12.5px;
+  --text-note: 11.5px;
+
+  /* Hairline weights -- the only depth cue in the system; no shadows. */
+  --rule-strong: 2px;
+  --rule: 1.5px;
+  --rule-hair: 1px;
+
+  --duration-fast: 120ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  color-scheme: light;
+  color: var(--ink);
+  background: var(--paper);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+  }
+}

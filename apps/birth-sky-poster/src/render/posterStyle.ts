@@ -5,18 +5,20 @@
  * poster's visual system (Swiss/instrument-plate direction: paper ground,
  * near-black ink, one functional red accent).
  */
+import { tokenDeclarations } from './tokens';
+
 export const POSTER_CSS = `
 .poster-root {
-  --paper: #f1efe7;
-  --ink: #17160f;
-  --ink-mid: #58564a;
-  --ink-faint: #c1bdaf;
-  --red: #bd2a26;
-  --font-sans: 'Inter Variable', 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', 'Roboto Mono', ui-monospace, Menlo, Consolas, monospace;
+  ${tokenDeclarations()}
+  /* Set on the root so it *inherits* into <text>. Writing this as
+     ".poster-root text { font-family: ... }" gives it specificity (0,1,1),
+     which silently beats every single-class rule below and forces the whole
+     poster into the sans face -- including every numeric readout that the
+     design requires to be monospace. */
+  font-family: var(--font-sans);
 }
 .poster-bg { fill: var(--paper); }
-.poster-root text { font-family: var(--font-sans); fill: var(--ink); }
+.poster-root text { fill: var(--ink); }
 
 .title-text { font-family: var(--font-sans); font-weight: 700; font-size: 46px; letter-spacing: -0.01em; }
 .title-subtext { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.16em; fill: var(--ink-mid); }
@@ -46,8 +48,18 @@ export const POSTER_CSS = `
 
 .legend-label { font-family: var(--font-sans); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; fill: var(--ink-mid); }
 .legend-value { font-family: var(--font-mono); font-size: 21px; fill: var(--ink); }
-.footer-text { font-family: var(--font-mono); font-size: 11.5px; fill: var(--ink-mid); }
+/* Sans, not mono: the footer is running Japanese prose, and the monospace
+   face carries no CJK glyphs, so half of each sentence fell back to a system
+   font mid-line. */
+.footer-text { font-family: var(--font-sans); font-size: 11.5px; fill: var(--ink-mid); }
 
 .editable { cursor: text; }
-.editable:hover { fill: var(--red); }
+/* An SVG <text> only receives pointer events on its glyph outlines by default,
+   so a click landing between two letters falls through to the background rect
+   and the field appears unresponsive. */
+.editable { pointer-events: all; }
+.editable:hover, .editable:focus { fill: var(--red); }
+.editable:focus { outline: none; }
+
+.skeleton-horizon { fill: none; stroke: var(--ink-faint); stroke-width: 2.2; }
 `;

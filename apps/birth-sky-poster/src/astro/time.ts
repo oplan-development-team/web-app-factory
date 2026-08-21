@@ -27,15 +27,13 @@ const UNIX_EPOCH_JD = 2_440_587.5;
  * instant expressed as milliseconds since the Unix epoch.
  */
 export function toUtcMillis(input: LocalDateTimeInput): number {
-  const wallClockAsUtcMillis = Date.UTC(
-    input.year,
-    input.month - 1,
-    input.day,
-    input.hour,
-    input.minute,
-    0,
-  );
-  return wallClockAsUtcMillis - input.utcOffsetHours * 3_600_000;
+  const wallClock = new Date(0);
+  wallClock.setUTCFullYear(input.year, input.month - 1, input.day);
+  wallClock.setUTCHours(input.hour, input.minute, 0, 0);
+  // setUTCFullYear rather than Date.UTC: the latter maps years 0-99 onto
+  // 1900-1999, which would silently relocate any chart for those years by a
+  // century. The spec accepts years 1-9999 (FR-001.3).
+  return wallClock.getTime() - input.utcOffsetHours * 3_600_000;
 }
 
 /** Julian Date for a given UTC instant. */
@@ -65,15 +63,4 @@ export function localSiderealDeg(gmstDeg: number, longitudeDeg: number): number 
   lst %= 360;
   if (lst < 0) lst += 360;
   return lst;
-}
-
-/** Formats sidereal degrees as HH:MM:SS. */
-export function formatSiderealTime(deg: number): string {
-  const totalHours = deg / 15;
-  const h = Math.floor(totalHours);
-  const mFloat = (totalHours - h) * 60;
-  const m = Math.floor(mFloat);
-  const s = Math.round((mFloat - m) * 60);
-  const pad = (n: number) => n.toString().padStart(2, '0');
-  return `${pad(h)}:${pad(m)}:${pad(s)}`;
 }

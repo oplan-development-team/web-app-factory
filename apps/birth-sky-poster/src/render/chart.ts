@@ -25,7 +25,7 @@ export function buildPosterSvg(
     'aria-label': `${text.title} — ${text.placeLine} ${text.dateLine} の星図ポスター`,
   });
 
-  const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+  const style = svgEl('style');
   style.textContent = POSTER_CSS;
   svg.appendChild(style);
 
@@ -35,7 +35,7 @@ export function buildPosterSvg(
 
   svg.appendChild(buildMasthead(text));
   svg.appendChild(buildDial());
-  svg.appendChild(buildStarfield(sky));
+  svg.appendChild(buildStarfield(sky, inputs.showStarNames));
   svg.appendChild(buildLegend(inputs, sky));
   svg.appendChild(buildFooter());
 
