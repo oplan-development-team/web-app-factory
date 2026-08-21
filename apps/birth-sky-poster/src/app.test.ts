@@ -4,6 +4,15 @@ import { RENDER_DEBOUNCE_MS, createApp, type AppHandle } from './app';
 import { mountAppMarkup } from './test-utils';
 import { requireElement } from './ui/dom';
 
+const exportPngFile = vi.hoisted(() => vi.fn<(...args: unknown[]) => Promise<void>>());
+const exportSvgFile = vi.hoisted(() => vi.fn<(...args: unknown[]) => Promise<void>>());
+const requestCurrentPosition = vi.hoisted(() =>
+  vi.fn<() => Promise<{ latitude: number; longitude: number }>>(),
+);
+
+vi.mock('./render/exportImage', () => ({ exportPngFile, exportSvgFile }));
+vi.mock('./ui/geolocation', () => ({ requestCurrentPosition }));
+
 let app: AppHandle;
 
 function input(id: string): HTMLInputElement {
@@ -26,8 +35,15 @@ function fireInput(el: HTMLElement): void {
   el.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
+function status(): HTMLParagraphElement {
+  return requireElement(document, 'status-region', 'p');
+}
+
 beforeEach(() => {
   vi.useFakeTimers();
+  exportPngFile.mockReset().mockResolvedValue(undefined);
+  exportSvgFile.mockReset().mockResolvedValue(undefined);
+  requestCurrentPosition.mockReset().mockResolvedValue({ latitude: 0, longitude: 0 });
   mountAppMarkup();
   app = createApp(document);
 });
@@ -275,6 +291,159 @@ describe('form submission', () => {
     requireElement(document, 'input-form', 'form').dispatchEvent(event);
 
     expect(event.defaultPrevented).toBe(true);
+  });
+});
+
+describe('export', () => {
+  function select(): HTMLSelectElement {
+    return requireElement(document, 'png-scale', 'select');
+  }
+
+  it('passes the chosen scale through to the rasterizer', async () => {
+    select().value = '4';
+    button('export-png').click();
+    await vi.runAllTimersAsync();
+
+    expect(exportPngFile).toHaveBeenCalledWith(expect.anything(), expect.any(String), 4);
+  });
+
+  it('defaults to the 2x preset', () => {
+    expect(select().value).toBe('2');
+  });
+
+  // A filename that only says "birth-sky-poster" collides for every chart the
+  // user saves; the place and date make each download self-describing.
+  it('names the file after the place and the charted date', async () => {
+    input('input-place').value = 'Reykjavik';
+    input('input-date').value = '1987-12-05';
+    fireInput(input('input-place'));
+    vi.advanceTimersByTime(RENDER_DEBOUNCE_MS);
+
+    button('export-svg').click();
+    await vi.runAllTimersAsync();
+
+    expect(exportSvgFile).toHaveBeenCalledWith(
+      expect.anything(),
+      'birth-sky-poster_reykjavik_19871205.svg',
+    );
+  });
+
+  it('falls back to a generic slug when the place has no ASCII characters', async () => {
+    input('input-place').value = '東京';
+    fireInput(input('input-place'));
+    vi.advanceTimersByTime(RENDER_DEBOUNCE_MS);
+
+    button('export-png').click();
+    await vi.runAllTimersAsync();
+
+    expect(exportPngFile).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.stringContaining('birth-sky-poster_chart_'),
+      expect.any(Number),
+    );
+  });
+
+  it('marks the button busy while the export runs', async () => {
+    let release: () => void = () => {};
+    exportPngFile.mockImplementation(() => new Promise<void>((resolve) => (release = resolve)));
+
+    button('export-png').click();
+    await Promise.resolve();
+
+    expect(button('export-png').disabled).toBe(true);
+    expect(button('export-png').getAttribute('aria-busy')).toBe('true');
+    expect(status().textContent).toContain('書き出しています');
+
+    release();
+    await vi.runAllTimersAsync();
+
+    expect(button('export-png').disabled).toBe(false);
+    expect(button('export-png').hasAttribute('aria-busy')).toBe(false);
+  });
+
+  it('confirms success in the status region', async () => {
+    button('export-svg').click();
+    await vi.runAllTimersAsync();
+
+    expect(status().textContent).toBe('SVGを書き出しました。');
+    expect(status().dataset['tone']).toBe('success');
+  });
+
+  // The prototype used window.alert here, which blocks the page and cannot be
+  // read by anything but a sighted user dismissing a modal.
+  it('surfaces a failure in the status region rather than an alert', async () => {
+    exportPngFile.mockRejectedValue(new Error('この解像度ではPNGを生成できませんでした。'));
+
+    button('export-png').click();
+    await vi.runAllTimersAsync();
+
+    expect(status().textContent).toBe('この解像度ではPNGを生成できませんでした。');
+    expect(status().dataset['tone']).toBe('error');
+    expect(status().getAttribute('role')).toBe('alert');
+  });
+
+  it('re-enables the button after a failure', async () => {
+    exportPngFile.mockRejectedValue(new Error('boom'));
+
+    button('export-png').click();
+    await vi.runAllTimersAsync();
+
+    expect(button('export-png').disabled).toBe(false);
+  });
+
+  it('does not attempt an export while the input is invalid', async () => {
+    input('input-lat').value = '999';
+    fireInput(input('input-lat'));
+    vi.advanceTimersByTime(RENDER_DEBOUNCE_MS);
+
+    button('export-png').click();
+    await vi.runAllTimersAsync();
+
+    expect(exportPngFile).not.toHaveBeenCalled();
+  });
+});
+
+describe('geolocation', () => {
+  it('fills the coordinate fields and re-renders', async () => {
+    requestCurrentPosition.mockResolvedValue({ latitude: 64.1466, longitude: -21.9426 });
+
+    button('geolocate-btn').click();
+    await vi.runAllTimersAsync();
+
+    expect(input('input-lat').value).toBe('64.1466');
+    expect(input('input-lon').value).toBe('-21.9426');
+    expect(status().dataset['tone']).toBe('success');
+  });
+
+  it('marks the button busy while locating', async () => {
+    let release: (value: { latitude: number; longitude: number }) => void = () => {};
+    requestCurrentPosition.mockImplementation(() => new Promise((resolve) => (release = resolve)));
+
+    button('geolocate-btn').click();
+    await Promise.resolve();
+
+    expect(button('geolocate-btn').disabled).toBe(true);
+    expect(button('geolocate-btn').getAttribute('aria-busy')).toBe('true');
+
+    release({ latitude: 0, longitude: 0 });
+    await vi.runAllTimersAsync();
+
+    expect(button('geolocate-btn').disabled).toBe(false);
+  });
+
+  it('reports a denied permission and leaves the fields alone', async () => {
+    const before = input('input-lat').value;
+    requestCurrentPosition.mockRejectedValue(
+      new Error('位置情報の利用が許可されませんでした。緯度・経度を手入力してください。'),
+    );
+
+    button('geolocate-btn').click();
+    await vi.runAllTimersAsync();
+
+    expect(status().dataset['tone']).toBe('error');
+    expect(status().textContent).toContain('許可されませんでした');
+    expect(input('input-lat').value).toBe(before);
+    expect(button('geolocate-btn').disabled).toBe(false);
   });
 });
 
