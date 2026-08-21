@@ -11,6 +11,28 @@ function editor(): HTMLInputElement | null {
   return document.querySelector('input.inline-edit-input');
 }
 
+/**
+ * Gives a node a layout box. jsdom performs no layout and reports every
+ * element as a zero-size rect at the origin, which would make the app's
+ * hit-testing match whichever editable text came first.
+ */
+function placeAt(node: SVGTextElement, left: number, top: number): void {
+  const rect = { left, top, right: left + 100, bottom: top + 20, width: 100, height: 20, x: left, y: top };
+  node.getBoundingClientRect = () => ({ ...rect, toJSON: () => rect }) as DOMRect;
+}
+
+/** Dispatches a click at the centre of the node's box, as the root delegate sees it. */
+function clickText(node: SVGTextElement): void {
+  const rect = node.getBoundingClientRect();
+  node.dispatchEvent(
+    new MouseEvent('click', {
+      bubbles: true,
+      clientX: rect.left + rect.width / 2,
+      clientY: rect.top + rect.height / 2,
+    }),
+  );
+}
+
 function press(target: Element, key: string): boolean {
   const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
   target.dispatchEvent(event);
@@ -21,6 +43,7 @@ beforeEach(() => {
   document.body.innerHTML = '';
   svg = svgEl('svg');
   node = svgText(64, 108, 'STAR CHART', { id: 'poster-editable-title', class: 'title editable' });
+  placeAt(node, 0, 0);
   svg.appendChild(node);
   document.body.appendChild(svg);
 
@@ -38,7 +61,7 @@ describe('affordances', () => {
 
 describe('opening the editor', () => {
   it('opens on click, seeded with the current text', () => {
-    node.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    clickText(node);
 
     expect(editor()?.value).toBe('STAR CHART');
   });
@@ -63,21 +86,42 @@ describe('opening the editor', () => {
       class: 'editable',
       'text-anchor': 'end',
     });
+    placeAt(dateNode, 500, 0);
     svg.appendChild(dateNode);
-    enableInlineEditing(svg, onCommit);
 
-    dateNode.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    clickText(dateNode);
 
     expect(editor()?.style.textAlign).toBe('right');
   });
 
+  // A click landing in the slack between letters must still open the field;
+  // the SVG text itself only hit-tests on its glyph outlines.
+  it('opens from a click inside the box but off the glyphs', () => {
+    const rect = node.getBoundingClientRect();
+    svg.dispatchEvent(
+      new MouseEvent('click', {
+        bubbles: true,
+        clientX: rect.right - 1,
+        clientY: rect.bottom - 1,
+      }),
+    );
+
+    expect(editor()).not.toBeNull();
+  });
+
+  it('ignores a click elsewhere on the poster', () => {
+    svg.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: 900, clientY: 900 }));
+
+    expect(editor()).toBeNull();
+  });
+
   it('closes a previous editor rather than stacking a second one', () => {
     const other = svgText(0, 0, 'TOKYO', { id: 'poster-editable-place', class: 'editable' });
+    placeAt(other, 500, 200);
     svg.appendChild(other);
-    enableInlineEditing(svg, onCommit);
 
-    node.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    other.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    clickText(node);
+    clickText(other);
 
     expect(document.querySelectorAll('.inline-edit-input')).toHaveLength(1);
     expect(editor()?.value).toBe('TOKYO');
@@ -86,7 +130,7 @@ describe('opening the editor', () => {
 
 describe('committing', () => {
   beforeEach(() => {
-    node.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    clickText(node);
   });
 
   it('writes the new value back and reports it', () => {
@@ -140,7 +184,7 @@ describe('committing', () => {
 
 describe('cancelling', () => {
   beforeEach(() => {
-    node.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    clickText(node);
   });
 
   it('discards the edit on Escape', () => {
@@ -167,7 +211,7 @@ describe('cancelling', () => {
 
 describe('repositioning', () => {
   it('follows the page as it scrolls', () => {
-    node.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    clickText(node);
     const spy = vi.spyOn(node, 'getBoundingClientRect');
 
     window.dispatchEvent(new Event('scroll'));
@@ -176,7 +220,7 @@ describe('repositioning', () => {
   });
 
   it('stops listening once the editor is gone', () => {
-    node.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    clickText(node);
     press(editor()!, 'Escape');
 
     const spy = vi.spyOn(node, 'getBoundingClientRect');
@@ -191,7 +235,7 @@ describe('closeInlineEditor', () => {
   // The poster SVG is replaced wholesale on every render; an editor left
   // behind would float over a node that no longer exists (FR-007.8).
   it('removes an editor left open', () => {
-    node.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    clickText(node);
 
     closeInlineEditor(document);
 

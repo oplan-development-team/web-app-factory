@@ -23,7 +23,39 @@ export function closeInlineEditor(doc: Document = document): void {
   doc.querySelectorAll(`.${INPUT_CLASS}`).forEach((node) => node.remove());
 }
 
+/** Extra clickable margin around an editable text, in CSS pixels. */
+const HIT_PADDING_PX = 4;
+
+/**
+ * Finds the editable text whose (padded) box contains the given viewport
+ * point, if any.
+ */
+function editableAt(svg: SVGSVGElement, clientX: number, clientY: number): SVGTextElement | null {
+  for (const node of svg.querySelectorAll<SVGTextElement>('text.editable')) {
+    const rect = node.getBoundingClientRect();
+    const inside =
+      clientX >= rect.left - HIT_PADDING_PX &&
+      clientX <= rect.right + HIT_PADDING_PX &&
+      clientY >= rect.top - HIT_PADDING_PX &&
+      clientY <= rect.bottom + HIT_PADDING_PX;
+    if (inside) return node;
+  }
+  return null;
+}
+
 export function enableInlineEditing(svg: SVGSVGElement, onCommit: CommitHandler): void {
+  // Clicks are handled at the root and hit-tested against each text's box
+  // rather than bound to the text nodes themselves. An SVG <text> only
+  // receives pointer events where its glyphs actually are, so a click landing
+  // in the gap between two letters -- or in the slack above and below them --
+  // passes straight through to the background rect and the field looks dead.
+  // WebKit is strictest about this, but the gaps are real everywhere.
+  svg.addEventListener('click', (event) => {
+    const target = editableAt(svg, event.clientX, event.clientY);
+    if (target === null) return;
+    startEditing(target, onCommit);
+  });
+
   svg.querySelectorAll<SVGTextElement>('text.editable').forEach((node) => {
     // The prototype bound click only, leaving these three fields unreachable
     // by keyboard. Exposing them as buttons gives them focus, a role, and an
@@ -32,7 +64,6 @@ export function enableInlineEditing(svg: SVGSVGElement, onCommit: CommitHandler)
     node.setAttribute('role', 'button');
     node.setAttribute('aria-label', `${node.textContent ?? ''}（クリックまたはEnterで編集）`);
 
-    node.addEventListener('click', () => startEditing(node, onCommit));
     node.addEventListener('keydown', (event) => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();

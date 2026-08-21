@@ -199,12 +199,20 @@ describe('poster text', () => {
 });
 
 describe('manual text overrides', () => {
-  function editTitle(value: string): void {
-    const title = document.getElementById('poster-editable-title')!;
-    title.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  // Clicks are hit-tested at the SVG root against each text's box, and jsdom
+  // reports every element as a zero-size rect at the origin. Focusing the node
+  // and pressing Enter is the keyboard path to the same editor and does not
+  // depend on layout.
+  function edit(id: string, value: string): void {
+    const node = document.getElementById(id)!;
+    node.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     const editor = document.querySelector<HTMLInputElement>('input.inline-edit-input')!;
     editor.value = value;
     editor.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  }
+
+  function editTitle(value: string): void {
+    edit('poster-editable-title', value);
   }
 
   it('survives a re-render triggered by an unrelated field', () => {
@@ -220,11 +228,7 @@ describe('manual text overrides', () => {
   // Once the date line is hand-written it must stop tracking the form, or the
   // user's wording is silently overwritten the next time they nudge a field.
   it('stops regenerating an edited date line from the form', () => {
-    const dateNode = document.getElementById('poster-editable-date')!;
-    dateNode.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    const editor = document.querySelector<HTMLInputElement>('input.inline-edit-input')!;
-    editor.value = 'THE LONGEST NIGHT';
-    editor.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    edit('poster-editable-date', 'THE LONGEST NIGHT');
 
     input('input-date').value = '1999-01-01';
     fireInput(input('input-date'));
@@ -269,9 +273,9 @@ describe('manual text overrides', () => {
   });
 
   it('closes any open editor when the poster is rebuilt', () => {
-    document.getElementById('poster-editable-title')!.dispatchEvent(
-      new MouseEvent('click', { bubbles: true }),
-    );
+    document
+      .getElementById('poster-editable-title')!
+      .dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     expect(document.querySelector('.inline-edit-input')).not.toBeNull();
 
     input('input-lat').value = '10';
