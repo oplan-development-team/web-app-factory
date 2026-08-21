@@ -41,8 +41,8 @@ export function fillDefaultValues(el: FormElements): void {
 export function readInputs(el: FormElements): PosterInputs | null {
   if (!el.form.reportValidity()) return null;
 
-  const [year, month, day] = el.date.value.split('-').map(Number);
-  const [hour, minute] = el.time.value.split(':').map(Number);
+  const [year = NaN, month = NaN, day = NaN] = el.date.value.split('-').map(Number);
+  const [hour = NaN, minute = NaN] = el.time.value.split(':').map(Number);
   const utcOffsetHours = Number(el.offset.value);
   const latitude = Number(el.lat.value);
   const longitude = Number(el.lon.value);

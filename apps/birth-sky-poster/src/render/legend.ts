@@ -100,11 +100,10 @@ export function buildLegend(inputs: PosterInputs, sky: ComputedSky): SVGGElement
   );
 
   const fields = buildFields(inputs, sky);
-  for (let i = 0; i < fields.length; i++) {
+  for (const [i, field] of fields.entries()) {
     const row = Math.floor(i / LEGEND_COLS);
     const col = i % LEGEND_COLS;
     const cell = legendCell(row, col);
-    const field = fields[i];
 
     g.appendChild(
       svgText(cell.x, cell.y + 26, field.label, { class: 'legend-label' }),
