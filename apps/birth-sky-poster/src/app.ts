@@ -93,6 +93,11 @@ export function createApp(doc: Document): AppHandle {
   let lastValidInputs: PosterInputs | null = null;
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
   let destroyed = false;
+  // Monotonic counter published on the frame. It gives tests (and anything
+  // observing the DOM) a way to tell a fresh render from a stale one, which
+  // the state attribute alone cannot express: two successive valid renders
+  // both leave the state on 'ready'.
+  let renderCount = 0;
 
   // The skeleton occupies the poster's exact aspect ratio from the first
   // paint, so swapping the real chart in later moves nothing (FR-009.2).
@@ -165,6 +170,8 @@ export function createApp(doc: Document): AppHandle {
 
     el.mount.replaceChildren(svg);
     currentSvg = svg;
+    renderCount += 1;
+    el.frame.dataset['render'] = String(renderCount);
     setState('ready');
   }
 
