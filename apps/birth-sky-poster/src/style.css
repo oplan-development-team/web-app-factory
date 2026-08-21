@@ -1,15 +1,15 @@
 /*
   Visual system: instrument-plate / navigational-chart aesthetic (Swiss
   International Style), deliberately avoiding the "dark navy + white dots +
-  cursive caption" template shared by most star-map poster products.
+  cursive caption" template that every other star-map poster product shares.
 
   - Ground: paper white / warm light grey. Ink: near-black. One functional
-    accent (vermillion red), reserved for the horizon line, the north
-    needle, and primary actions -- never decorative.
-  - Type: a grotesque sans for headings/labels, a monospace for every
-    numeric or coordinate value, set on a firm baseline rhythm.
-  - Layout: an asymmetric two-column instrument panel (control column +
-    chart), hairline rules instead of cards/shadows/rounded corners.
+    accent (vermillion red), reserved for the horizon line, the north needle,
+    primary actions, focus and errors -- never decorative.
+  - Type: a grotesque sans for language, a monospace for every numeric or
+    coordinate value. The split is exceptionless.
+  - Layout: an asymmetric two-column instrument panel (fixed control rail +
+    fluid chart), hairline rules instead of cards, shadows or rounded corners.
 */
 
 @import './styles/tokens.css';
@@ -33,14 +33,19 @@ body {
   flex-direction: column;
 }
 
+:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+
 /* ---------- Header ---------- */
 
 .app-header {
   display: flex;
   align-items: flex-end;
   gap: 28px;
-  padding: 28px clamp(20px, 4vw, 56px) 20px;
-  border-bottom: 2px solid var(--ink);
+  padding: 28px clamp(16px, 4vw, 56px) 20px;
+  border-bottom: var(--rule-strong) solid var(--ink);
 }
 
 .app-header__mark {
@@ -54,7 +59,7 @@ body {
 
 .app-header__titles h1 {
   margin: 0;
-  font-size: clamp(28px, 3.4vw, 42px);
+  font-size: var(--text-display);
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1;
@@ -66,33 +71,44 @@ body {
   color: var(--ink-mid);
 }
 
+/* The mark is decorative at narrow widths and would push the title to wrap. */
+@media (max-width: 560px) {
+  .app-header {
+    gap: 0;
+  }
+
+  .app-header__mark {
+    display: none;
+  }
+}
+
 /* ---------- Layout ---------- */
 
 .layout {
   flex: 1;
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 340px minmax(0, 1fr);
   align-items: start;
 }
 
 @media (max-width: 900px) {
   .layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 /* ---------- Control panel ---------- */
 
 .control-panel {
-  padding: clamp(20px, 3vw, 40px);
-  border-right: 1px solid var(--ink-faint);
+  padding: clamp(16px, 3vw, 40px);
+  border-right: var(--rule-hair) solid var(--ink-faint);
   min-width: 0;
 }
 
 @media (max-width: 900px) {
   .control-panel {
     border-right: none;
-    border-bottom: 1px solid var(--ink-faint);
+    border-bottom: var(--rule-hair) solid var(--ink-faint);
   }
 }
 
@@ -110,7 +126,13 @@ legend {
   padding: 0 0 10px;
   margin-bottom: 14px;
   width: 100%;
-  border-bottom: 1px solid var(--ink-faint);
+  border-bottom: var(--rule-hair) solid var(--ink-faint);
+}
+
+/* The step number is set in the accent so the rail reads in order at a glance. */
+.legend__index {
+  color: var(--red);
+  margin-right: 0.7em;
 }
 
 .field-row {
@@ -127,7 +149,7 @@ legend {
 }
 
 label {
-  font-size: 12.5px;
+  font-size: var(--text-label);
   font-weight: 600;
   color: var(--ink);
 }
@@ -141,20 +163,27 @@ input[type='time'],
 input[type='number'],
 input[type='text'] {
   font-family: var(--font-mono);
-  font-size: 14.5px;
+  font-size: var(--text-value);
   color: var(--ink);
   background: var(--paper);
   border: none;
-  border-bottom: 1.5px solid var(--ink);
+  border-bottom: var(--rule) solid var(--ink);
   border-radius: 0;
   padding: 8px 2px;
   outline: none;
   width: 100%;
+  min-width: 0;
 }
 
 input:focus-visible {
+  outline: none;
   border-bottom-color: var(--red);
   box-shadow: 0 1px 0 0 var(--red);
+}
+
+input[aria-invalid='true'] {
+  border-bottom-color: var(--red);
+  background: var(--red-dim);
 }
 
 input[type='checkbox'] {
@@ -164,19 +193,33 @@ input[type='checkbox'] {
 }
 
 .field-hint {
-  font-size: 11.5px;
+  font-size: var(--text-note);
   line-height: 1.5;
   color: var(--ink-mid);
   margin: 4px 0 0;
 }
 
+.field-error {
+  font-size: var(--text-note);
+  line-height: 1.4;
+  color: var(--red);
+  font-weight: 600;
+  margin: 2px 0 0;
+}
+
+.field-error[hidden] {
+  display: none;
+}
+
 .disclaimer {
-  font-size: 11.5px;
+  font-size: var(--text-note);
   line-height: 1.6;
   color: var(--ink-mid);
   padding-top: 18px;
-  border-top: 1px solid var(--ink-faint);
+  border-top: var(--rule-hair) solid var(--ink-faint);
 }
+
+/* ---------- Buttons ---------- */
 
 .btn {
   font-family: var(--font-sans);
@@ -186,18 +229,25 @@ input[type='checkbox'] {
   padding: 10px 16px;
   border-radius: 0;
   cursor: pointer;
-  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
 }
 
 .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: default;
+}
+
+.btn[aria-busy='true'] {
+  cursor: progress;
 }
 
 .btn--ghost {
   background: transparent;
   color: var(--ink);
-  border: 1.5px solid var(--ink);
+  border: var(--rule) solid var(--ink);
 }
 
 .btn--ghost:hover:not(:disabled) {
@@ -205,15 +255,41 @@ input[type='checkbox'] {
   color: var(--red);
 }
 
+.btn--ghost:active:not(:disabled) {
+  background: var(--red-dim);
+}
+
 .btn--primary {
   background: var(--ink);
   color: var(--paper);
-  border: 1.5px solid var(--ink);
+  border: var(--rule) solid var(--ink);
 }
 
 .btn--primary:hover:not(:disabled) {
   background: var(--red);
   border-color: var(--red);
+}
+
+.btn--primary:active:not(:disabled) {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* A text-weight action, so "reset wording" does not compete with the two
+   export buttons for attention. */
+.btn--link {
+  background: none;
+  border: none;
+  border-bottom: var(--rule-hair) solid currentColor;
+  padding: 0;
+  font-size: var(--text-note);
+  font-weight: 600;
+  color: var(--ink-mid);
+  align-self: flex-start;
+}
+
+.btn--link:hover:not(:disabled) {
+  color: var(--red);
 }
 
 #geolocate-btn {
@@ -227,46 +303,124 @@ input[type='checkbox'] {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: clamp(20px, 3vw, 40px);
+  padding: clamp(16px, 3vw, 40px);
   min-width: 0;
 }
 
 .poster-frame {
+  position: relative;
   width: 100%;
-  max-width: 640px;
-  border: 1px solid var(--ink-faint);
+  max-width: 700px;
+  border: var(--rule-hair) solid var(--ink-faint);
   background: var(--paper);
+  /* Reserving the poster's proportions up front means swapping the skeleton
+     for the real chart never moves anything below it (FR-009.3, CLS = 0). */
+  aspect-ratio: 5 / 7;
 }
 
-#poster-mount {
+.poster-mount {
   display: block;
   width: 100%;
+  height: 100%;
   line-height: 0;
 }
 
-#poster-mount svg {
+.poster-mount svg {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
 }
+
+/* ---------- Poster states ---------- */
+
+.poster-overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: clamp(16px, 4%, 32px);
+  pointer-events: none;
+}
+
+.poster-frame[data-state='loading'] .poster-overlay,
+.poster-frame[data-state='invalid'] .poster-overlay {
+  display: flex;
+}
+
+.poster-frame[data-state='invalid'] {
+  border-color: var(--red);
+}
+
+/* The chart underneath is stale once the input stops validating, so it is
+   dimmed rather than left looking current. */
+.poster-frame[data-state='invalid'] .poster-mount {
+  opacity: 0.25;
+}
+
+.poster-overlay__title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+}
+
+.poster-frame[data-state='invalid'] .poster-overlay__title {
+  color: var(--red);
+}
+
+.poster-overlay__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.poster-overlay__list li {
+  font-size: var(--text-note);
+  line-height: 1.5;
+  color: var(--ink);
+  padding-left: 14px;
+  border-left: var(--rule) solid var(--red);
+}
+
+.poster-frame[data-state='loading'] .poster-overlay__list {
+  display: none;
+}
+
+/* ---------- Export bar ---------- */
 
 .export-bar {
   width: 100%;
-  max-width: 640px;
+  max-width: 700px;
   margin-top: 18px;
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
   padding-top: 14px;
-  border-top: 1px solid var(--ink-faint);
+  border-top: var(--rule-hair) solid var(--ink-faint);
+}
+
+.export-bar__hints {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 240px;
+  min-width: 0;
 }
 
 .export-bar__hint {
-  font-size: 11.5px;
+  margin: 0;
+  font-size: var(--text-note);
+  line-height: 1.5;
   color: var(--ink-mid);
-  flex: 1 1 220px;
 }
 
 .export-bar__actions {
@@ -277,8 +431,9 @@ input[type='checkbox'] {
 }
 
 .export-bar__scale-label {
-  font-size: 11.5px;
+  font-size: var(--text-note);
   color: var(--ink-mid);
+  font-weight: 500;
 }
 
 #png-scale {
@@ -286,17 +441,64 @@ input[type='checkbox'] {
   font-size: 12.5px;
   color: var(--ink);
   background: var(--paper);
-  border: 1.5px solid var(--ink);
+  border: var(--rule) solid var(--ink);
+  border-radius: 0;
   padding: 7px 8px;
+}
+
+#png-scale:focus-visible {
+  border-color: var(--red);
+}
+
+/* ---------- Status region ---------- */
+
+.status-region {
+  width: 100%;
+  max-width: 700px;
+  margin: 12px 0 0;
+  padding: 8px 0 8px 14px;
+  font-size: var(--text-note);
+  line-height: 1.5;
+  border-left: var(--rule-strong) solid var(--ink-faint);
+  color: var(--ink-mid);
+}
+
+.status-region[data-tone='success'] {
+  border-left-color: var(--ink);
+  color: var(--ink);
+}
+
+.status-region[data-tone='error'] {
+  border-left-color: var(--red);
+  color: var(--red);
+  font-weight: 600;
+}
+
+.status-region[hidden] {
+  display: none;
 }
 
 /* ---------- Footer ---------- */
 
 .app-footer {
-  padding: 16px clamp(20px, 4vw, 56px) 22px;
+  padding: 16px clamp(16px, 4vw, 56px) 22px;
   font-size: 11px;
+  line-height: 1.6;
   color: var(--ink-mid);
-  border-top: 1px solid var(--ink-faint);
+  border-top: var(--rule-hair) solid var(--ink-faint);
+}
+
+.app-footer p {
+  margin: 0;
+}
+
+.app-footer__credit {
+  margin-top: 4px;
+  opacity: 0.85;
+}
+
+.app-footer a {
+  color: inherit;
 }
 
 /* ---------- Inline edit input (floating over the SVG poster) ---------- */
@@ -306,7 +508,8 @@ input[type='checkbox'] {
   background: var(--paper);
   color: var(--red);
   border: none;
-  border-bottom: 2px solid var(--red);
+  border-bottom: var(--rule-strong) solid var(--red);
+  border-radius: 0;
   outline: none;
   padding: 2px 4px;
 }
