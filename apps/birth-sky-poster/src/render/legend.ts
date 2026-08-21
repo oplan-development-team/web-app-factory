@@ -15,9 +15,9 @@ import {
   formatDate,
   formatLat,
   formatLon,
+  formatSiderealTime,
   formatUtcOffset,
 } from './format';
-import { formatSiderealTime } from '../astro/time';
 
 export const EDITABLE_IDS = {
   title: 'poster-editable-title',

@@ -66,14 +66,3 @@ export function localSiderealDeg(gmstDeg: number, longitudeDeg: number): number 
   if (lst < 0) lst += 360;
   return lst;
 }
-
-/** Formats sidereal degrees as HH:MM:SS. */
-export function formatSiderealTime(deg: number): string {
-  const totalHours = deg / 15;
-  const h = Math.floor(totalHours);
-  const mFloat = (totalHours - h) * 60;
-  const m = Math.floor(mFloat);
-  const s = Math.round((mFloat - m) * 60);
-  const pad = (n: number) => n.toString().padStart(2, '0');
-  return `${pad(h)}:${pad(m)}:${pad(s)}`;
-}
