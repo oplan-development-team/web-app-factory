@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ProjectedStar } from '../astro/compute';
-import { LABEL_MAGNITUDE_LIMIT, layOutStarLabels } from './starLabels';
+import { LABEL_MAGNITUDE_LIMIT, labelBoundingBox, layOutStarLabels } from './starLabels';
 
 const CHART_RADIUS = 322;
 
@@ -53,6 +53,18 @@ describe('layOutStarLabels', () => {
 
     expect(labels[0]!.x).toBeGreaterThan(50);
     expect(labels[0]!.y).toBeCloseTo(-20 + 9.5 / 3, 5);
+  });
+
+  // The box has to contain the glyphs as every supported engine renders them.
+  // Widest measurements for JetBrains Mono at 9.5 units (Firefox): advance
+  // 0.6em, side bearing 0.25em, ascent 1.125em, descent 0.375em.
+  it('contains the widest box any supported engine draws', () => {
+    const box = labelBoundingBox({ text: 'Vega', x: 0, y: 0 });
+
+    expect(box.top).toBeLessThanOrEqual(-9.5 * 1.125);
+    expect(box.bottom).toBeGreaterThanOrEqual(9.5 * 0.375);
+    expect(box.left).toBeLessThanOrEqual(-9.5 * 0.25);
+    expect(box.right).toBeGreaterThanOrEqual(4 * 9.5 * 0.6 + 9.5 * 0.25);
   });
 
   // Overlapping labels are the single most visible way a dense star chart
@@ -111,8 +123,15 @@ describe('layOutStarLabels', () => {
     });
 
     for (const label of layOutStarLabels(stars, CHART_RADIUS)) {
-      const width = label.text.length * 9.5 * 0.6;
-      expect(Math.hypot(label.x + width, label.y)).toBeLessThanOrEqual(CHART_RADIUS);
+      const box = labelBoundingBox(label);
+      for (const [x, y] of [
+        [box.left, box.top],
+        [box.right, box.top],
+        [box.left, box.bottom],
+        [box.right, box.bottom],
+      ]) {
+        expect(Math.hypot(x!, y!)).toBeLessThanOrEqual(CHART_RADIUS);
+      }
     }
   });
 
@@ -129,15 +148,12 @@ describe('layOutStarLabels', () => {
 
     for (let i = 0; i < labels.length; i++) {
       for (let j = i + 1; j < labels.length; j++) {
-        const a = labels[i]!;
-        const b = labels[j]!;
-        const aRight = a.x + a.text.length * 9.5 * 0.6;
-        const bRight = b.x + b.text.length * 9.5 * 0.6;
+        const a = labelBoundingBox(labels[i]!);
+        const b = labelBoundingBox(labels[j]!);
 
-        const horizontallyApart = aRight <= b.x || bRight <= a.x;
-        const verticallyApart = Math.abs(a.y - b.y) >= 9.5;
+        const apart = a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top;
 
-        expect(horizontallyApart || verticallyApart).toBe(true);
+        expect(apart).toBe(true);
       }
     }
   });
