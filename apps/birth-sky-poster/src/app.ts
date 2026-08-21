@@ -1,7 +1,7 @@
 import { computeSky } from './astro/compute';
 import { CONSTELLATIONS, STARS } from './catalog';
 import { buildPosterSvg } from './render/chart';
-import { enableInlineEditing } from './render/editableText';
+import { closeInlineEditor, enableInlineEditing } from './render/editableText';
 import { exportPngFile, exportSvgFile } from './render/exportImage';
 import { CHART_R } from './render/layout';
 import { EDITABLE_IDS, defaultDateLine, defaultPlaceLine, defaultTitle } from './render/legend';
@@ -125,6 +125,10 @@ export function createApp(doc: Document): AppHandle {
 
   function renderNow(): void {
     if (destroyed) return;
+
+    // The poster SVG is replaced wholesale below, so any open editor would be
+    // left hovering over a node that no longer exists (FR-007.8).
+    closeInlineEditor(doc);
 
     const result = readInputs(el.form);
     applyFieldErrors(el.form, result.ok ? [] : result.errors);
