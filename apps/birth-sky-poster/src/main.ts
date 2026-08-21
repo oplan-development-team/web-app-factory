@@ -10,7 +10,7 @@ import { CHART_R } from './render/layout';
 import { EDITABLE_IDS, defaultDateLine, defaultPlaceLine, defaultTitle } from './render/legend';
 import { enableInlineEditing } from './render/editableText';
 import { exportPngFile, exportSvgFile } from './render/exportImage';
-import { fillDefaultValues, queryFormElements, readInputs } from './ui/form';
+import { applyFieldErrors, fillDefaultValues, queryFormElements, readInputs } from './ui/form';
 import { requireElement } from './ui/dom';
 import { requestCurrentPosition } from './ui/geolocation';
 
@@ -27,8 +27,10 @@ const overrides: PosterTextOverrides = { title: defaultTitle(), dateLine: '', pl
 let currentSvg: SVGSVGElement | null = null;
 
 function render(): void {
-  const inputs = readInputs(formEl);
-  if (!inputs) return;
+  const result = readInputs(formEl);
+  applyFieldErrors(formEl, result.ok ? [] : result.errors);
+  if (!result.ok) return;
+  const inputs = result.value;
 
   if (!dirty.date) overrides.dateLine = defaultDateLine(inputs);
   if (!dirty.place) overrides.placeLine = defaultPlaceLine(inputs);

@@ -15,6 +15,8 @@ export default defineConfig({
         // Entry point: three lines of side-effectful bootstrapping, covered
         // end-to-end by the Playwright suite instead.
         'src/main.ts',
+        // Test fixture helper, not shipped code.
+        'src/test-utils.ts',
       ],
       thresholds: {
         lines: 80,

@@ -2,18 +2,18 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="日時と場所を入力すると、その瞬間・その場所から見えていた星空を天文計算で再現し、計器図面のような精密な円形星図ポスターとして書き出せるツール。"
+      content="日時と場所を入力すると、その瞬間・その場所から見えていた星空を天文計算で再現し、計器図面のような精密な円形星図ポスターとして書き出せるツール。すべてブラウザ内で完結し、入力は外部に送信されません。"
     />
     <title>Birth Sky Poster — 観測星図ジェネレーター</title>
   </head>
   <body>
     <div id="app">
       <header class="app-header">
-        <div class="app-header__mark">N&nbsp;E&nbsp;S&nbsp;W</div>
+        <div class="app-header__mark" aria-hidden="true">N&nbsp;E&nbsp;S&nbsp;W</div>
         <div class="app-header__titles">
           <h1>BIRTH SKY POSTER</h1>
           <p>生まれた瞬間の星空を、観測データとして描く円形星図ジェネレーター</p>
@@ -24,15 +24,20 @@
         <section class="control-panel" aria-label="観測条件の入力">
           <form id="input-form" novalidate>
             <fieldset>
-              <legend>01 — 日時</legend>
+              <legend><span class="legend__index">01</span> 日時</legend>
+
               <div class="field-row">
                 <label for="input-date">日付</label>
                 <input id="input-date" name="date" type="date" required />
+                <p id="error-date" class="field-error" hidden></p>
               </div>
+
               <div class="field-row">
                 <label for="input-time">時刻（現地時刻）</label>
                 <input id="input-time" name="time" type="time" step="60" required />
+                <p id="error-time" class="field-error" hidden></p>
               </div>
+
               <div class="field-row">
                 <label for="input-offset">UTCとの時差（時間）</label>
                 <input
@@ -44,7 +49,9 @@
                   max="14"
                   required
                 />
+                <p id="error-offset" class="field-error" hidden></p>
               </div>
+
               <p class="field-hint">
                 タイムゾーンDBは使用しません。サマータイム等も含め、UTCとの時差を数値で入力してください（例:
                 日本は +9、英国夏時間は +1）。
@@ -52,27 +59,56 @@
             </fieldset>
 
             <fieldset>
-              <legend>02 — 場所</legend>
+              <legend><span class="legend__index">02</span> 場所</legend>
+
               <div class="field-row">
                 <label for="input-lat">緯度（北緯 +）</label>
-                <input id="input-lat" name="lat" type="number" step="0.0001" min="-90" max="90" required />
+                <input
+                  id="input-lat"
+                  name="lat"
+                  type="number"
+                  step="0.0001"
+                  min="-90"
+                  max="90"
+                  required
+                />
+                <p id="error-lat" class="field-error" hidden></p>
               </div>
+
               <div class="field-row">
                 <label for="input-lon">経度（東経 +）</label>
-                <input id="input-lon" name="lon" type="number" step="0.0001" min="-180" max="180" required />
+                <input
+                  id="input-lon"
+                  name="lon"
+                  type="number"
+                  step="0.0001"
+                  min="-180"
+                  max="180"
+                  required
+                />
+                <p id="error-lon" class="field-error" hidden></p>
               </div>
-              <button type="button" id="geolocate-btn" class="btn btn--ghost">
-                現在地を使う
-              </button>
-              <p id="geolocate-status" class="field-hint" role="status"></p>
+
+              <button type="button" id="geolocate-btn" class="btn btn--ghost">現在地を使う</button>
+
               <div class="field-row">
                 <label for="input-place">場所ラベル（任意・自由記述）</label>
-                <input id="input-place" name="place" type="text" maxlength="40" placeholder="例: 東京" />
+                <input
+                  id="input-place"
+                  name="place"
+                  type="text"
+                  maxlength="40"
+                  placeholder="例: 東京"
+                />
               </div>
+              <p class="field-hint">
+                座標から地名は引きません（外部への問い合わせが必要になるため）。ポスターに載せたい表記をそのまま入力してください。
+              </p>
             </fieldset>
 
             <fieldset>
-              <legend>03 — 表示</legend>
+              <legend><span class="legend__index">03</span> 表示</legend>
+
               <div class="field-row field-row--checkbox">
                 <input id="input-constellations" name="constellations" type="checkbox" checked />
                 <label for="input-constellations">星座線を表示する</label>
@@ -85,32 +121,56 @@
           </form>
 
           <p class="disclaimer">
-            簡易恒星暦（J2000.0平均位置）による計算のため、歳差・固有運動の補正は行っていません。極端に古い／未来の日付では誤差が大きくなります。恒星は約4.5等より明るいもののみ収録しています。
+            J2000.0元期の平均位置による簡易計算です。歳差・固有運動・大気差の補正は行っていません。恒星は4.5等より明るいもののみ収録しています。
           </p>
         </section>
 
         <section class="poster-panel" aria-label="星図ポスター">
-          <div class="poster-frame">
-            <div id="poster-mount"></div>
+          <div id="poster-frame" class="poster-frame" data-state="loading">
+            <div id="poster-mount" class="poster-mount"></div>
+            <div id="poster-overlay" class="poster-overlay">
+              <p id="poster-overlay-title" class="poster-overlay__title">観測条件を計算しています</p>
+              <ul id="poster-overlay-list" class="poster-overlay__list"></ul>
+            </div>
           </div>
+
           <div class="export-bar">
-            <span class="export-bar__hint">タイトル・日付・場所の文字はポスター上をクリックすると編集できます。</span>
+            <div class="export-bar__hints">
+              <p class="export-bar__hint">
+                ポスター上のタイトル・日付・場所はクリック（またはTabで選択してEnter）で編集できます。
+              </p>
+              <button type="button" id="reset-text" class="btn btn--link" disabled>
+                表示文言をリセット
+              </button>
+            </div>
+
             <div class="export-bar__actions">
               <label for="png-scale" class="export-bar__scale-label">PNG解像度</label>
               <select id="png-scale">
-                <option value="1">標準 (1000×1400px)</option>
-                <option value="2" selected>高解像度 (2000×2800px)</option>
-                <option value="4">印刷用 (4000×5600px)</option>
+                <option value="1">標準 1000×1400</option>
+                <option value="2" selected>高解像度 2000×2800</option>
+                <option value="4">印刷用 4000×5600</option>
               </select>
               <button type="button" id="export-png" class="btn btn--primary">PNGを書き出す</button>
               <button type="button" id="export-svg" class="btn btn--ghost">SVGを書き出す</button>
             </div>
           </div>
+
+          <p id="status-region" class="status-region" role="status" aria-live="polite" hidden></p>
         </section>
       </main>
 
       <footer class="app-footer">
-        app-factoryパイプラインによる自律生成プロトタイプです。全ての計算はブラウザ内で完結し、外部へは送信されません。
+        <p>
+          すべての天文計算・描画・書き出しはブラウザ内で完結します。入力された日時・位置情報が外部へ送信されることはありません。
+        </p>
+        <p class="app-footer__credit">
+          恒星位置・星座線データ:
+          <a href="https://github.com/ofrohn/d3-celestial" rel="noopener noreferrer" target="_blank"
+            >d3-celestial</a
+          >
+          (BSD-3-Clause, &copy; Olaf Frohn) 収録の Hipparcos 由来データより生成。
+        </p>
       </footer>
     </div>
     <script type="module" src="/src/main.ts"></script>
