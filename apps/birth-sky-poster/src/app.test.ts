@@ -182,6 +182,90 @@ describe('poster text', () => {
   });
 });
 
+describe('manual text overrides', () => {
+  function editTitle(value: string): void {
+    const title = document.getElementById('poster-editable-title')!;
+    title.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    const editor = document.querySelector<HTMLInputElement>('input.inline-edit-input')!;
+    editor.value = value;
+    editor.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  }
+
+  it('survives a re-render triggered by an unrelated field', () => {
+    editTitle('OUR NIGHT');
+
+    input('input-lat').value = '51.5074';
+    fireInput(input('input-lat'));
+    vi.advanceTimersByTime(RENDER_DEBOUNCE_MS);
+
+    expect(document.getElementById('poster-editable-title')?.textContent).toBe('OUR NIGHT');
+  });
+
+  // Once the date line is hand-written it must stop tracking the form, or the
+  // user's wording is silently overwritten the next time they nudge a field.
+  it('stops regenerating an edited date line from the form', () => {
+    const dateNode = document.getElementById('poster-editable-date')!;
+    dateNode.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    const editor = document.querySelector<HTMLInputElement>('input.inline-edit-input')!;
+    editor.value = 'THE LONGEST NIGHT';
+    editor.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+    input('input-date').value = '1999-01-01';
+    fireInput(input('input-date'));
+    vi.advanceTimersByTime(RENDER_DEBOUNCE_MS);
+
+    expect(document.getElementById('poster-editable-date')?.textContent).toBe('THE LONGEST NIGHT');
+  });
+
+  it('enables the reset control once a text has been edited', () => {
+    editTitle('OUR NIGHT');
+
+    expect(button('reset-text').disabled).toBe(false);
+  });
+
+  it('restores the generated wording on reset', () => {
+    editTitle('OUR NIGHT');
+
+    button('reset-text').click();
+
+    expect(document.getElementById('poster-editable-title')?.textContent).toBe('STAR CHART');
+    expect(button('reset-text').disabled).toBe(true);
+  });
+
+  it('resumes tracking the form after a reset', () => {
+    editTitle('OUR NIGHT');
+    button('reset-text').click();
+
+    input('input-place').value = 'oslo';
+    fireInput(input('input-place'));
+    vi.advanceTimersByTime(RENDER_DEBOUNCE_MS);
+
+    expect(document.getElementById('poster-editable-place')?.textContent).toBe('OSLO');
+  });
+
+  it('confirms the reset in the status region', () => {
+    editTitle('OUR NIGHT');
+    button('reset-text').click();
+
+    const status = requireElement(document, 'status-region', 'p');
+    expect(status.hidden).toBe(false);
+    expect(status.textContent).toContain('再生成');
+  });
+
+  it('closes any open editor when the poster is rebuilt', () => {
+    document.getElementById('poster-editable-title')!.dispatchEvent(
+      new MouseEvent('click', { bubbles: true }),
+    );
+    expect(document.querySelector('.inline-edit-input')).not.toBeNull();
+
+    input('input-lat').value = '10';
+    fireInput(input('input-lat'));
+    vi.advanceTimersByTime(RENDER_DEBOUNCE_MS);
+
+    expect(document.querySelector('.inline-edit-input')).toBeNull();
+  });
+});
+
 describe('form submission', () => {
   // A form whose fields are all single-line inputs submits on Enter, which
   // would reload the page and throw away everything the user had entered.
