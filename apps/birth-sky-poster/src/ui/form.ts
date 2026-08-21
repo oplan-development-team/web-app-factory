@@ -10,6 +10,7 @@ export interface FormElements {
   lon: HTMLInputElement;
   place: HTMLInputElement;
   constellations: HTMLInputElement;
+  starNames: HTMLInputElement;
 }
 
 export function queryFormElements(doc: Document): FormElements {
@@ -22,6 +23,7 @@ export function queryFormElements(doc: Document): FormElements {
     lon: requireElement(doc, 'input-lon', 'input'),
     place: requireElement(doc, 'input-place', 'input'),
     constellations: requireElement(doc, 'input-constellations', 'input'),
+    starNames: requireElement(doc, 'input-star-names', 'input'),
   };
 }
 
@@ -65,5 +67,6 @@ export function readInputs(el: FormElements): PosterInputs | null {
     longitude,
     placeLabel: el.place.value,
     showConstellations: el.constellations.checked,
+    showStarNames: el.starNames.checked,
   };
 }

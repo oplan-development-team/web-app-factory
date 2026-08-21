@@ -2,9 +2,8 @@ import '@fontsource-variable/inter';
 import '@fontsource-variable/jetbrains-mono';
 import './style.css';
 
-import starsData from './data/stars.json';
-import constellationsData from './data/constellations.json';
-import type { ConstellationRecord, PosterTextOverrides, StarRecord } from './types';
+import { CONSTELLATIONS, STARS } from './catalog';
+import type { PosterTextOverrides } from './types';
 import { computeSky } from './astro/compute';
 import { buildPosterSvg } from './render/chart';
 import { CHART_R } from './render/layout';
@@ -14,9 +13,6 @@ import { exportPngFile, exportSvgFile } from './render/exportImage';
 import { fillDefaultValues, queryFormElements, readInputs } from './ui/form';
 import { requireElement } from './ui/dom';
 import { requestCurrentPosition } from './ui/geolocation';
-
-const stars = starsData as StarRecord[];
-const constellations = constellationsData as ConstellationRecord[];
 
 const formEl = queryFormElements(document);
 fillDefaultValues(formEl);
@@ -37,7 +33,7 @@ function render(): void {
   if (!dirty.date) overrides.dateLine = defaultDateLine(inputs);
   if (!dirty.place) overrides.placeLine = defaultPlaceLine(inputs);
 
-  const sky = computeSky(inputs, CHART_R, stars, constellations);
+  const sky = computeSky(inputs, CHART_R, STARS, CONSTELLATIONS);
   const svg = buildPosterSvg(inputs, sky, overrides);
 
   enableInlineEditing(svg, (elementId, value) => {

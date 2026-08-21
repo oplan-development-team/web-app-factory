@@ -1,5 +1,6 @@
 import type { ComputedSky } from '../astro/compute';
 import type { PosterInputs, PosterTextOverrides } from '../types';
+import { MAGNITUDE_LIMIT } from '../catalog';
 import { svgEl, svgText } from './svg-utils';
 import {
   FOOTER_TOP,
@@ -82,7 +83,7 @@ function buildFields(inputs: PosterInputs, sky: ComputedSky): LegendField[] {
     { label: 'JULIAN DATE', value: sky.jd.toFixed(5) },
     { label: 'GREENWICH SIDEREAL TIME', value: formatSiderealTime(sky.gstDeg) },
     { label: 'LOCAL SIDEREAL TIME', value: formatSiderealTime(sky.lstDeg) },
-    { label: 'STARS SHOWN (≤ 4.5m)', value: String(sky.stars.length) },
+    { label: `STARS SHOWN (≤ ${MAGNITUDE_LIMIT}m)`, value: String(sky.stars.length) },
   ];
 }
 
