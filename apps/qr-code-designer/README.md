@@ -21,6 +21,16 @@ npm run test    # 単体テスト
 バックエンドは不要。`dist/` を任意の静的ホストに置くだけで動く。
 `base: './'` を設定しているのでサブディレクトリ配信でも動作する。
 
+### Docker
+
+```bash
+docker build -t qr-code-designer .
+docker run --rm -p 8080:80 qr-code-designer
+# http://localhost:8080
+```
+
+ビルド済みの `dist/` を nginx で配信するだけのマルチステージ構成（実行時イメージは約62MB）。
+
 ---
 
 ## 機能

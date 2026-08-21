@@ -1,0 +1,331 @@
+/*
+  Visual system: instrument-plate / navigational-chart aesthetic (Swiss
+  International Style), deliberately avoiding the "dark navy + white dots +
+  cursive caption" template shared by most star-map poster products.
+
+  - Ground: paper white / warm light grey. Ink: near-black. One functional
+    accent (vermillion red), reserved for the horizon line, the north
+    needle, and primary actions -- never decorative.
+  - Type: a grotesque sans for headings/labels, a monospace for every
+    numeric or coordinate value, set on a firm baseline rhythm.
+  - Layout: an asymmetric two-column instrument panel (control column +
+    chart), hairline rules instead of cards/shadows/rounded corners.
+*/
+
+:root {
+  --paper: #f1efe7;
+  --paper-raised: #e8e4d8;
+  --ink: #17160f;
+  --ink-mid: #58564a;
+  --ink-faint: #c1bdaf;
+  --red: #bd2a26;
+  --red-dim: rgba(189, 42, 38, 0.14);
+
+  --font-sans: 'Inter Variable', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'Roboto Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  color-scheme: light;
+  color: var(--ink);
+  background: var(--paper);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+#app {
+  max-width: 1440px;
+  margin: 0 auto;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Header ---------- */
+
+.app-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 28px;
+  padding: 28px clamp(20px, 4vw, 56px) 20px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.app-header__mark {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.5em;
+  color: var(--ink-mid);
+  padding-bottom: 6px;
+  white-space: nowrap;
+}
+
+.app-header__titles h1 {
+  margin: 0;
+  font-size: clamp(28px, 3.4vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.app-header__titles p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--ink-mid);
+}
+
+/* ---------- Layout ---------- */
+
+.layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Control panel ---------- */
+
+.control-panel {
+  padding: clamp(20px, 3vw, 40px);
+  border-right: 1px solid var(--ink-faint);
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .control-panel {
+    border-right: none;
+    border-bottom: 1px solid var(--ink-faint);
+  }
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 28px;
+}
+
+legend {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--ink-mid);
+  padding: 0 0 10px;
+  margin-bottom: 14px;
+  width: 100%;
+  border-bottom: 1px solid var(--ink-faint);
+}
+
+.field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.field-row--checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.field-row--checkbox label {
+  font-weight: 500;
+}
+
+input[type='date'],
+input[type='time'],
+input[type='number'],
+input[type='text'] {
+  font-family: var(--font-mono);
+  font-size: 14.5px;
+  color: var(--ink);
+  background: var(--paper);
+  border: none;
+  border-bottom: 1.5px solid var(--ink);
+  border-radius: 0;
+  padding: 8px 2px;
+  outline: none;
+  width: 100%;
+}
+
+input:focus-visible {
+  border-bottom-color: var(--red);
+  box-shadow: 0 1px 0 0 var(--red);
+}
+
+input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--red);
+}
+
+.field-hint {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-mid);
+  margin: 4px 0 0;
+}
+
+.disclaimer {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-mid);
+  padding-top: 18px;
+  border-top: 1px solid var(--ink-faint);
+}
+
+.btn {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 10px 16px;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.btn--primary {
+  background: var(--ink);
+  color: var(--paper);
+  border: 1.5px solid var(--ink);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+#geolocate-btn {
+  margin: 4px 0 6px;
+  width: 100%;
+}
+
+/* ---------- Poster panel ---------- */
+
+.poster-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(20px, 3vw, 40px);
+  min-width: 0;
+}
+
+.poster-frame {
+  width: 100%;
+  max-width: 640px;
+  border: 1px solid var(--ink-faint);
+  background: var(--paper);
+}
+
+#poster-mount {
+  display: block;
+  width: 100%;
+  line-height: 0;
+}
+
+#poster-mount svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.export-bar {
+  width: 100%;
+  max-width: 640px;
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--ink-faint);
+}
+
+.export-bar__hint {
+  font-size: 11.5px;
+  color: var(--ink-mid);
+  flex: 1 1 220px;
+}
+
+.export-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.export-bar__scale-label {
+  font-size: 11.5px;
+  color: var(--ink-mid);
+}
+
+#png-scale {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  padding: 7px 8px;
+}
+
+/* ---------- Footer ---------- */
+
+.app-footer {
+  padding: 16px clamp(20px, 4vw, 56px) 22px;
+  font-size: 11px;
+  color: var(--ink-mid);
+  border-top: 1px solid var(--ink-faint);
+}
+
+/* ---------- Inline edit input (floating over the SVG poster) ---------- */
+
+.inline-edit-input {
+  z-index: 1000;
+  background: var(--paper);
+  color: var(--red);
+  border: none;
+  border-bottom: 2px solid var(--red);
+  outline: none;
+  padding: 2px 4px;
+}

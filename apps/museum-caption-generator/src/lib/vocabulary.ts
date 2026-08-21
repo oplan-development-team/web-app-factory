@@ -1,0 +1,131 @@
+import type { WeightedItem } from './types';
+
+/**
+ * 語彙バンク。tags は analyzeImage() が返す MoodTag と対応し、
+ * 画像解析結果に応じて出現しやすさを重み付けするために使う。
+ * 'neutral' は常に一定の重みを持つ汎用語彙。
+ */
+
+export const NOUNS: WeightedItem[] = [
+  { text: '不在', tags: ['dark'] },
+  { text: '沈黙', tags: ['dark', 'cool'] },
+  { text: '影', tags: ['dark'] },
+  { text: '喪失', tags: ['dark'] },
+  { text: '記憶の残骸', tags: ['dark', 'mono'] },
+  { text: '空洞', tags: ['dark', 'cool'] },
+  { text: '亡霊', tags: ['dark'] },
+  { text: '欠落', tags: ['dark', 'mono'] },
+  { text: '光', tags: ['light'] },
+  { text: '余白', tags: ['light', 'neutral'] },
+  { text: '透明', tags: ['light'] },
+  { text: '祝祭', tags: ['light', 'warm'] },
+  { text: '覚醒', tags: ['light'] },
+  { text: '解放', tags: ['light'] },
+  { text: '朝', tags: ['light', 'warm'] },
+  { text: '呼吸', tags: ['light', 'neutral'] },
+  { text: '郷愁', tags: ['warm'] },
+  { text: '体温', tags: ['warm'] },
+  { text: '灯火', tags: ['warm'] },
+  { text: '団らん', tags: ['warm'] },
+  { text: '発酵', tags: ['warm'] },
+  { text: '熱', tags: ['warm'] },
+  { text: '帰郷', tags: ['warm'] },
+  { text: '距離', tags: ['cool'] },
+  { text: '氷結', tags: ['cool'] },
+  { text: '静寂', tags: ['cool', 'mono'] },
+  { text: '孤独', tags: ['cool'] },
+  { text: '無機質', tags: ['cool'] },
+  { text: '硝子の壁', tags: ['cool'] },
+  { text: '真空', tags: ['cool', 'dark'] },
+  { text: '境界線', tags: ['mono'] },
+  { text: '判読不能', tags: ['mono'] },
+  { text: 'ノイズ', tags: ['mono', 'neutral'] },
+  { text: '残響', tags: ['mono', 'cool'] },
+  { text: '皮膚', tags: ['neutral'] },
+  { text: '境界', tags: ['neutral'] },
+  { text: '反復', tags: ['neutral'] },
+  { text: '断片', tags: ['neutral'] },
+  { text: '装置', tags: ['neutral'] },
+  { text: '儀式', tags: ['neutral'] },
+  { text: '風景', tags: ['neutral'] },
+  { text: '身体', tags: ['neutral'] },
+  { text: '痕跡', tags: ['neutral', 'mono'] },
+];
+
+export const ADJECTIVES: WeightedItem[] = [
+  { text: '名づけえぬ', tags: ['dark'] },
+  { text: '取り返しのつかない', tags: ['dark'] },
+  { text: '誰にも見せなかった', tags: ['dark', 'mono'] },
+  { text: 'すでに失われた', tags: ['dark'] },
+  { text: 'まだ名前を持たない', tags: ['light'] },
+  { text: 'ふいに訪れる', tags: ['light'] },
+  { text: '祝福された', tags: ['light', 'warm'] },
+  { text: '目覚めたばかりの', tags: ['light'] },
+  { text: '遠い夏の日の', tags: ['warm'] },
+  { text: '台所の匂いのする', tags: ['warm'] },
+  { text: '誰かの体温が残る', tags: ['warm'] },
+  { text: '忘れかけていた', tags: ['warm', 'neutral'] },
+  { text: '凍りついた', tags: ['cool'] },
+  { text: '無音の', tags: ['cool', 'mono'] },
+  { text: '距離を測るための', tags: ['cool'] },
+  { text: '硝子越しの', tags: ['cool'] },
+  { text: '白と黒の弁証法にいまだ沈む', tags: ['mono'] },
+  { text: '境界が溶けていく', tags: ['mono', 'neutral'] },
+  { text: '判読不能な', tags: ['mono'] },
+  { text: '名もなき', tags: ['neutral'] },
+  { text: '反復する', tags: ['neutral'] },
+  { text: 'ありふれた、しかし', tags: ['neutral'] },
+  { text: '儀式としての', tags: ['neutral'] },
+];
+
+export const MATERIALS: WeightedItem[] = [
+  { text: '闇に沈めた記憶', tags: ['dark'] },
+  { text: '不在の証明', tags: ['dark'] },
+  { text: '消しゴムの跡', tags: ['dark', 'mono'] },
+  { text: '停電の夜の輪郭', tags: ['dark'] },
+  { text: 'まぶたの裏の残像', tags: ['light'] },
+  { text: '朝日に晒した確信', tags: ['light', 'warm'] },
+  { text: '透明な誓約', tags: ['light'] },
+  { text: '台所の湯気', tags: ['warm'] },
+  { text: '実家のタオルの匂い', tags: ['warm'] },
+  { text: '発酵した郷愁', tags: ['warm'] },
+  { text: '祖母の毛布の繊維', tags: ['warm'] },
+  { text: '冷蔵庫の静電気', tags: ['cool'] },
+  { text: '硝子の孤独', tags: ['cool'] },
+  { text: 'ステンレスの無関心', tags: ['cool'] },
+  { text: '氷点下の沈黙', tags: ['cool', 'dark'] },
+  { text: 'モノクロの言い訳', tags: ['mono'] },
+  { text: '白黒フィルムの偏見', tags: ['mono'] },
+  { text: '判読不能な走り書き', tags: ['mono'] },
+  { text: 'スマートフォンの画面越しの視線', tags: ['neutral'] },
+  { text: '経年劣化した jpeg 圧縮', tags: ['neutral'] },
+  { text: '定形外郵便の緊張', tags: ['neutral'] },
+  { text: '深夜のコンビニの光', tags: ['neutral', 'warm'] },
+  { text: '作家自身の後悔、少量', tags: ['neutral'] },
+  { text: '未読の通知、複数', tags: ['neutral'] },
+  { text: '返信しなかった十二通のメッセージ', tags: ['neutral', 'dark'] },
+  { text: '解凍されないままの冷凍庫の奥', tags: ['neutral', 'cool'] },
+];
+
+export const EPITHETS: WeightedItem[] = [
+  { text: '沈黙の彫刻家', tags: ['dark', 'cool'] },
+  { text: '光の密輸者', tags: ['light'] },
+  { text: '郷愁の会計士', tags: ['warm'] },
+  { text: '距離の測量士', tags: ['cool'] },
+  { text: '余白の相続人', tags: ['light', 'neutral'] },
+  { text: '反復の番人', tags: ['neutral'] },
+  { text: '不在の目撃者', tags: ['dark'] },
+  { text: '判読不能の詩人', tags: ['mono'] },
+];
+
+export const FIRST_NAMES = [
+  'アルド', 'ヨナス', 'エリク', 'マルタ', 'イレーネ', 'セルジュ', 'ヴィクトル',
+  'アンネリー', 'パウル', 'グレタ', 'ミハウ', 'クララ', 'テオ', 'イングリッド',
+  'ルカ', 'ソフィ', 'ハンナ', 'オスカル',
+];
+
+export const LAST_NAMES = [
+  'ヴェントゥリーニ', 'シュトラウプ', 'ファン・デル・ローエ', 'コワルスキ',
+  'ベルグレン', 'デュボア', 'ハルトマン', 'ノヴァーク', 'ラーション',
+  'ミュラー=カイザー', 'ブランシャール', 'ヴィンターホルト', 'アダムチク',
+];
