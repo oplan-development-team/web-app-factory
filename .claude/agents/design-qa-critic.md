@@ -43,6 +43,7 @@ prototype-builderが作ったものを、実装した本人としてではなく
 **最終回答（StructuredOutput）を返す前に**、次のBashコマンドを実行してログを1件残すこと。箇条書き（`- `）形式で書く。**合格で問題がなければ「結果」の1行で十分**。不合格の場合、または合格でも気になる弱点を見つけた場合は、`- 問題: ...`・`- 気づき/改善案: ...`を行として追加し、具体的に書く（このケースはむしろ厚く書く）。
 
 ```bash
-mkdir -p /Users/gijutsukaihatsushitsu/Claude/New_Service_App/.claude/logs/app-factory
-printf '\n### [%s] design-qa-critic — <合格 または 不合格>\n%s\n' "$(date +%H:%M:%S)" $'- 結果: <合否と一言>' >> "/Users/gijutsukaihatsushitsu/Claude/New_Service_App/.claude/logs/app-factory/$(date +%Y-%m-%d).md"
+LOG_DIR="$(git rev-parse --show-toplevel)/.claude/logs/app-factory"
+mkdir -p "$LOG_DIR"
+printf '\n### [%s] design-qa-critic — <合格 または 不合格>\n%s\n' "$(date +%H:%M:%S)" $'- 結果: <合否と一言>' >> "$LOG_DIR/$(date +%Y-%m-%d).md"
 ```

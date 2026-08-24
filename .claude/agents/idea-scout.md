@@ -32,6 +32,7 @@ New_Service_App（単発・小規模なWebアプリを複数つくって試し�
 **最終回答（StructuredOutput）を返す前に**、次のBashコマンドを実行してログを1件残すこと。スキルの説明を読むだけで終わらせず、必ずこのコマンドを実行する。箇条書き（`- `）形式で書く。**問題なく完了していれば「結果」の1行で十分**（長々と書かない）。既存アイディアと際どく重複していた、レンズの指示が曖昧で迷った、等の気づきがあれば行を追加する。
 
 ```bash
-mkdir -p /Users/gijutsukaihatsushitsu/Claude/New_Service_App/.claude/logs/app-factory
-printf '\n### [%s] idea-scout（レンズ: <担当レンズ名>） — <一言サマリー>\n%s\n' "$(date +%H:%M:%S)" $'- 結果: <生成件数・着眼点を簡潔に>' >> "/Users/gijutsukaihatsushitsu/Claude/New_Service_App/.claude/logs/app-factory/$(date +%Y-%m-%d).md"
+LOG_DIR="$(git rev-parse --show-toplevel)/.claude/logs/app-factory"
+mkdir -p "$LOG_DIR"
+printf '\n### [%s] idea-scout（レンズ: <担当レンズ名>） — <一言サマリー>\n%s\n' "$(date +%H:%M:%S)" $'- 結果: <生成件数・着眼点を簡潔に>' >> "$LOG_DIR/$(date +%Y-%m-%d).md"
 ```

@@ -14,10 +14,10 @@ New_Service_App（`apps/` 配下に単発・小規模アプリを寄せ集める
 
 ## やること
 
-`Workflow` ツールを次のように呼び出す。
+`Workflow` ツールを次のように呼び出す。**`scriptPath`には、このチェックアウト（現在の作業ディレクトリ）における`.claude/workflows/app-factory.js`の絶対パスを渡す。** ローカル環境・GitHub Actions・Routines等、実行環境によってリポジトリのチェックアウト先は異なる（例: `/home/runner/work/<repo>/<repo>/`、`/home/user/<repo>/` 等）。**特定の環境の絶対パスを決め打ちで使い回さないこと。** 分からなければ `git rev-parse --show-toplevel` 等で現在のチェックアウト先を確認してから組み立てる。
 
 ```
-Workflow({ scriptPath: "/Users/gijutsukaihatsushitsu/Claude/New_Service_App/.claude/workflows/app-factory.js" })
+Workflow({ scriptPath: "<git rev-parse --show-toplevelで得られるパス>/.claude/workflows/app-factory.js" })
 ```
 
 ワークフローは以下の6段を自律的に実行する。
@@ -28,7 +28,7 @@ Workflow({ scriptPath: "/Users/gijutsukaihatsushitsu/Claude/New_Service_App/.cla
 
 ```
 Workflow({
-  scriptPath: "/Users/gijutsukaihatsushitsu/Claude/New_Service_App/.claude/workflows/app-factory.js",
+  scriptPath: "<このチェックアウトでの絶対パス>/.claude/workflows/app-factory.js",
   args: { seedIdea: { title: "...", summary: "...", targetUser: "..." } }
 })
 ```
@@ -41,7 +41,7 @@ Workflow({
 4. **Build** — `prototype-builder` が `apps/<slug>/` に実装する（実装前に `frontend-design` スキルを必ず呼ぶ）
 5. **Review & Fix** — `design-qa-critic` 2体と `prototype-verifier` 1体を並行実行し、Anti-Template Policyへの適合・実際の動作・Dockerビルドの成否（prototype-builderの自己申告を信用せず独立確認、確認後はimage/containerを削除）を検証する。指摘があれば `prototype-builder` に差し戻して修正させ、再度検証する（最大2ラウンド）。**バグ修正はメインセッションが肩代わりせず、必ずこのループの中でprototype-builderに行わせる。**
 
-各エージェントの役割の詳細は `.claude/agents/idea-scout.md` 等、個別のファイルを参照。各エージェントは作業の最後に `pipeline-log` スキルの手順で `.claude/logs/app-factory/` に活動記録を1件残す。Workflowの戻り値だけでは追えない各エージェントの判断は、このログで追える。
+各エージェントの役割の詳細は `.claude/agents/idea-scout.md` 等、個別のファイルを参照。各エージェントは作業の最後に、自身のエージェント定義に埋め込まれたBashコマンドを実行して `.claude/logs/app-factory/` に活動記録を1件残す（`pipeline-log` スキルはこの規約のドキュメントであり、エージェントに「スキルを呼べ」と間接的に指示するとログが書かれないことがあったため、具体的なコマンドを各エージェント定義に直接埋め込む方式にしている）。Workflowの戻り値だけでは追えない各エージェントの判断は、このログで追える。
 
 ## ワークフロー完了後にやること
 

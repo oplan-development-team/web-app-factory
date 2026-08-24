@@ -28,6 +28,7 @@ tools: [Read, Grep, Glob, WebSearch, WebFetch, Bash]
 **最終回答（StructuredOutput）を返す前に**、次のBashコマンドを実行してログを1件残すこと。箇条書き（`- `）形式で書く。**問題なく完了していれば「結果」の1行で十分**。要件を絞る際に悩んだ点、スタイル方向の選定理由で特筆すべき点があれば行を追加する。
 
 ```bash
-mkdir -p /Users/gijutsukaihatsushitsu/Claude/New_Service_App/.claude/logs/app-factory
-printf '\n### [%s] concept-developer — <一言サマリー>\n%s\n' "$(date +%H:%M:%S)" $'- 結果: <決めたslug・スタイル方向を簡潔に>' >> "/Users/gijutsukaihatsushitsu/Claude/New_Service_App/.claude/logs/app-factory/$(date +%Y-%m-%d).md"
+LOG_DIR="$(git rev-parse --show-toplevel)/.claude/logs/app-factory"
+mkdir -p "$LOG_DIR"
+printf '\n### [%s] concept-developer — <一言サマリー>\n%s\n' "$(date +%H:%M:%S)" $'- 結果: <決めたslug・スタイル方向を簡潔に>' >> "$LOG_DIR/$(date +%Y-%m-%d).md"
 ```

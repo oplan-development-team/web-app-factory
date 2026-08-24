@@ -10,7 +10,9 @@ export const meta = {
   ],
 }
 
-const REPO_ROOT = '/Users/gijutsukaihatsushitsu/Claude/New_Service_App'
+// このプロジェクト（New_Service_App）内で完結させるため、パスは常にリポジトリルートからの相対パスで
+// 表現する。絶対パスをここにハードコードしない（ローカル環境とCI環境でパスが異なるため。過去に
+// 特定マシンの絶対パスがハードコードされ、CI環境で誤ったパスにプロトタイプを作ってしまう不具合があった）。
 
 const IDEAS_SCHEMA = {
   type: 'object',
@@ -132,9 +134,9 @@ if (seedIdea) {
       : ''
     const ideaBatches = await parallel(LENSES.map(lens => () =>
       agent(
-        `New_Service_App (${REPO_ROOT}) というプロジェクト用に、単発・小規模なWebアプリのアイディアを5つ考えてください。` +
+        `New_Service_App というプロジェクト用に、単発・小規模なWebアプリのアイディアを5つ考えてください。` +
         `割り当てレンズ:「${lens.label}」(${lens.brief})。` +
-        `まず ${REPO_ROOT}/PROJECTS.md と ${REPO_ROOT}/apps/ を確認し、既存のアイディア・完成済み・進行中のアプリと重複しないようにしてください。` +
+        `まずリポジトリルートの PROJECTS.md と apps/ ディレクトリを確認し、既存のアイディア・完成済み・進行中のアプリと重複しないようにしてください。` +
         `対象は個人が数時間〜1日程度で作り切れる規模。外部有料APIキーや継続的なインフラ費用が前提のものは避けてください。` +
         feedbackNote,
         { agentType: 'idea-scout', label: `scout:${lens.key}:r${round}`, phase: 'Ideate', schema: IDEAS_SCHEMA }
@@ -192,7 +194,7 @@ phase('Concept')
 const concept = await agent(
   `次のアイディアを、実装可能なコンセプトに具体化してください。` +
   `タイトル: ${winnerIdea.title} / 概要: ${winnerIdea.summary} / 対象ユーザー: ${winnerIdea.targetUser || '未指定'}。` +
-  `${REPO_ROOT}/apps/ 配下の既存ディレクトリ名と衝突しないkebab-caseのslugを決めてください。` +
+  `リポジトリルートの apps/ 配下の既存ディレクトリ名と衝突しないkebab-caseのslugを決めてください。` +
   `スタイル方向は曖昧な「クリーンでミニマル」を禁止し、エディトリアル/ネオブルータリズム/ガラスモーフィズム/` +
   `ダーク or ライトラグジュアリー/ベント/スクロールテリング/スイス/レトロフューチャリズム等から具体的に1つ選んでください。` +
   `技術スタックは依存が少なく短時間で作り切れるもの（素のHTML/CSS/JS、またはVite+TS程度）を優先してください。`,
@@ -202,7 +204,7 @@ log(`コンセプト確定: ${concept.title} / ${concept.styleDirection} / apps/
 
 phase('Build')
 let build = await agent(
-  `次のコンセプトに基づき、${REPO_ROOT}/apps/${concept.slug}/ 配下にプロトタイプを実装してください。` +
+  `次のコンセプトに基づき、リポジトリルートの apps/${concept.slug}/ 配下にプロトタイプを実装してください。` +
   `実装前に frontend-design スキルを必ず呼び出し、指定のスタイル方向を具体的なビジュアル方針(配色・タイポグラフィ・` +
   `レイアウトの理由)まで固めてから実装してください。コンセプト: ${JSON.stringify(concept)}。` +
   `プロトタイプなので網羅的なテストは不要ですが、npm run build 等が実際に通り、起動して操作できる状態まで仕上げてください。` +
@@ -214,15 +216,15 @@ log(`実装完了: ${build.dirPath}`)
 phase('Review & Fix')
 const MAX_REVIEW_ROUNDS = 2
 const QA_PROMPT =
-  `${REPO_ROOT}/apps/${concept.slug}/ の実装を、CLAUDE.mdのAnti-Template Policyに照らして検証してください。` +
+  `リポジトリルートの apps/${concept.slug}/ の実装を、CLAUDE.mdのAnti-Template Policyに照らして検証してください。` +
   `禁止パターン(画一的なカードグリッド/中央寄せグラデーションブロブのヒーロー/ライブラリのデフォルトそのまま/` +
   `単調な余白・角丸・影/グレー基調+差し色1色だけ 等)に当てはまっていないか、` +
   `階層・リズム・奥行き・タイポグラフィ・意味のある配色・作り込まれたhover/focus/active状態のうち` +
   `最低4項目を満たしているかを、実際にコードと画面を確認して厳しく判定してください。疑わしい場合はpassed=falseとしてください。`
 const VERIFY_PROMPT =
-  `${REPO_ROOT}/apps/${concept.slug}/ を実際にビルド・起動し、主要機能を操作して動作確認してください。` +
+  `リポジトリルートの apps/${concept.slug}/ を実際にビルド・起動し、主要機能を操作して動作確認してください。` +
   `コンソールエラーの有無、375/768/1440幅での見た目の破綻の有無を確認してください。` +
-  `また、${REPO_ROOT}/apps/${concept.slug}/Dockerfile を使って実際に \`docker build\` が成功するかを独立に確認し、結果をdockerBuildOkとして報告してください。` +
+  `また、apps/${concept.slug}/Dockerfile を使って実際に \`docker build\` が成功するかを独立に確認し、結果をdockerBuildOkとして報告してください。` +
   `確認後は起動したプロセス・作成したDockerイメージ/コンテナを必ず終了・削除してください。`
 
 let qaRounds = []
@@ -257,7 +259,7 @@ for (let round = 1; round <= MAX_REVIEW_ROUNDS; round++) {
   }
   log(`ラウンド${round}: 指摘があったためprototype-builderに修正を差し戻します`)
   build = await agent(
-    `${REPO_ROOT}/apps/${concept.slug}/ の実装に対して、Design QAとVerifyから次の指摘が出ています。指摘箇所を修正してください。` +
+    `リポジトリルートの apps/${concept.slug}/ の実装に対して、Design QAとVerifyから次の指摘が出ています。指摘箇所を修正してください。` +
     `指摘内容: ${JSON.stringify(fixNotes)}。無関係な変更は加えず、指摘の解消に集中してください。修正後、npm run build 等が通ることを確認してください。`,
     { agentType: 'prototype-builder', label: `fix:r${round}`, phase: 'Review & Fix', schema: BUILD_SCHEMA }
   )
