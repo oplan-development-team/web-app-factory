@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>タイピング心電図 / TYPING ECG MONITOR</title>
+<meta name="description" content="タイピングの打鍵間隔を心電図モニター風に描画し、ジョーク診断を行うプロトタイプ。医療機器ではありません。" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="void">
+    <main class="chassis" role="main">
+      <!-- Top brand strip -->
+      <header class="chassis__top">
+        <div class="brand">
+          <span class="brand__mark">&#x2764;</span>
+          <span class="brand__name">CARDIO-TYPE&nbsp;3000</span>
+          <span class="brand__model">MODEL&nbsp;TE-88</span>
+        </div>
+        <div class="lamp-row" aria-hidden="true">
+          <span id="lampPower" class="lamp lamp--green is-on" title="POWER"></span>
+          <span id="lampSignal" class="lamp lamp--amber" title="SIGNAL"></span>
+          <span id="lampAlarm" class="lamp lamp--red" title="ALARM"></span>
+        </div>
+      </header>
+
+      <!-- Screen: waveform + vitals overlay -->
+      <section class="screen" aria-label="心電図モニター画面">
+        <div class="screen__inner">
+          <canvas id="ecgCanvas" class="ecg-canvas" width="1000" height="260" role="img" aria-label="タイピング波形"></canvas>
+
+          <div class="vitals-overlay">
+            <div class="vital vital--bpm">
+              <span class="vital__label">HR (BPM)</span>
+              <span id="bpmValue" class="vital__value vital__value--big">--</span>
+            </div>
+            <div class="vital">
+              <span class="vital__label">KEYSTROKES</span>
+              <span id="keyCount" class="vital__value">0</span>
+            </div>
+            <div class="vital">
+              <span class="vital__label">ELAPSED</span>
+              <span id="elapsedTime" class="vital__value">00:00</span>
+            </div>
+          </div>
+
+          <div id="statusMessage" class="status-message">
+            SIGNAL WAITING — 入力を開始してください（診断には20打鍵以上必要）
+          </div>
+
+          <div class="scanline-overlay" aria-hidden="true"></div>
+          <div class="crt-flicker" aria-hidden="true"></div>
+        </div>
+
+        <!-- Diagnosis report, revealed inside the screen glass -->
+        <div id="reportPanel" class="report-panel" hidden>
+          <div class="report-panel__head">
+            <span>検査結果レポート</span>
+            <span id="reportTime" class="report-panel__time"></span>
+          </div>
+          <div class="report-panel__body">
+            <h2 id="reportName" class="report-panel__name">---</h2>
+            <p id="reportComment" class="report-panel__comment">---</p>
+            <dl class="report-panel__stats">
+              <div><dt>平均間隔</dt><dd id="statMeanInterval">-- ms</dd></div>
+              <div><dt>変動係数 (CV)</dt><dd id="statCv">--</dd></div>
+              <div><dt>平均BPM相当</dt><dd id="statAvgBpm">-- bpm</dd></div>
+              <div><dt>総打鍵数</dt><dd id="statTotalKeys">--</dd></div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <!-- Input jack panel -->
+      <section class="console" aria-label="信号入力コンソール">
+        <label for="typingInput" class="console__label">
+          <span class="console__label-tag">SIGNAL INPUT</span>
+          <span class="console__label-sub">ここに自由に文字を入力してください（内容は保存・送信されません。打鍵の間隔のみを計測します）</span>
+        </label>
+        <textarea
+          id="typingInput"
+          class="console__textarea"
+          rows="4"
+          placeholder="&gt; ここにタイピングしてください..."
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        ></textarea>
+
+        <div class="console__controls">
+          <button id="diagnoseBtn" type="button" class="btn btn--amber" disabled>診断する</button>
+          <button id="saveBtn" type="button" class="btn btn--green" disabled>PNG保存</button>
+          <button id="resetBtn" type="button" class="btn btn--red">リセット</button>
+        </div>
+      </section>
+
+      <footer class="chassis__footer">
+        <p>
+          本機はジョークプロトタイプです。医学的診断ではありません。入力文字は画面表示のみに使用され、保存・送信は一切行いません。
+          物理キーボードでの利用を想定しています（モバイル仮想キーボードでは計測精度が下がる場合があります）。
+        </p>
+      </footer>
+    </main>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+node_modules
+dist
+*.log
+.DS_Store
+README.md
+build.js
+server.js
+package.json
+package-lock.json
