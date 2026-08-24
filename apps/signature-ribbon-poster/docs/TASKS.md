@@ -12,7 +12,7 @@
 
 ## Phase B — core（純粋ロジック）
 
-- [ ] **T03** `core/poster.ts` / `core/geometry.ts`: ポスター空間定数と clamp/lerp/distance/midpoint — FR-001.8
+- [x] **T03** `core/poster.ts` / `core/geometry.ts`: ポスター空間定数と clamp/lerp/distance/midpoint — FR-001.8
 - [ ] **T04** `core/palette.ts`: 背景 3 / リボン色 5 の定義と hex 演算、id 解決 — FR-005, FR-006
 - [ ] **T05** `core/speed.ts`: `SpeedSmoother`（5 サンプル移動平均・リセット） — FR-002
 - [ ] **T06** `core/ribbon-metrics.ts`: レスポンス → maxSpeed、速度 → 幅/不透明度/発光量の写像 — FR-003, FR-013.2
