@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="名前や誕生日をシードに、左右・点対称の幾何学紋様を自動生成するオリジナル家紋ジェネレーター。家紋帳の見開きページを開く体験でSVG書き出しができます。"
+    />
+    <meta name="theme-color" content="#f3ecdb" />
+    <title>オリジナル家紋ジェネレーター — 家紋帳</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Noto+Serif+JP:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <header class="masthead">
+        <p class="masthead-eyebrow">Original Crest Archive</p>
+        <h1 class="masthead-title">家紋帳</h1>
+        <p class="masthead-sub">名前や誕生日から、あなただけの紋様を編む。</p>
+      </header>
+
+      <main class="book" aria-label="家紋帳 見開きページ">
+        <!-- 左ページ: 入力と生成履歴 -->
+        <section class="page page-left" aria-labelledby="left-page-heading">
+          <p class="page-folio page-folio-left" aria-hidden="true">左之丁</p>
+          <h2 id="left-page-heading" class="page-heading">紋を編む</h2>
+
+          <form id="seed-form" class="seed-form" autocomplete="off">
+            <div class="field">
+              <label for="input-name">名前</label>
+              <input id="input-name" name="name" type="text" placeholder="例）水野 蒼" maxlength="40" />
+            </div>
+            <div class="field">
+              <label for="input-birthday">誕生日・記念日など</label>
+              <input id="input-birthday" name="birthday" type="text" placeholder="例）1998-04-12" maxlength="40" />
+            </div>
+            <p class="field-hint">入力した文字を種として、その場で紋様が育ちます。</p>
+          </form>
+
+          <div class="palette-select" role="group" aria-label="配色を選ぶ">
+            <span class="palette-select-label">色目</span>
+            <div class="palette-swatches" id="palette-swatches"></div>
+          </div>
+
+          <div class="next-pattern-row">
+            <button id="next-pattern-btn" type="button" class="btn-outline" disabled>
+              <span>次のパターンへ</span>
+            </button>
+            <p class="next-pattern-hint">同じ種のまま、別の紋様を呼び出します。</p>
+          </div>
+
+          <div class="history-block">
+            <h3 class="history-heading">図版帖<span class="history-count" id="history-count"></span></h3>
+            <p id="history-empty" class="history-empty">まだ紋がありません。名前や誕生日を入れると、ここに記録されていきます。</p>
+            <ol id="history-list" class="history-list" hidden></ol>
+          </div>
+        </section>
+
+        <!-- 綴じ目 -->
+        <div class="spine" aria-hidden="true">
+          <div class="spine-shadow"></div>
+        </div>
+
+        <!-- 右ページ: 選択中の家紋を大きく表示 -->
+        <section class="page page-right" aria-labelledby="right-page-heading">
+          <p class="page-folio page-folio-right" aria-hidden="true">右之丁</p>
+          <h2 id="right-page-heading" class="visually-hidden">選択中の家紋</h2>
+
+          <div class="crest-stage">
+            <div id="crest-mount" class="crest-mount" aria-live="polite"></div>
+            <p id="crest-placeholder-text" class="crest-placeholder-text">
+              名前や誕生日を左のページに書き入れると、<br />紋がここに生まれます。
+            </p>
+          </div>
+
+          <div id="crest-caption" class="crest-caption" hidden>
+            <p class="crest-caption-line" id="crest-plate-label"></p>
+            <p class="crest-caption-line" id="crest-desc"></p>
+            <p class="crest-caption-seed" id="crest-seed-echo"></p>
+          </div>
+
+          <div class="right-page-footer">
+            <p id="download-status" class="download-status" role="status" aria-live="polite"></p>
+            <button id="download-btn" type="button" class="stamp-btn" disabled aria-label="表示中の家紋をSVGで書き出す">
+              <span class="stamp-btn-frame">
+                <span class="stamp-btn-text">書<br />出</span>
+              </span>
+            </button>
+          </div>
+        </section>
+      </main>
+
+      <p id="error-banner" class="error-banner" role="alert" hidden></p>
+
+      <footer class="site-footer">
+        <p>生成・書き出しはすべてこの端末内のブラウザで完結します。入力内容がサーバーへ送信されることはありません。</p>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

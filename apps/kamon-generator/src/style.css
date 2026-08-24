@@ -1,0 +1,714 @@
+/* ==========================================================================
+   オリジナル家紋ジェネレーター — 家紋帳エディトリアル
+   配色: 和紙のオフホワイト背景 + 墨の本文 + 朱(#C33A2E)を唯一の差し色に。
+   書体: 日本語=Noto Serif JP / 英数字=Cormorant Garamond。
+   レイアウト: 見開き本（左=入力・履歴、右=大きな家紋）+ 中央の綴じ目影。
+   ========================================================================== */
+
+:root {
+  --ink: #241f18;
+  --ink-soft: #4a4236;
+  --ink-faint: #8a8070;
+  --vermillion: #c33a2e;
+  --vermillion-deep: #9c2c22;
+  --washi-1: #f7f1e3;
+  --washi-2: #efe6d2;
+  --paper: #fbf7ec;
+  --paper-edge: #e7dcc2;
+  --hairline: rgba(74, 66, 54, 0.22);
+  --shadow-warm: rgba(96, 68, 32, 0.22);
+
+  --font-jp: "Noto Serif JP", "Hiragino Mincho ProN", serif;
+  --font-latin: "Cormorant Garamond", var(--font-jp);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(255, 255, 255, 0.5), transparent 55%),
+    linear-gradient(160deg, var(--washi-1) 0%, var(--washi-2) 55%, var(--washi-1) 100%);
+  color: var(--ink);
+  font-family: var(--font-jp);
+  -webkit-font-smoothing: antialiased;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+#app {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: min(7vh, 68px) 24px 48px;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead {
+  text-align: left;
+  margin: 0 0 40px 4px;
+  max-width: 30em;
+}
+
+.masthead-eyebrow {
+  margin: 0 0 6px;
+  font-family: var(--font-latin);
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  color: var(--vermillion-deep);
+  text-transform: uppercase;
+}
+
+.masthead-title {
+  margin: 0;
+  font-size: clamp(30px, 4.2vw, 42px);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+}
+
+.masthead-sub {
+  margin: 10px 0 0;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+  letter-spacing: 0.03em;
+}
+
+/* ---------- book spread ---------- */
+
+.book {
+  position: relative;
+  display: grid;
+  grid-template-columns: 0.92fr 44px 1.2fr;
+  align-items: stretch;
+  border-radius: 3px;
+  box-shadow:
+    0 26px 60px -28px var(--shadow-warm),
+    0 4px 14px -6px rgba(60, 40, 15, 0.18);
+}
+
+.page {
+  position: relative;
+  background: var(--paper);
+  padding: 52px 44px 48px;
+  display: flex;
+  flex-direction: column;
+  min-height: 640px;
+}
+
+.page-left {
+  border-radius: 3px 0 0 3px;
+  border-right: 1px solid var(--paper-edge);
+}
+
+.page-right {
+  border-radius: 0 3px 3px 0;
+  align-items: stretch;
+}
+
+.page-folio {
+  position: absolute;
+  top: 20px;
+  font-family: var(--font-latin);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: var(--ink-faint);
+}
+
+.page-folio-left {
+  left: 44px;
+}
+
+.page-folio-right {
+  right: 44px;
+}
+
+.page-heading {
+  margin: 4px 0 26px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* spine: 中央の綴じ目 */
+
+.spine {
+  position: relative;
+  background: linear-gradient(
+    90deg,
+    rgba(40, 28, 12, 0.16) 0%,
+    rgba(40, 28, 12, 0.05) 20%,
+    rgba(40, 28, 12, 0.05) 80%,
+    rgba(40, 28, 12, 0.16) 100%
+  );
+}
+
+.spine-shadow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 100% at 50% 50%, rgba(30, 20, 8, 0.32), transparent 72%);
+}
+
+/* ---------- 左ページ: フォーム ---------- */
+
+.seed-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 12.5px;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+}
+
+.field input {
+  font-family: var(--font-jp);
+  font-size: 16px;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  padding: 8px 2px 10px;
+  outline: none;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.field input::placeholder {
+  color: var(--ink-faint);
+  opacity: 0.85;
+}
+
+.field input:hover {
+  border-bottom-color: var(--ink-faint);
+}
+
+.field input:focus-visible {
+  border-bottom: 2px solid var(--vermillion);
+  padding-bottom: 9px;
+  background: rgba(195, 58, 46, 0.04);
+}
+
+.field-hint {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  letter-spacing: 0.02em;
+}
+
+/* ---------- 色目（配色プリセット） ---------- */
+
+.palette-select {
+  margin-bottom: 26px;
+}
+
+.palette-select-label {
+  display: block;
+  font-size: 12.5px;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+
+.palette-swatches {
+  display: flex;
+  gap: 10px;
+}
+
+.palette-swatch {
+  appearance: none;
+  border: 1px solid var(--hairline);
+  background: var(--washi-1);
+  padding: 8px 6px 7px;
+  width: 64px;
+  cursor: pointer;
+  font-family: var(--font-jp);
+  color: var(--ink-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: transform 140ms ease, border-color 140ms ease;
+}
+
+.palette-swatch:hover {
+  transform: translateY(-1px);
+  border-color: var(--ink-faint);
+}
+
+.palette-swatch-chip {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.palette-swatch-label {
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  position: relative;
+  padding-bottom: 3px;
+}
+
+.palette-swatch[aria-pressed="true"] {
+  color: var(--ink);
+}
+
+.palette-swatch[aria-pressed="true"] .palette-swatch-label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--vermillion);
+}
+
+.palette-swatch[aria-pressed="true"] {
+  border-color: var(--vermillion-deep);
+}
+
+.palette-swatch:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: 2px;
+}
+
+/* ---------- 次のパターンへ ---------- */
+
+.next-pattern-row {
+  margin-bottom: 30px;
+}
+
+.btn-outline {
+  appearance: none;
+  font-family: var(--font-jp);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  color: var(--vermillion-deep);
+  background: transparent;
+  border: 1px solid var(--vermillion-deep);
+  clip-path: polygon(0 0, 100% 0, 100% 84%, 97% 100%, 0 100%);
+  padding: 10px 22px;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, transform 120ms ease;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--vermillion-deep);
+  color: var(--paper);
+}
+
+.btn-outline:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn-outline:disabled {
+  color: var(--ink-faint);
+  border-color: var(--hairline);
+  cursor: not-allowed;
+}
+
+.btn-outline:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: 3px;
+}
+
+.next-pattern-hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+/* ---------- 図版帖（履歴） ---------- */
+
+.history-block {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-heading {
+  margin: 0 0 4px;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.history-count {
+  font-family: var(--font-latin);
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.history-empty {
+  font-size: 13px;
+  color: var(--ink-faint);
+  line-height: 1.9;
+  border-top: 1px dashed var(--hairline);
+  padding-top: 16px;
+  margin-top: 10px;
+}
+
+.history-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--hairline);
+  overflow-y: auto;
+  max-height: 420px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--hairline);
+  cursor: pointer;
+  background: transparent;
+  width: 100%;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  text-align: left;
+  transition: background-color 150ms ease, transform 150ms ease;
+  font-family: var(--font-jp);
+}
+
+.history-item:hover {
+  background: rgba(195, 58, 46, 0.05);
+  transform: translateX(4px);
+}
+
+.history-item:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: -2px;
+}
+
+.history-item[aria-current="true"] {
+  background: rgba(195, 58, 46, 0.08);
+}
+
+.history-plate-no {
+  font-family: var(--font-latin);
+  font-size: 15px;
+  color: var(--vermillion-deep);
+  width: 26px;
+  flex: none;
+}
+
+.history-thumb {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  background: var(--washi-1);
+}
+
+.history-thumb svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.history-desc {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+/* ---------- 右ページ: 家紋表示 ---------- */
+
+.crest-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 12px 0 8px;
+}
+
+.crest-mount {
+  width: min(360px, 78%);
+  aspect-ratio: 1 / 1;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.crest-mount.is-empty {
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.crest-mount svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 10px 22px rgba(70, 48, 20, 0.16));
+}
+
+@keyframes crest-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.965);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.crest-mount.is-updating svg {
+  animation: crest-appear 220ms ease both;
+}
+
+.crest-placeholder-text {
+  margin: 0;
+  text-align: center;
+  font-size: 13.5px;
+  line-height: 2;
+  color: var(--ink-faint);
+  max-width: 22em;
+}
+
+.crest-caption {
+  text-align: center;
+  margin: 4px 0 8px;
+}
+
+.crest-caption-line {
+  margin: 0 0 6px;
+  font-size: 13.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+
+#crest-plate-label {
+  font-family: var(--font-latin);
+  color: var(--vermillion-deep);
+  letter-spacing: 0.14em;
+  font-size: 13px;
+}
+
+.crest-caption-seed {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-faint);
+  font-style: italic;
+  font-family: var(--font-latin);
+}
+
+.right-page-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.download-status {
+  font-size: 12.5px;
+  color: var(--vermillion-deep);
+  min-height: 1.4em;
+  letter-spacing: 0.03em;
+}
+
+/* 角印風の書き出しボタン */
+
+.stamp-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transform: rotate(-2.2deg);
+  transition: transform 160ms ease;
+}
+
+.stamp-btn-frame {
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  background: var(--vermillion);
+  color: var(--washi-1);
+  clip-path: polygon(
+    3% 6%,
+    36% 0%,
+    70% 3%,
+    100% 9%,
+    97% 40%,
+    100% 72%,
+    94% 100%,
+    58% 97%,
+    28% 100%,
+    0% 92%,
+    4% 60%,
+    0% 30%
+  );
+  box-shadow: inset 0 0 0 1.5px rgba(255, 250, 240, 0.35), 0 8px 18px -8px rgba(156, 44, 34, 0.55);
+}
+
+.stamp-btn-text {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.stamp-btn:hover:not(:disabled) {
+  transform: rotate(0deg) scale(1.04);
+}
+
+.stamp-btn:active:not(:disabled) {
+  transform: rotate(0deg) scale(0.95);
+}
+
+.stamp-btn:disabled {
+  cursor: not-allowed;
+}
+
+.stamp-btn:disabled .stamp-btn-frame {
+  background: var(--ink-faint);
+  box-shadow: none;
+}
+
+.stamp-btn:focus-visible {
+  outline: 2px solid var(--vermillion-deep);
+  outline-offset: 4px;
+}
+
+@keyframes stamp-pulse {
+  from {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+.stamp-btn.is-stamped::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  border: 2px solid var(--vermillion);
+  animation: stamp-pulse 560ms ease-out;
+}
+
+.stamp-btn {
+  position: relative;
+}
+
+/* ---------- エラー・フッター ---------- */
+
+.error-banner {
+  margin: 18px 4px 0;
+  padding: 12px 16px;
+  border: 1px solid var(--vermillion-deep);
+  background: rgba(195, 58, 46, 0.06);
+  color: var(--vermillion-deep);
+  font-size: 13.5px;
+  border-radius: 2px;
+}
+
+.site-footer {
+  margin: 28px 4px 0;
+  font-size: 12px;
+  color: var(--ink-faint);
+  letter-spacing: 0.02em;
+}
+
+/* ---------- レスポンシブ ---------- */
+
+@media (max-width: 900px) {
+  .book {
+    grid-template-columns: 1fr;
+    box-shadow: 0 18px 40px -22px var(--shadow-warm);
+  }
+
+  .spine {
+    height: 26px;
+    background: linear-gradient(
+      180deg,
+      rgba(40, 28, 12, 0.16) 0%,
+      rgba(40, 28, 12, 0.04) 30%,
+      rgba(40, 28, 12, 0.04) 70%,
+      rgba(40, 28, 12, 0.16) 100%
+    );
+  }
+
+  .spine-shadow {
+    background: radial-gradient(ellipse 100% 60% at 50% 50%, rgba(30, 20, 8, 0.32), transparent 72%);
+  }
+
+  .page-left,
+  .page-right {
+    border-radius: 0;
+    border-right: none;
+  }
+
+  .page {
+    padding: 40px 26px 36px;
+    min-height: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crest-mount,
+  .btn-outline,
+  .history-item,
+  .stamp-btn,
+  .palette-swatch {
+    transition: none;
+  }
+
+  .crest-mount.is-updating svg {
+    animation: none;
+  }
+
+  .stamp-btn.is-stamped::after {
+    animation: none;
+    display: none;
+  }
+}
