@@ -19,7 +19,7 @@
 - [x] **T07** `core/stroke.ts`: `StrokeBuilder`（1.5px 未満の点を棄却、速度付与、確定） — FR-001.5, FR-002.3
 - [x] **T08** `core/history.ts`: Undo/Redo スタック（上限 50、push で future 破棄） — FR-008
 - [x] **T09** `core/export-presets.ts`: 3 解像度プリセットと id 解決 — FR-010
-- [ ] **T10** `core/draft.ts`: ドラフトの直列化・復元・スキーマ検証 — FR-011.3, FR-011.4
+- [x] **T10** `core/draft.ts`: ドラフトの直列化・復元・スキーマ検証 — FR-011.3, FR-011.4
 - [ ] **T11** `core/draft-storage.ts`: localStorage リポジトリ（例外を投げない・破損時削除） — FR-011.4, FR-011.5, E-08, E-09
 
 ## Phase C — render（描画層）
