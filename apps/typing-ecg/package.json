@@ -1,0 +1,12 @@
+{
+  "name": "typing-ecg",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "タイピング心電図 — 打鍵の間隔タイミングを心電図モニター風に描画するジョークプロトタイプ",
+  "scripts": {
+    "build": "node build.js",
+    "start": "node server.js",
+    "dev": "node server.js"
+  }
+}
