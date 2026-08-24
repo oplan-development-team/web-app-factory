@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DEPARTURES — Deadline Departure Board</title>
+<meta name="description" content="複数の締切をSolari式スプリットフラップ発着案内板のように表示するローカル専用カウントダウンボード">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+<div class="grain-overlay" aria-hidden="true"></div>
+<div class="scanline-overlay" aria-hidden="true"></div>
+
+<main class="board-case">
+
+  <header class="board-header">
+    <div class="board-title">
+      <span class="board-title__kicker">SOLARI TYPE&nbsp;&nbsp;/&nbsp;&nbsp;LOCAL BOARD</span>
+      <h1 class="board-title__main">DEPARTURES</h1>
+      <span class="board-title__sub">DEADLINE FLIGHT INFORMATION SYSTEM</span>
+    </div>
+    <div class="board-clock" aria-label="現在時刻">
+      <div class="board-clock__flaps" id="clockFlaps"></div>
+      <span class="board-clock__label">LOCAL TIME</span>
+    </div>
+  </header>
+
+  <section class="add-form-section" aria-labelledby="addFormHeading">
+    <h2 id="addFormHeading" class="visually-hidden">新しい締切を追加</h2>
+    <form id="addForm" class="add-form" novalidate>
+      <div class="field field--title">
+        <label for="titleInput">TITLE</label>
+        <input id="titleInput" name="title" type="text" maxlength="16" placeholder="PROJECT LAUNCH" autocomplete="off" required>
+      </div>
+      <div class="field field--date">
+        <label for="dateInput">DATE</label>
+        <input id="dateInput" name="date" type="date" required>
+      </div>
+      <div class="field field--time">
+        <label for="timeInput">TIME <span class="field__optional">(OPTIONAL)</span></label>
+        <input id="timeInput" name="time" type="time">
+      </div>
+      <button type="submit" class="btn-add">
+        <span>ADD FLIGHT</span>
+      </button>
+    </form>
+    <p class="form-error" id="formError" role="alert" aria-live="assertive"></p>
+  </section>
+
+  <div class="board-columns-header" aria-hidden="true">
+    <span class="col col--rank">NO</span>
+    <span class="col col--title">DESTINATION</span>
+    <span class="col col--remain">REMAINING</span>
+    <span class="col col--due">DUE</span>
+    <span class="col col--status">STATUS</span>
+    <span class="col col--del"></span>
+  </div>
+
+  <div id="boardRows" class="board-rows" aria-live="polite" aria-relevant="additions removals"></div>
+
+  <div id="emptyState" class="empty-state">
+    <div class="empty-state__flap-row" id="emptyFlaps"></div>
+    <p class="empty-state__hint">締切がありません。上のフォームからフライトを追加してください。</p>
+  </div>
+
+  <footer class="board-footer">
+    <span>ALL DATA STORED LOCALLY IN THIS BROWSER — NOTHING IS SENT ANYWHERE</span>
+  </footer>
+</main>
+
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>
