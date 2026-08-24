@@ -76,7 +76,7 @@ function drawStroke(ctx: CanvasRenderingContext2D, stroke: Stroke): void {
   const { points, color } = stroke;
   if (points.length < 2) {
     if (points.length === 1) {
-      drawDot(ctx, points[0], color);
+      drawDot(ctx, points[0]!, color);
     }
     return;
   }
@@ -84,8 +84,8 @@ function drawStroke(ctx: CanvasRenderingContext2D, stroke: Stroke): void {
   const hotCore = lighten(color, 0.72);
 
   for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const curr = points[i];
+    const prev = points[i - 1]!;
+    const curr = points[i]!;
     const speedNorm = clamp(curr.speed / MAX_SPEED, 0, 1);
 
     const width = lerp(MAX_WIDTH, MIN_WIDTH, speedNorm);

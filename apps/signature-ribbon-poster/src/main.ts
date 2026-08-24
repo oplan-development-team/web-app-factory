@@ -21,7 +21,7 @@ const clearButton = requireElement<HTMLButtonElement>("#clear-btn");
 const downloadButton = requireElement<HTMLButtonElement>("#download-btn");
 const stageHint = requireElement<HTMLParagraphElement>("#stage-hint");
 
-const engine = new RibbonEngine(canvas, BACKGROUND_PRESETS[0].hex, RIBBON_HUES[0].hex);
+const engine = new RibbonEngine(canvas, BACKGROUND_PRESETS[0]!.hex, RIBBON_HUES[0]!.hex);
 
 function buildSwatches(
   container: HTMLDivElement,
