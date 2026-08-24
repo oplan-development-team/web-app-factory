@@ -1,202 +1,225 @@
 /**
- * シード文字列から決定的に「家紋風」の幾何学紋様を組み立てる。
+ * シード文字列から、色に依存しない紋の構造を決定的に組み立てる。
  *
- * 方針:
- *  1. seedForVariant() でシード+バリアント番号を32bitハッシュ化し、mulberry32 に渡す
- *  2. 対称モード（線対称 or 点対称2/4/6分割）を確定的に選ぶ
- *  3. 「複製の基本単位」（線対称なら右半分、点対称ならn分割の1ウェッジ）の中に
- *     中心モチーフ・外周リングモチーフの図形を配置する
- *  4. 単位図形をSVG側のtransform（鏡像 or 回転）で複製することで、
- *     手計算せずに厳密な対称性を担保する
+ * 抽選は「制約の強い順」に行う（PLAN 3.1）。外郭を先に決めると紋様域の半径が
+ * 確定し、以降のすべての寸法がそこから逆算されるため、無効な組み合わせが生じない。
+ *
+ *   外郭 → モチーフ → 構成 → 充填率 → 形状のゆらぎ → 座
  */
 
-import { type Rng, mulberry32, pick, randFloat, randInt, seedForVariant } from "./hash";
-import { type ShapeKind, type ShapeSpec, SHAPE_LABEL, polarToXY, renderShape } from "./shapes";
+import {
+  FILL_RATIO_MAX,
+  FILL_RATIO_MIN,
+  MIN_STROKE,
+} from "./constants";
+import {
+  CROSSED_TILT_MAX,
+  CROSSED_TILT_MIN,
+  type CompositionPlan,
+  type Placement,
+  planComposition,
+} from "./composition";
+import { type Enclosure, enclosureById, ENCLOSURES } from "./enclosure";
+import { flattenSegments } from "./geometry";
+import { type Rng, mulberry32, pick, randFloat, seedForVariant, weightedPick } from "./hash";
+import { MOTIFS, buildMotifGeometry } from "./motifs";
+import type { CompositionKind, Motif, UnitGeometry } from "./motifs/types";
+import { CATEGORY_LABEL } from "./motifs/types";
+import { buildKamonName, symmetryLabelOf } from "./naming";
 
-export type Symmetry = { type: "mirror" } | { type: "point"; n: 2 | 4 | 6 };
+export type SeatKind = "none" | "dot" | "ring" | "hanabishi";
 
-export interface Palette {
-  id: "sumi" | "shu" | "kon";
-  label: string;
-  ink: string;
-  paper: string;
+export interface Seat {
+  kind: SeatKind;
+  radius: number;
+  width: number;
 }
-
-export const PALETTES: Palette[] = [
-  { id: "sumi", label: "墨 × 白", ink: "#201d1a", paper: "#ffffff" },
-  { id: "shu", label: "朱 × 白", ink: "#c33a2e", paper: "#ffffff" },
-  { id: "kon", label: "白 × 紺", ink: "#f4efe2", paper: "#1b2a4a" },
-];
-
-const CX = 200;
-const CY = 200;
-const SHAPE_KINDS: ShapeKind[] = ["petal", "diamond", "circle", "cross"];
 
 export interface KamonStructure {
   seedText: string;
   variantIndex: number;
-  symmetry: Symmetry;
+  enclosureId: Enclosure["id"];
+  motifId: string;
+  motifLabel: string;
+  categoryLabel: string;
+  composition: CompositionPlan;
+  fillRatio: number;
+  unit: UnitGeometry;
+  seat: Seat;
+  name: string;
   symmetryLabel: string;
-  centerShape: ShapeKind;
-  ringShape: ShapeKind;
-  unitElements: ShapeSpec[];
-  centerCoreRadius: number;
-  frameRadii: number[];
+  /** 描画プリミティブ数（外郭の輪 + 単位 + 座）。FR-102.1 の検証対象 */
+  primitiveCount: number;
 }
 
-function symmetryLabelOf(sym: Symmetry): string {
-  if (sym.type === "mirror") return "線対称・左右";
-  return `点対称・${sym.n}分割`;
+/**
+ * 構成ごとの抽選重み。
+ * 放射は中心で単位が噛み合って塊をつくるため、家紋らしさが最も安定して出る。
+ * 単独は 1 単位だけを大きく置くので、多用すると紋の表情が単調になる。
+ */
+const COMPOSITION_WEIGHT: Record<CompositionKind, number> = {
+  radial: 6,
+  crossed: 3,
+  ring: 3,
+  single: 2,
+};
+
+/** モチーフが対応する構成の中から 1 つ選び、単位数を確定する */
+function chooseComposition(rng: Rng, motif: Motif): { kind: CompositionKind; count: number } {
+  const spec = weightedPick(
+    rng,
+    motif.supports.map((s) => ({ value: s, weight: COMPOSITION_WEIGHT[s.kind] })),
+  );
+  switch (spec.kind) {
+    case "single":
+      return { kind: "single", count: 1 };
+    case "crossed":
+      return { kind: "crossed", count: 2 };
+    case "radial":
+    case "ring":
+      return { kind: spec.kind, count: pick(rng, spec.counts) };
+  }
 }
 
-/** シード文字列とバリアント番号から、色に依存しない紋様の構造を組み立てる */
+/**
+ * 座を置くのは、構成そのものが中心を空けている場合に限る（FR-140.1）。
+ * 放射構成は単位が中心で接して塊をつくるため（FR-103.2）、そこへ座を重ねても
+ * 墨の上に墨を置くだけで意味がない。
+ */
+function centerIsOpen(kind: CompositionKind, baseOffset: number): boolean {
+  if (kind === "ring") return true;
+  if (kind === "radial") return baseOffset > 8;
+  return false;
+}
+
+function chooseSeat(
+  rng: Rng,
+  kind: CompositionKind,
+  baseOffset: number,
+  innerRadius: number,
+): Seat {
+  if (!centerIsOpen(kind, baseOffset)) {
+    return { kind: "none", radius: 0, width: 0 };
+  }
+
+  const chosen = weightedPick<SeatKind>(rng, [
+    { value: "none", weight: 30 },
+    { value: "dot", weight: 32 },
+    { value: "ring", weight: 18 },
+    { value: "hanabishi", weight: 20 },
+  ]);
+
+  switch (chosen) {
+    case "none":
+      return { kind: "none", radius: 0, width: 0 };
+    case "dot":
+      return { kind: "dot", radius: randFloat(rng, 14, 20), width: 0 };
+    case "ring":
+      return {
+        kind: "ring",
+        radius: randFloat(rng, 20, 28),
+        width: Math.max(MIN_STROKE, innerRadius * 0.07),
+      };
+    case "hanabishi":
+      return { kind: "hanabishi", radius: randFloat(rng, 26, 34), width: 0 };
+  }
+}
+
 export function buildKamonStructure(seedText: string, variantIndex: number): KamonStructure {
-  const rng: Rng = mulberry32(seedForVariant(seedText, variantIndex));
+  const seed = seedForVariant(seedText, variantIndex);
+  const rng = mulberry32(seed);
 
-  const symmetryOptions: Symmetry[] = [
-    { type: "mirror" },
-    { type: "point", n: 2 },
-    { type: "point", n: 4 },
-    { type: "point", n: 6 },
-  ];
-  const symmetry = pick(rng, symmetryOptions);
-  const unitSpan = symmetry.type === "mirror" ? 180 : 360 / symmetry.n;
-  const unitStart = symmetry.type === "mirror" ? 0 : -unitSpan / 2;
+  const enclosure = weightedPick(
+    rng,
+    ENCLOSURES.map((e) => ({ value: e, weight: e.weight })),
+  );
 
-  const centerShape = pick(rng, SHAPE_KINDS);
-  const ringShape = pick(rng, SHAPE_KINDS);
-  const centerFilled = rng() < 0.6;
-  const ringFilled = rng() < 0.4;
+  const motif = pick(rng, MOTIFS);
+  const { kind, count } = chooseComposition(rng, motif);
+  const fillRatio = randFloat(rng, FILL_RATIO_MIN, FILL_RATIO_MAX);
+  const motifRadius = enclosure.innerRadius * fillRatio;
+  const tilt =
+    kind === "crossed" ? randFloat(rng, CROSSED_TILT_MIN, CROSSED_TILT_MAX) : 0;
 
-  const unitElements: ShapeSpec[] = [];
+  /*
+   * 単位の寸法と、複製後の紋全体の外接半径は一致しない。
+   * 違い構成のように支点をずらして傾ける配置では両者が大きくずれる。
+   * そこで一度組み立てて実測し、同じ乱数列のまま寸法だけを直して組み直す。
+   * 配置も単位も寸法に対して線形なので、この 1 回の補正で
+   * 充填率（FR-103.1）が構成によらず正確に成立する。
+   */
+  const motifSeed = (seed ^ 0x9e3779b9) >>> 0;
+  const buildWith = (size: number): UnitGeometry =>
+    buildMotifGeometry(motif, kind, mulberry32(motifSeed), size);
 
-  // 中心モチーフ: 単位の中央（真上方向）に1つだけ置き、複製で花状・放射状に見せる
-  {
-    const angle = unitStart + unitSpan / 2;
-    const radius = randFloat(rng, 26, 54);
-    const { x, y } = polarToXY(CX, CY, angle, radius);
-    unitElements.push({
-      kind: centerShape,
-      x,
-      y,
-      rot: angle,
-      size: randFloat(rng, 20, 34),
-      aspect: randFloat(rng, 0.5, 0.95),
-      filled: centerFilled,
-    });
+  let composition = planComposition(kind, count, motifRadius, tilt);
+  let unit = buildWith(composition.unitSize);
+  const measured = assemblyExtent(unit, composition.placements);
+  if (measured > 0) {
+    composition = planComposition(kind, count, (motifRadius * motifRadius) / measured, tilt);
+    unit = buildWith(composition.unitSize);
   }
 
-  // 外周リングモチーフ: 1〜2層、各層に複数個を単位内で分散配置
-  const ringLayerCount = randInt(rng, 1, 2);
-  for (let layer = 0; layer < ringLayerCount; layer++) {
-    const baseRadius = 96 + layer * 42 + randFloat(rng, -6, 6);
-    const countPerUnit = randInt(rng, 1, 3);
-    const localRotOffset = pick(rng, [0, 0, 45, 90]); // 大半は放射方向、たまに向きを変える
-    const size = randFloat(rng, 12, 22) - layer * 1.5;
-    const aspect = randFloat(rng, 0.45, 0.9);
+  const seat = chooseSeat(rng, kind, unit.baseOffset, enclosure.innerRadius);
 
-    for (let i = 0; i < countPerUnit; i++) {
-      const slice = unitSpan / countPerUnit;
-      const jitter = slice * 0.12;
-      const angle = unitStart + slice * (i + 0.5) + randFloat(rng, -jitter, jitter);
-      const radius = baseRadius + randFloat(rng, -4, 4);
-      const { x, y } = polarToXY(CX, CY, angle, radius);
-      unitElements.push({
-        kind: ringShape,
-        x,
-        y,
-        rot: angle + localRotOffset,
-        size: Math.max(6, size),
-        aspect,
-        filled: ringFilled,
-      });
-    }
-  }
-
-  const centerCoreRadius = randFloat(rng, 3, 8);
-
-  const frameRadii: number[] = [];
-  if (rng() < 0.75) frameRadii.push(188);
-  if (rng() < 0.5) frameRadii.push(170);
+  const primitiveCount =
+    enclosure.rings.length + composition.count + (seat.kind === "none" ? 0 : 1);
 
   return {
     seedText,
     variantIndex,
-    symmetry,
-    symmetryLabel: symmetryLabelOf(symmetry),
-    centerShape,
-    ringShape,
-    unitElements,
-    centerCoreRadius,
-    frameRadii,
+    enclosureId: enclosure.id,
+    motifId: motif.id,
+    motifLabel: motif.label,
+    categoryLabel: CATEGORY_LABEL[motif.category],
+    composition,
+    fillRatio,
+    unit,
+    seat,
+    name: buildKamonName({
+      enclosurePrefix: enclosure.prefix,
+      motifLabel: motif.label,
+      kind,
+      count: composition.count,
+    }),
+    symmetryLabel: symmetryLabelOf(kind, composition.count),
+    primitiveCount,
   };
 }
 
-/** 単位図形を対称モードに応じて複製し、完全なSVGマークアップを組み立てる */
-export function renderKamonSVG(structure: KamonStructure, palette: Palette): string {
-  const { symmetry, unitElements, centerCoreRadius, frameRadii } = structure;
-  const { ink, paper } = palette;
+/** 構造から外郭の定義を引き直す（描画側が使う） */
+export function enclosureOf(structure: KamonStructure): Enclosure {
+  return enclosureById(structure.enclosureId);
+}
 
-  const unitMarkup = unitElements.map((el) => renderShape(el, ink)).join("");
-
-  let groupsMarkup: string;
-  if (symmetry.type === "mirror") {
-    groupsMarkup =
-      `<g>${unitMarkup}</g>` + `<g transform="matrix(-1 0 0 1 ${CX * 2} 0)">${unitMarkup}</g>`;
-  } else {
-    const n = symmetry.n;
-    const groups: string[] = [];
-    for (let k = 0; k < n; k++) {
-      const angle = (360 / n) * k;
-      groups.push(`<g transform="rotate(${angle.toFixed(2)} ${CX} ${CY})">${unitMarkup}</g>`);
+/**
+ * 単位を配置どおりに並べたときの、紋全体の外接半径を実測する。
+ * 配置は `translate(0, pivotDrop) rotate(θ) translate(0, -offset)` の順に効く。
+ */
+export function assemblyExtent(
+  unit: UnitGeometry,
+  placements: readonly Placement[],
+): number {
+  const points = [
+    ...unit.fills.flatMap((f) => flattenSegments(f)),
+    ...unit.strokes.flatMap((s) => flattenSegments(s.segments)),
+  ];
+  let max = 0;
+  for (const placement of placements) {
+    const rad = (placement.rotate * Math.PI) / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+    for (const p of points) {
+      const ly = p.y - placement.offset;
+      const x = p.x * cos - ly * sin;
+      const y = p.x * sin + ly * cos + placement.pivotDrop;
+      max = Math.max(max, Math.hypot(x, y));
     }
-    groupsMarkup = groups.join("");
   }
-
-  const frameMarkup = frameRadii
-    .map(
-      (r, i) =>
-        `<circle cx="${CX}" cy="${CY}" r="${r}" fill="none" stroke="${ink}" stroke-width="${i === 0 ? 2.4 : 1.2}" opacity="${i === 0 ? 1 : 0.55}"/>`,
-    )
-    .join("");
-
-  const backdrop = `<circle cx="${CX}" cy="${CY}" r="192" fill="${paper}"/>`;
-  const coreDot = `<circle cx="${CX}" cy="${CY}" r="${centerCoreRadius.toFixed(2)}" fill="${ink}"/>`;
-
-  return [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" role="img" aria-label="生成された家紋">`,
-    backdrop,
-    frameMarkup,
-    groupsMarkup,
-    coreDot,
-    `</svg>`,
-  ].join("");
+  return max;
 }
 
-/** 家紋の口上（キャプション）用の短い説明を組み立てる */
-export function describeStructure(structure: KamonStructure): string {
-  const centerLabel = SHAPE_LABEL[structure.centerShape];
-  const ringLabel = SHAPE_LABEL[structure.ringShape];
-  return `中心：${centerLabel}　外周：${ringLabel}　${structure.symmetryLabel}`;
-}
-
-/** シード未入力時に表示する、幽かな輪郭だけのプレースホルダー図案 */
-export function placeholderSVG(): string {
-  return [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" role="img" aria-label="紋はまだありません">`,
-    `<circle cx="200" cy="200" r="188" fill="none" stroke="#b9ac8f" stroke-width="1.4" stroke-dasharray="2 10" stroke-linecap="round"/>`,
-    `<circle cx="200" cy="200" r="4" fill="#c9bd9e"/>`,
-    `</svg>`,
-  ].join("");
-}
-
-/** ダウンロード用ファイル名をシード文字列から作る（安全な文字のみ残す） */
-export function filenameFromSeed(seedText: string, variantIndex: number): string {
-  const base = seedText.trim() || "無銘";
-  const safe = base
-    .normalize("NFKC")
-    .replace(/[\\/:*?"<>|]/g, "")
-    .replace(/\s+/g, "-")
-    .slice(0, 24);
-  return `kamon-${safe || "無銘"}-${variantIndex + 1}.svg`;
+/** 紋全体の外接半径（構造から実測する） */
+export function motifExtentOf(structure: KamonStructure): number {
+  return assemblyExtent(structure.unit, structure.composition.placements);
 }
