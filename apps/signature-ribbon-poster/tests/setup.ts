@@ -7,6 +7,31 @@
  */
 HTMLCanvasElement.prototype.getContext = (() => null) as HTMLCanvasElement["getContext"];
 
+/**
+ * Node 25 ships a native `localStorage` global that shadows the jsdom one on
+ * `window`, but it is inert unless the process was started with
+ * `--localstorage-file`. Swap in a working in-memory Storage so tests exercise
+ * the same code path a browser would.
+ */
+if (typeof window.localStorage?.setItem !== "function") {
+  const entries = new Map<string, string>();
+  const memoryStorage: Storage = {
+    get length() {
+      return entries.size;
+    },
+    key: (index) => [...entries.keys()][index] ?? null,
+    getItem: (key) => entries.get(key) ?? null,
+    setItem: (key, value) => void entries.set(key, String(value)),
+    removeItem: (key) => void entries.delete(key),
+    clear: () => entries.clear(),
+  };
+  Object.defineProperty(window, "localStorage", {
+    value: memoryStorage,
+    writable: true,
+    configurable: true,
+  });
+}
+
 if (!("PointerEvent" in globalThis)) {
   class PointerEventPolyfill extends MouseEvent {
     readonly pointerId: number;
