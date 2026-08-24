@@ -154,3 +154,270 @@ export function maxRadius(points: readonly Point[], origin: Point = { x: 0, y: 0
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
+
+/* ==========================================================================
+   構造化パス
+   モチーフは文字列ではなくセグメント列として組み立てる。
+   鏡像・拡縮・平行移動と外接半径の算出を、文字列を再解析せずに行うため。
+   ========================================================================== */
+
+export type Segment =
+  | { t: "M"; p: Point }
+  | { t: "L"; p: Point }
+  | { t: "Q"; c: Point; p: Point }
+  | { t: "C"; c1: Point; c2: Point; p: Point }
+  | { t: "Z" };
+
+export function segmentsToPath(segments: readonly Segment[]): string {
+  return segments
+    .map((seg) => {
+      switch (seg.t) {
+        case "M":
+          return moveTo(seg.p);
+        case "L":
+          return lineTo(seg.p);
+        case "Q":
+          return quadTo(seg.c, seg.p);
+        case "C":
+          return cubicTo(seg.c1, seg.c2, seg.p);
+        case "Z":
+          return CLOSE;
+      }
+    })
+    .join(" ");
+}
+
+function mapSegment(seg: Segment, f: (p: Point) => Point): Segment {
+  switch (seg.t) {
+    case "M":
+      return { t: "M", p: f(seg.p) };
+    case "L":
+      return { t: "L", p: f(seg.p) };
+    case "Q":
+      return { t: "Q", c: f(seg.c), p: f(seg.p) };
+    case "C":
+      return { t: "C", c1: f(seg.c1), c2: f(seg.c2), p: f(seg.p) };
+    case "Z":
+      return seg;
+  }
+}
+
+export function mapSegments(
+  segments: readonly Segment[],
+  f: (p: Point) => Point,
+): Segment[] {
+  return segments.map((seg) => mapSegment(seg, f));
+}
+
+/** 縦軸（x=0）に対する鏡像。fill-rule="evenodd" を使うため巻き方向は問わない。 */
+export function mirrorSegments(segments: readonly Segment[]): Segment[] {
+  return mapSegments(segments, (p) => ({ x: -p.x, y: p.y }));
+}
+
+export function translateSegments(
+  segments: readonly Segment[],
+  dx: number,
+  dy: number,
+): Segment[] {
+  return mapSegments(segments, (p) => ({ x: p.x + dx, y: p.y + dy }));
+}
+
+export function scaleSegments(segments: readonly Segment[], k: number): Segment[] {
+  return mapSegments(segments, (p) => ({ x: p.x * k, y: p.y * k }));
+}
+
+/** ベジェ 1 本あたりの標本点数。外接半径の誤差が図の 0.2% 未満に収まる値。 */
+const FLATTEN_STEPS = 16;
+
+function quadAt(p0: Point, c: Point, p1: Point, t: number): Point {
+  const u = 1 - t;
+  return {
+    x: u * u * p0.x + 2 * u * t * c.x + t * t * p1.x,
+    y: u * u * p0.y + 2 * u * t * c.y + t * t * p1.y,
+  };
+}
+
+function cubicAt(p0: Point, c1: Point, c2: Point, p1: Point, t: number): Point {
+  const u = 1 - t;
+  return {
+    x: u * u * u * p0.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * p1.x,
+    y: u * u * u * p0.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * p1.y,
+  };
+}
+
+/**
+ * セグメント列を、実際に線が通る点の列へ展開する。
+ *
+ * 制御点は曲線の外側へ張り出すため、外接半径や重心をそのまま制御点から求めると
+ * 図形を実際より大きく見積もってしまう（円を三次ベジェで近似した場合は約 14% 過大）。
+ * 充填率の判定と中心合わせは、必ずこの展開後の点で行う。
+ */
+export function flattenSegments(
+  segments: readonly Segment[],
+  steps = FLATTEN_STEPS,
+): Point[] {
+  const points: Point[] = [];
+  let current: Point = { x: 0, y: 0 };
+  let start: Point = { x: 0, y: 0 };
+
+  for (const seg of segments) {
+    switch (seg.t) {
+      case "M":
+        current = seg.p;
+        start = seg.p;
+        points.push(current);
+        break;
+      case "L":
+        current = seg.p;
+        points.push(current);
+        break;
+      case "Q": {
+        for (let i = 1; i <= steps; i++) points.push(quadAt(current, seg.c, seg.p, i / steps));
+        current = seg.p;
+        break;
+      }
+      case "C": {
+        for (let i = 1; i <= steps; i++)
+          points.push(cubicAt(current, seg.c1, seg.c2, seg.p, i / steps));
+        current = seg.p;
+        break;
+      }
+      case "Z":
+        current = start;
+        break;
+    }
+  }
+
+  return points;
+}
+
+export interface Bounds {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+}
+
+export function boundsOf(groups: readonly (readonly Segment[])[]): Bounds {
+  const points = groups.flatMap((g) => flattenSegments(g));
+  if (points.length === 0) {
+    return { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+  }
+  return {
+    minX: Math.min(...points.map((p) => p.x)),
+    maxX: Math.max(...points.map((p) => p.x)),
+    minY: Math.min(...points.map((p) => p.y)),
+    maxY: Math.max(...points.map((p) => p.y)),
+  };
+}
+
+/**
+ * 複数のセグメント群をまとめて重心（バウンディングボックス中心）に寄せ、
+ * 外接半径がちょうど `radius` になるよう等倍拡縮する。
+ *
+ * 「基部から伸びる単位」として定義したモチーフを、そのまま
+ * 「中心対称に据える図形」へ転用するための変換（PLAN 3.2）。
+ */
+export function centerAndFit(
+  groups: readonly (readonly Segment[])[],
+  radius: number,
+): { groups: Segment[][]; scale: number } {
+  const b = boundsOf(groups);
+  const dx = -(b.minX + b.maxX) / 2;
+  const dy = -(b.minY + b.maxY) / 2;
+  const centered = groups.map((g) => translateSegments(g, dx, dy));
+  const current = maxRadius(centered.flatMap((g) => flattenSegments(g)));
+  const scale = current > 0 ? radius / current : 1;
+  return { groups: centered.map((g) => scaleSegments(g, scale)), scale };
+}
+
+/**
+ * 2 点を結ぶ帯状の閉じた副パス。塗り面に開ける白抜き（葉脈・羽の筋）に使う。
+ * 始端と終端で幅を変えられる。
+ */
+export function taperedSlit(
+  from: Point,
+  to: Point,
+  widthAtFrom: number,
+  widthAtTo: number,
+): Segment[] {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const len = Math.hypot(dx, dy);
+  if (len === 0) throw new Error("taperedSlit: 始点と終点が同一です");
+  const nx = -dy / len;
+  const ny = dx / len;
+  const a = widthAtFrom / 2;
+  const b = widthAtTo / 2;
+  return [
+    { t: "M", p: { x: from.x + nx * a, y: from.y + ny * a } },
+    { t: "L", p: { x: to.x + nx * b, y: to.y + ny * b } },
+    { t: "L", p: { x: to.x - nx * b, y: to.y - ny * b } },
+    { t: "L", p: { x: from.x - nx * a, y: from.y - ny * a } },
+    { t: "Z" },
+  ];
+}
+
+/**
+ * 基部 (0,0) から右側を上へ辿る手順を与えると、縦軸対称の閉じた輪郭を返す。
+ * 家紋のモチーフはほぼ全てが縦軸対称であるため、片側だけを記述できるようにする。
+ */
+export interface OutlineStep {
+  /** 省略時は直線 */
+  control?: Point;
+  to: Point;
+}
+
+export function symmetricOutline(steps: readonly OutlineStep[]): Segment[] {
+  if (steps.length === 0) throw new Error("symmetricOutline: 手順が空です");
+  const base: Point = { x: 0, y: 0 };
+  const segments: Segment[] = [{ t: "M", p: base }];
+
+  for (const step of steps) {
+    segments.push(
+      step.control ? { t: "Q", c: step.control, p: step.to } : { t: "L", p: step.to },
+    );
+  }
+
+  // 先端から基部へ、左側を鏡像で辿って戻る
+  const mirror = (p: Point): Point => ({ x: -p.x, y: p.y });
+  for (let i = steps.length - 1; i >= 0; i--) {
+    const current = steps[i] as OutlineStep;
+    const previous = i > 0 ? (steps[i - 1] as OutlineStep).to : base;
+    segments.push(
+      current.control
+        ? { t: "Q", c: mirror(current.control), p: mirror(previous) }
+        : { t: "L", p: mirror(previous) },
+    );
+  }
+
+  segments.push({ t: "Z" });
+  return segments;
+}
+
+/** 真円の閉じたセグメント列（円弧を使わず 4 本の三次ベジェで近似する） */
+const KAPPA = 0.5522847498307936;
+
+export function circleSegments(center: Point, radius: number): Segment[] {
+  const { x, y } = center;
+  const k = radius * KAPPA;
+  return [
+    { t: "M", p: { x, y: y - radius } },
+    { t: "C", c1: { x: x + k, y: y - radius }, c2: { x: x + radius, y: y - k }, p: { x: x + radius, y } },
+    { t: "C", c1: { x: x + radius, y: y + k }, c2: { x: x + k, y: y + radius }, p: { x, y: y + radius } },
+    { t: "C", c1: { x: x - k, y: y + radius }, c2: { x: x - radius, y: y + k }, p: { x: x - radius, y } },
+    { t: "C", c1: { x: x - radius, y: y - k }, c2: { x: x - k, y: y - radius }, p: { x, y: y - radius } },
+    { t: "Z" },
+  ];
+}
+
+/** 多角形の閉じたセグメント列 */
+export function polygonSegments(points: readonly Point[]): Segment[] {
+  if (points.length < 3) throw new Error("polygonSegments: 3 点以上が必要です");
+  const [first, ...rest] = points as [Point, ...Point[]];
+  return [
+    { t: "M", p: first },
+    ...rest.map((p): Segment => ({ t: "L", p })),
+    { t: "Z" },
+  ];
+}
