@@ -3,3 +3,12 @@ dist
 .git
 *.local
 .DS_Store
+coverage
+test-results
+playwright-report
+blob-report
+tests
+bench
+docs
+playwright.config.ts
+playwright.bench.config.ts

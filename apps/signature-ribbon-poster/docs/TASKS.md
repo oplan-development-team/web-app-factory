@@ -8,7 +8,7 @@
 ## Phase A — 基盤
 
 - [x] **T01** 仕様書 3 点（SPEC / PLAN / TASKS）を追加する
-- [ ] **T02** Vitest（jsdom + v8 カバレッジ 80% 閾値）と Playwright を導入し、npm scripts を整備する — NFR-002
+- [x] **T02** Vitest（jsdom + v8 カバレッジ 80% 閾値）と Playwright を導入し、npm scripts を整備する — NFR-002
 
 ## Phase B — core（純粋ロジック）
 
