@@ -73,10 +73,18 @@ export function rgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${clamp(alpha, 0, 1)})`;
 }
 
-/** Mixes a hex colour toward white to build the bright "hot core" tone of the ribbon. */
+/**
+ * Mixes a hex colour toward white to build the bright "hot core" tone of the ribbon.
+ * Returns hex (not `rgb(...)`) so the result can be fed straight back into
+ * {@link rgba} — the prototype returned `rgb(...)` here, which {@link hexToRgb}
+ * could not parse, silently leaving the hot-core pass with a stale stroke style.
+ */
 export function lighten(hex: string, amount: number): string {
   const { r, g, b } = hexToRgb(hex);
   const t = clamp(amount, 0, 1);
-  const mix = (channel: number): number => Math.round(channel + (255 - channel) * t);
-  return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
+  const mix = (channel: number): string =>
+    Math.round(channel + (255 - channel) * t)
+      .toString(16)
+      .padStart(2, "0");
+  return `#${mix(r)}${mix(g)}${mix(b)}`;
 }

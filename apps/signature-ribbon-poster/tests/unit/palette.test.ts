@@ -102,14 +102,18 @@ describe("rgba", () => {
 
 describe("lighten", () => {
   it("returns the same colour at amount 0", () => {
-    expect(lighten("#204060", 0)).toBe("rgb(32, 64, 96)");
+    expect(lighten("#204060", 0)).toBe("#204060");
   });
 
   it("returns white at amount 1", () => {
-    expect(lighten("#204060", 1)).toBe("rgb(255, 255, 255)");
+    expect(lighten("#204060", 1)).toBe("#ffffff");
   });
 
   it("mixes toward white in between", () => {
-    expect(lighten("#000000", 0.5)).toBe("rgb(128, 128, 128)");
+    expect(lighten("#000000", 0.5)).toBe("#808080");
+  });
+
+  it("returns hex that rgba() can parse, so the hot core never falls back to a stale style", () => {
+    expect(rgba(lighten("#d9ac4c", 0.72), 0.5)).toBe("rgba(244, 232, 205, 0.5)");
   });
 });
