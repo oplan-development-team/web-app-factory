@@ -15,7 +15,7 @@
 - [x] **T03** `core/poster.ts` / `core/geometry.ts`: ポスター空間定数と clamp/lerp/distance/midpoint — FR-001.8
 - [x] **T04** `core/palette.ts`: 背景 3 / リボン色 5 の定義と hex 演算、id 解決 — FR-005, FR-006
 - [x] **T05** `core/speed.ts`: `SpeedSmoother`（5 サンプル移動平均・リセット） — FR-002
-- [ ] **T06** `core/ribbon-metrics.ts`: レスポンス → maxSpeed、速度 → 幅/不透明度/発光量の写像 — FR-003, FR-013.2
+- [x] **T06** `core/ribbon-metrics.ts`: レスポンス → maxSpeed、速度 → 幅/不透明度/発光量の写像 — FR-003, FR-013.2
 - [ ] **T07** `core/stroke.ts`: `StrokeBuilder`（1.5px 未満の点を棄却、速度付与、確定） — FR-001.5, FR-002.3
 - [ ] **T08** `core/history.ts`: Undo/Redo スタック（上限 50、push で future 破棄） — FR-008
 - [ ] **T09** `core/export-presets.ts`: 3 解像度プリセットと id 解決 — FR-010
