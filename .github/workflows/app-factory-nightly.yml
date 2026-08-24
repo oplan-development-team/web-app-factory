@@ -8,6 +8,7 @@ on:
 jobs:
   app-factory:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     permissions:
       contents: write
       id-token: write
@@ -30,10 +31,24 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: true
           claude_args: |
-            --allowedTools "Bash,Read,Write,Edit,Glob,Grep,Skill,Workflow,TodoWrite"
+            --allowedTools "Bash,Read,Write,Edit,Glob,Grep,Skill,Workflow,TodoWrite,TaskList,TaskGet,TaskOutput"
           prompt: |
             これはNew_Service_App（GitHubリポジトリ: oplan-development-team/web-app-factory）という
             プロジェクトの自律プロトタイピング・パイプラインを実行するジョブです。
+
+            ## 重要: このジョブは非対話・1回限りの実行です
+
+            `Workflow` ツールはバックグラウンドで非同期実行され、完了時に通知が届く設計ですが、
+            それは対話セッション向けの仕組みです。**このジョブにはその「後から通知を受け取るターン」が
+            存在しません。** `Workflow` を呼び出した後に「完了通知を待ちます」と言ってそのまま終了すると、
+            ジョブは（見かけ上）成功したことになりますが、実際のパイプラインは完了を待たれないまま
+            宙に浮き、何もコミット・プッシュされません。これは過去に実際に起きた失敗です。
+
+            **`Workflow` を呼び出したら、`TaskList` / `TaskGet` / `TaskOutput` を使って、
+            そのタスクが完了するまで自分自身でポーリングし続けてください**
+            （例: `TaskList` や `TaskGet` でステータスを確認し、未完了なら `Bash` で
+            `sleep 60` 等を挟んでから再確認する、を繰り返す）。ワークフローが完了するまでは
+            絶対に作業を終了しないでください。
 
             ## やること
 
@@ -41,6 +56,7 @@ jobs:
             2. `app-factory` スキルを呼び出し、その指示に従って `Workflow` ツールでアイディア出しから
                プロトタイプ完成までのパイプラインを実行してください（`.claude/skills/app-factory/SKILL.md` 参照）。
                ユーザー起点のアイディア（`args.seedIdea`）は指定しません。自律的にアイディアから生成してください。
+               **上記の「重要」に従い、完了するまで能動的にポーリングしてください。**
             3. ワークフロー完了後は、`app-factory` スキルに書かれている「ワークフロー完了後にやること」の手順
                （apps/<slug>/の実在確認、QA/Verify結果の確認、PROJECTS.mdへの追記）に従ってください。
             4. 完了したら、新しいブランチ `app-factory/auto-<slug>`（<slug>は生成されたアプリのディレクトリ名に
