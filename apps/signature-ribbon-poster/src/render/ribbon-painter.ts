@@ -28,6 +28,8 @@ const DOT_ALPHA = 0.85;
  */
 export class RibbonPainter {
   private options: RibbonPaintOptions;
+  /** Next segment to commit: `segment` within `stroke`. Segment 0 is the lone-point dot. */
+  private cursor = { stroke: 0, segment: 0 };
 
   constructor(
     private readonly ctx: Ctx2D,
@@ -41,11 +43,43 @@ export class RibbonPainter {
   }
 
   /** Clears the layer and draws every stroke from scratch. */
-  repaint(strokes: readonly Stroke[]): void {
+  repaint(strokes: readonly Stroke[], isLastOpen = false): void {
     this.ctx.clearRect(0, 0, this.options.width, this.options.height);
+    this.cursor = { stroke: 0, segment: 0 };
+    this.appendPending(strokes, isLastOpen);
+  }
+
+  /**
+   * Draws only the segments that have not been committed yet, leaving what is
+   * already on the layer untouched. This is what keeps the cost of a drag
+   * proportional to the points just added rather than to the whole artwork
+   * (NFR-001.2).
+   *
+   * A segment is the arc centred on point `i`, so it can only be drawn once
+   * point `i + 1` exists. While a stroke is still open its trailing segment is
+   * therefore held back until the next point arrives, or until the stroke closes.
+   */
+  appendPending(strokes: readonly Stroke[], isLastOpen = false): void {
     this.prepare();
-    for (const stroke of strokes) {
-      this.drawStroke(stroke, 0, stroke.points.length - 1);
+
+    for (let index = this.cursor.stroke; index < strokes.length; index++) {
+      const stroke = strokes[index];
+      if (!stroke) {
+        continue;
+      }
+
+      const isOpen = isLastOpen && index === strokes.length - 1;
+      const lastPoint = stroke.points.length - 1;
+      const drawableTo = isOpen ? lastPoint - 1 : lastPoint;
+      const from = index === this.cursor.stroke ? this.cursor.segment : 0;
+
+      this.drawStroke(stroke, from, drawableTo);
+
+      if (isOpen) {
+        this.cursor = { stroke: index, segment: Math.max(from, drawableTo + 1) };
+        return;
+      }
+      this.cursor = { stroke: index + 1, segment: 0 };
     }
   }
 

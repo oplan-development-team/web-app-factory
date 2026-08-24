@@ -26,7 +26,7 @@
 
 - [x] **T12** `render/types.ts`: `Ctx2D` / `CanvasLike` / `CanvasFactory` と、テスト用フェイク ctx — NFR-003.3
 - [x] **T13** `render/ribbon-painter.ts`: コア層への描画（中点二次ベジェ・可変幅・ホットコア・単点ドット） — FR-004.1, FR-004.3, E-01
-- [ ] **T14** `render/ribbon-painter.ts`: 増分描画のカーソル管理（`appendPending` / `repaintAll`） — NFR-001.2
+- [x] **T14** `render/ribbon-painter.ts`: 増分描画のカーソル管理（`appendPending` / `repaintAll`） — NFR-001.2
 - [ ] **T15** `render/bloom.ts`: 2 段ブルームの生成と合成（`ctx.filter` フォールバック付き） — NFR-001.1, E-16
 - [ ] **T16** `render/scene.ts`: 背景 → ブルーム → コア の合成 — FR-004.2
 - [ ] **T17** `render/caption.ts`: キャプション焼き込み（比率ベース・幅超過時の縮小と切り詰め） — FR-007.3, FR-007.5, E-07
