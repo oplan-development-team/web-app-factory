@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="署名や一筆書きを、速度に応じて発光するリボンの光跡として描き、ポスターとして書き出すツール。" />
+    <meta
+      name="description"
+      content="署名や一筆書きを、速度に応じて発光するリボンの光跡として描き、ポスターとして書き出すツール。"
+    />
     <title>Signature Ribbon Poster</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17,13 +20,21 @@
     <div id="app">
       <main class="stage" aria-label="署名リボン描画エリア">
         <div class="poster-frame" id="poster-frame">
-          <canvas id="ribbon-canvas" aria-label="署名を描くキャンバス"></canvas>
-          <div class="caption-preview" id="caption-preview" aria-hidden="true"></div>
+          <canvas
+            id="ribbon-canvas"
+            aria-label="署名を描くキャンバス。マウス・タッチ・ペンでドラッグすると、動かした速度に応じて太さと発光が変わるリボンが描かれます。"
+          ></canvas>
+          <p class="caption-preview" id="caption-preview" aria-hidden="true"></p>
         </div>
+
         <p class="stage-hint" id="stage-hint">マウス・タッチ・ペンでここに署名してください</p>
+
+        <div class="toast-host" id="toast-host"></div>
       </main>
 
       <aside class="control-panel" aria-label="制作コントロール">
+        <div class="banner-host" id="banner-host"></div>
+
         <header class="panel-header">
           <p class="eyebrow">Atelier&nbsp;Series&nbsp;No.&nbsp;01</p>
           <h1 class="panel-title">Signature<br /><em>Ribbon</em></h1>
@@ -32,17 +43,27 @@
 
         <section class="panel-section">
           <h2>Background</h2>
-          <div class="swatch-row" id="background-swatches" role="radiogroup" aria-label="背景プリセット"></div>
+          <div class="swatch-row" id="background-swatches" aria-label="背景プリセット"></div>
         </section>
 
         <section class="panel-section">
           <h2>Ribbon&nbsp;Hue</h2>
-          <div class="swatch-row" id="ribbon-swatches" role="radiogroup" aria-label="リボンの色"></div>
+          <div class="swatch-row" id="ribbon-swatches" aria-label="リボンの色"></div>
+        </section>
+
+        <section class="panel-section">
+          <h2>
+            Response
+            <span class="section-readout" id="response-readout"></span>
+          </h2>
+          <input class="slider" id="response-slider" />
+          <p class="section-note">遅い動きと速い動きの差を、どれくらい強く線に出すか。</p>
         </section>
 
         <section class="panel-section">
           <h2>Signature Line</h2>
           <label class="caption-field">
+            <span class="visually-hidden">署名者名・日付（任意、60文字まで）</span>
             <input
               id="caption-input"
               type="text"
@@ -54,12 +75,22 @@
           </label>
         </section>
 
+        <section class="panel-section">
+          <h2>Resolution</h2>
+          <div class="segment-row" id="resolution-picker"></div>
+          <p class="section-note" id="resolution-readout"></p>
+        </section>
+
         <footer class="panel-actions">
           <div class="text-actions">
-            <button id="undo-btn" class="ghost-btn" type="button">Undo</button>
-            <button id="clear-btn" class="ghost-btn" type="button">Clear</button>
+            <button id="undo-btn" class="ghost-btn" type="button" disabled>Undo</button>
+            <button id="redo-btn" class="ghost-btn" type="button" disabled>Redo</button>
+            <button id="clear-btn" class="ghost-btn" type="button" disabled>Clear</button>
           </div>
-          <button id="download-btn" class="primary-btn" type="button">Download Poster</button>
+          <button id="download-btn" class="primary-btn" type="button" disabled>
+            <span class="primary-btn__label" id="download-label">Download Poster</span>
+            <span class="primary-btn__scan" aria-hidden="true"></span>
+          </button>
         </footer>
       </aside>
     </div>
