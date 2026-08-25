@@ -145,6 +145,9 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 680px;
+  /* グリッド項目の既定は min-width:auto。中身の最小幅より縮まず、狭い画面で丁が
+     はみ出す。Firefox / WebKit で顕著に出る（Chromium だけ見ていると気付かない） */
+  min-width: 0;
 }
 
 /* 左右で内寸を変える。編む丁は詰めて、紋を置く丁は広く取る */
@@ -227,6 +230,10 @@ body {
 .field input {
   font-family: var(--font-jp);
   font-size: 16px;
+  /* input は既定で size=20 相当の固有幅（約 346px）を持ち、これが丁全体の
+     最小幅を押し上げる。明示的に外さないと 320px 幅で横スクロールが出る */
+  min-width: 0;
+  width: 100%;
   color: var(--ink);
   background: transparent;
   border: none;
@@ -500,6 +507,8 @@ body {
   width: 100%;
   height: 100%;
   display: block;
+  /* SVG の図形がクリックの当たり判定を奪わないようにする（ブラウザ差が出やすい） */
+  pointer-events: none;
 }
 
 .plate-text {
