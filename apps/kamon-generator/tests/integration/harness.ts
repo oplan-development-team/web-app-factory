@@ -21,13 +21,33 @@ function appMarkup(): string {
   return cachedBody;
 }
 
-/** 入力のデバウンスと割り出しの最短表示が両方明けるまで待つ */
-export function settleMs(): number {
-  return INPUT_DEBOUNCE_MS + MIN_DRAFT_MS + 80;
-}
-
+/**
+ * 入力のデバウンス 200ms と割り出しの最短表示 260ms を足した時間を固定で待つと、
+ * 実行機の負荷次第で足りなくなる（実際に 1/10 程度の頻度で落ちた）。
+ * 目的の状態になるまで細かく確かめる。
+ */
 export function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+const SETTLE_TIMEOUT_MS = (INPUT_DEBOUNCE_MS + MIN_DRAFT_MS) * 8;
+
+export async function waitFor(
+  predicate: () => boolean,
+  label: string,
+  timeoutMs = SETTLE_TIMEOUT_MS,
+): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (predicate()) return;
+    await wait(10);
+  }
+  throw new Error(`${timeoutMs}ms 待っても条件を満たしませんでした: ${label}`);
+}
+
+/** 紋が立ち上がるまで待つ */
+export function waitForReady(): Promise<void> {
+  return waitFor(() => stageState() === "ready", "表示面が ready にならない");
 }
 
 export function mountApp(): AppHandle {
@@ -66,5 +86,11 @@ export async function typeName(value: string): Promise<void> {
   const input = $("#input-name", HTMLInputElement);
   input.value = value;
   input.dispatchEvent(new Event("input", { bubbles: true }));
-  await wait(settleMs());
+
+  if (value.trim().length === 0) {
+    // 「何も起きない」ことの確認は待つ条件を書けないので、余裕をみて時間で待つ
+    await wait((INPUT_DEBOUNCE_MS + MIN_DRAFT_MS) * 3);
+    return;
+  }
+  await waitForReady();
 }

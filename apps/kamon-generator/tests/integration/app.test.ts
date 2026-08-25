@@ -11,7 +11,8 @@ import {
   plateNumbers,
   stageState,
   typeName,
-  wait,
+  waitFor,
+  waitForReady,
 } from "./harness";
 
 let app: AppHandle | undefined;
@@ -36,15 +37,28 @@ describe("状態の遷移 (FR-500 / AC-12)", () => {
 
   it("名前を入れると drafting を経て ready になる", async () => {
     app = mountApp();
+
+    /*
+     * drafting は 260ms しか出ない。時間を決め打ちして「いま drafting か」を
+     * 問い合わせると、実行機の負荷次第で通り過ぎたあとに見にいくことになる。
+     * 属性の変化そのものを記録して、並びで確かめる。
+     */
+    const seen: string[] = [];
+    const stage = $("#crest-stage", HTMLDivElement);
+    const observer = new MutationObserver(() => {
+      const state = stage.dataset["state"] ?? "";
+      if (seen.at(-1) !== state) seen.push(state);
+    });
+    observer.observe(stage, { attributes: true, attributeFilter: ["data-state"] });
+
     const input = $("#input-name", HTMLInputElement);
     input.value = "水野 蒼";
     input.dispatchEvent(new Event("input", { bubbles: true }));
 
-    await wait(260);
-    expect(stageState()).toBe("drafting");
+    await waitForReady();
+    observer.disconnect();
 
-    await wait(300);
-    expect(stageState()).toBe("ready");
+    expect(seen).toEqual(["drafting", "ready"]);
     expect($("#crest-name", HTMLHeadingElement).textContent).not.toBe("");
     expect($("#crest-caption", HTMLDivElement).hidden).toBe(false);
   });
@@ -108,7 +122,7 @@ describe("図版帖 (FR-300 / AC-14 / AC-15)", () => {
 
     const next = $("#next-crest-btn", HTMLButtonElement);
     for (let i = 0; i < 10; i += 1) next.click();
-    await wait(400);
+    await waitForReady();
 
     // 第 1 案 + 連打した 10 案
     expect(plateNumbers()).toEqual(["11", "10", "09", "08", "07", "06", "05", "04", "03", "02", "01"]);
@@ -128,7 +142,7 @@ describe("図版帖 (FR-300 / AC-14 / AC-15)", () => {
     app = mountApp();
     await typeName("水野 蒼");
     $("#next-crest-btn", HTMLButtonElement).click();
-    await wait(400);
+    await waitForReady();
 
     const oldest = [...document.querySelectorAll(".plate-item")].at(-1);
     if (!(oldest instanceof HTMLButtonElement)) throw new Error("図版が無い");
@@ -176,7 +190,7 @@ describe("永続化 (FR-301 / AC-16 / AC-19)", () => {
     app = mountApp();
     await typeName("水野 蒼");
     $("#next-crest-btn", HTMLButtonElement).click();
-    await wait(400);
+    await waitForReady();
     const before = plateNames();
 
     app.destroy();
@@ -267,7 +281,7 @@ describe("保存できない環境 (FR-301.4 / AC-17)", () => {
     // 2 件目を作っても通知は増えない（同じ文言のまま上書きされない）
     status.textContent = "";
     $("#next-crest-btn", HTMLButtonElement).click();
-    await wait(400);
+    await waitForReady();
     expect(status.textContent).toBe("");
     expect(plateNames()).toHaveLength(2);
   });
@@ -289,7 +303,10 @@ describe("書き出し (FR-400 / AC-22)", () => {
     app = mountApp();
     await typeName("水野 蒼");
     $("#export-svg-btn", HTMLButtonElement).click();
-    await wait(20);
+    await waitFor(
+      () => $("#status-region", HTMLParagraphElement).textContent !== "",
+      "ステータスに何も出ない",
+    );
 
     const status = $("#status-region", HTMLParagraphElement);
     expect(status.textContent).toContain("書き出しました");
@@ -313,7 +330,10 @@ describe("書き出し (FR-400 / AC-22)", () => {
     app = mountApp();
     await typeName("水野 蒼");
     $("#export-svg-btn", HTMLButtonElement).click();
-    await wait(20);
+    await waitFor(
+      () => $("#status-region", HTMLParagraphElement).textContent !== "",
+      "ステータスに何も出ない",
+    );
 
     const status = $("#status-region", HTMLParagraphElement);
     expect(status.textContent).toContain("書き出しに失敗しました");
