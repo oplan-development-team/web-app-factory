@@ -7,6 +7,7 @@
   --color-page: #030302;
   --color-pearl: #f2ece2;
   --color-pearl-dim: rgba(242, 236, 226, 0.56);
+  --color-alert: #d1264f;
 
   --panel-bg: rgba(9, 8, 8, 0.62);
   --panel-border: rgba(201, 162, 75, 0.22);
@@ -16,8 +17,17 @@
   --space-2: 1rem;
   --space-3: 1.75rem;
   --space-4: 2.75rem;
-  --space-5: 4rem;
 
+  /*
+   * The panel must never push its primary action below the fold, but it should
+   * still breathe on a tall display. These collapse with the viewport instead of
+   * being uniformly tight everywhere.
+   */
+  --panel-gap: clamp(1.1rem, 2.3vh, 2.75rem);
+  --panel-rule-gap: clamp(0.9rem, 2vh, 1.75rem);
+
+  --duration-fast: 220ms;
+  --duration-normal: 320ms;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -43,6 +53,17 @@ body {
   display: flex;
   height: 100vh;
   width: 100vw;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* ---------- Stage (canvas area) ---------- */
@@ -88,6 +109,7 @@ body {
   left: 0;
   right: 0;
   bottom: 6%;
+  margin: 0;
   text-align: center;
   font-family: var(--font-display);
   font-style: italic;
@@ -106,12 +128,63 @@ body {
   font-size: 0.9rem;
   letter-spacing: 0.08em;
   color: var(--color-pearl-dim);
-  transition: opacity 320ms var(--ease-out-expo);
+  transition: opacity var(--duration-normal) var(--ease-out-expo);
+}
+
+.stage-hint[hidden] {
+  display: block;
+  opacity: 0;
+}
+
+/* ---------- Toasts ---------- */
+
+.toast-host {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-3);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.toast {
+  display: block;
+  max-width: min(34rem, 70vw);
+  padding: 0.7rem 1.4rem;
+  background: rgba(6, 5, 5, 0.94);
+  border: 1px solid var(--hairline);
+  border-left-width: 2px;
+  border-left-color: var(--color-gold);
+  color: var(--color-pearl);
+  font-family: var(--font-label);
+  font-size: 0.88rem;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity var(--duration-normal) var(--ease-out-expo),
+    transform var(--duration-normal) var(--ease-out-expo);
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast--error {
+  border-left-color: var(--color-alert);
 }
 
 /* ---------- Control panel ---------- */
 
 .control-panel {
+  position: relative;
   flex: 0 0 320px;
   width: 320px;
   height: 100vh;
@@ -120,19 +193,57 @@ body {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-left: 1px solid var(--panel-border);
-  padding: var(--space-4) var(--space-3) var(--space-3);
+  padding: clamp(1.4rem, 3.4vh, 2.75rem) var(--space-3) var(--panel-rule-gap);
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--panel-gap);
+}
+
+.banner-host {
+  position: absolute;
+  inset: var(--space-2) var(--space-2) auto;
+  z-index: 10;
+}
+
+.restore-banner {
+  /* Fully opaque: it sits over the panel header, and letting the title bleed
+     through would make the placard read as an accident rather than a choice. */
+  background: #0b0a09;
+  border: 1px solid var(--panel-border);
+  border-top: 2px solid var(--color-gold);
+  padding: var(--space-2) var(--space-2) 0.75rem;
+  box-shadow: 0 20px 44px -20px rgba(0, 0, 0, 0.95);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition:
+    opacity var(--duration-normal) var(--ease-out-expo),
+    transform var(--duration-normal) var(--ease-out-expo);
+}
+
+.restore-banner.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.restore-banner__message {
+  margin: 0 0 var(--space-2);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--color-pearl-dim);
+}
+
+.restore-banner__actions {
+  display: flex;
+  gap: var(--space-3);
 }
 
 .panel-header {
-  padding-bottom: var(--space-3);
+  padding-bottom: var(--panel-rule-gap);
   border-bottom: 1px solid var(--hairline);
 }
 
 .eyebrow {
-  margin: 0 0 var(--space-2);
+  margin: 0 0 clamp(0.5rem, 1.4vh, 1rem);
   font-family: var(--font-label);
   font-size: 0.68rem;
   letter-spacing: 0.32em;
@@ -144,7 +255,7 @@ body {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 2.1rem;
+  font-size: clamp(1.65rem, 3.6vh, 2.1rem);
   line-height: 1.08;
   color: var(--color-pearl);
 }
@@ -156,13 +267,17 @@ body {
 }
 
 .lede {
-  margin: var(--space-2) 0 0;
+  margin: clamp(0.45rem, 1.2vh, 1rem) 0 0;
   font-style: italic;
   font-size: 0.95rem;
   color: var(--color-pearl-dim);
 }
 
 .panel-section h2 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
   margin: 0 0 var(--space-2);
   font-family: var(--font-label);
   font-size: 0.72rem;
@@ -170,6 +285,23 @@ body {
   text-transform: uppercase;
   font-weight: 500;
   color: var(--color-pearl-dim);
+}
+
+.section-readout {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--color-gold-bright);
+}
+
+.section-note {
+  margin: var(--space-1) 0 0;
+  font-size: 0.74rem;
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+  color: rgba(242, 236, 226, 0.38);
 }
 
 .swatch-row {
@@ -188,9 +320,9 @@ body {
   cursor: pointer;
   padding: 0;
   transition:
-    transform 220ms var(--ease-out-expo),
-    box-shadow 220ms var(--ease-out-expo),
-    border-color 220ms var(--ease-out-expo);
+    transform var(--duration-fast) var(--ease-out-expo),
+    box-shadow var(--duration-fast) var(--ease-out-expo),
+    border-color var(--duration-fast) var(--ease-out-expo);
 }
 
 .swatch::after {
@@ -199,7 +331,7 @@ body {
   inset: -5px;
   border-radius: 50%;
   border: 1px solid transparent;
-  transition: border-color 220ms var(--ease-out-expo);
+  transition: border-color var(--duration-fast) var(--ease-out-expo);
 }
 
 .swatch:hover {
@@ -216,12 +348,139 @@ body {
 
 .swatch[aria-checked="true"] {
   border-color: var(--color-gold);
-  box-shadow: 0 0 0 1px var(--color-gold), 0 0 16px 1px rgba(201, 162, 75, 0.55);
+  box-shadow:
+    0 0 0 1px var(--color-gold),
+    0 0 16px 1px rgba(201, 162, 75, 0.55);
 }
 
 .swatch[aria-checked="true"]::after {
   border-color: rgba(201, 162, 75, 0.4);
 }
+
+/* ---------- Response slider ---------- */
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 22px;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  --slider-progress: 50%;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    var(--color-gold) 0,
+    var(--color-gold) var(--slider-progress),
+    var(--hairline) var(--slider-progress),
+    var(--hairline) 100%
+  );
+}
+
+.slider::-moz-range-track {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    var(--color-gold) 0,
+    var(--color-gold) var(--slider-progress),
+    var(--hairline) var(--slider-progress),
+    var(--hairline) 100%
+  );
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 11px;
+  height: 11px;
+  margin-top: -5px;
+  background: var(--color-page);
+  border: 1px solid var(--color-gold);
+  transform: rotate(45deg);
+  transition:
+    box-shadow var(--duration-fast) var(--ease-out-expo),
+    background var(--duration-fast) var(--ease-out-expo);
+}
+
+.slider::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  background: var(--color-page);
+  border: 1px solid var(--color-gold);
+  border-radius: 0;
+  transform: rotate(45deg);
+}
+
+.slider:hover::-webkit-slider-thumb,
+.slider:focus-visible::-webkit-slider-thumb {
+  background: var(--color-gold);
+  box-shadow: 0 0 14px 1px rgba(201, 162, 75, 0.6);
+}
+
+.slider:hover::-moz-range-thumb,
+.slider:focus-visible::-moz-range-thumb {
+  background: var(--color-gold);
+}
+
+/* ---------- Segmented control ---------- */
+
+.segment-row {
+  display: flex;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.segment {
+  position: relative;
+  flex: 1 1 0;
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0.45rem 0 0.7rem;
+  color: var(--color-pearl-dim);
+  font-family: var(--font-label);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out-expo);
+}
+
+.segment::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  right: 50%;
+  bottom: -1px;
+  height: 1px;
+  background: var(--color-gold);
+  transition:
+    left var(--duration-normal) var(--ease-out-expo),
+    right var(--duration-normal) var(--ease-out-expo);
+}
+
+.segment:hover {
+  color: var(--color-pearl);
+}
+
+.segment:focus-visible {
+  outline: 1px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+.segment[aria-checked="true"] {
+  color: var(--color-gold-bright);
+}
+
+.segment[aria-checked="true"]::after {
+  left: 0;
+  right: 0;
+}
+
+/* ---------- Caption field ---------- */
 
 .caption-field {
   display: block;
@@ -238,7 +497,7 @@ body {
   font-size: 1rem;
   padding: var(--space-1) 0.1rem var(--space-2);
   outline: none;
-  transition: border-color 220ms var(--ease-out-expo);
+  transition: border-color var(--duration-fast) var(--ease-out-expo);
 }
 
 #caption-input::placeholder {
@@ -249,13 +508,15 @@ body {
   border-bottom-color: var(--color-gold);
 }
 
+/* ---------- Actions ---------- */
+
 .panel-actions {
   margin-top: auto;
-  padding-top: var(--space-3);
+  padding-top: var(--panel-rule-gap);
   border-top: 1px solid var(--hairline);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--panel-rule-gap);
 }
 
 .text-actions {
@@ -275,6 +536,11 @@ body {
   text-transform: uppercase;
   cursor: pointer;
   position: relative;
+  transition: color var(--duration-fast) var(--ease-out-expo);
+}
+
+.ghost-btn--accent {
+  color: var(--color-gold-bright);
 }
 
 .ghost-btn::after {
@@ -285,7 +551,7 @@ body {
   bottom: -3px;
   height: 1px;
   background: var(--color-gold);
-  transition: right 260ms var(--ease-out-expo);
+  transition: right var(--duration-normal) var(--ease-out-expo);
 }
 
 .ghost-btn:hover {
@@ -294,6 +560,15 @@ body {
 
 .ghost-btn:hover::after {
   right: 0;
+}
+
+.ghost-btn:focus-visible {
+  outline: 1px solid var(--color-gold);
+  outline-offset: 3px;
+}
+
+.ghost-btn:active {
+  color: var(--color-gold);
 }
 
 .ghost-btn:disabled {
@@ -306,6 +581,8 @@ body {
 }
 
 .primary-btn {
+  position: relative;
+  overflow: hidden;
   appearance: none;
   background: transparent;
   border: 1px solid var(--color-gold);
@@ -317,19 +594,61 @@ body {
   padding: 0.85rem 1rem;
   cursor: pointer;
   transition:
-    background 220ms var(--ease-out-expo),
-    color 220ms var(--ease-out-expo),
-    box-shadow 220ms var(--ease-out-expo);
+    background var(--duration-fast) var(--ease-out-expo),
+    color var(--duration-fast) var(--ease-out-expo),
+    border-color var(--duration-fast) var(--ease-out-expo),
+    box-shadow var(--duration-fast) var(--ease-out-expo);
 }
 
-.primary-btn:hover {
+.primary-btn:hover:not(:disabled) {
   background: var(--color-gold);
   color: #17130a;
   box-shadow: 0 0 24px -4px rgba(201, 162, 75, 0.7);
 }
 
-.primary-btn:active {
+.primary-btn:active:not(:disabled) {
   background: var(--color-gold-bright);
+}
+
+.primary-btn:focus-visible {
+  outline: 1px solid var(--color-gold-bright);
+  outline-offset: 3px;
+}
+
+.primary-btn:disabled {
+  border-color: rgba(201, 162, 75, 0.28);
+  color: rgba(242, 236, 226, 0.26);
+  cursor: default;
+}
+
+/* Loading state: a hairline sweeps across the button while the poster renders. */
+.primary-btn__scan {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 40%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-gold-bright), transparent);
+  opacity: 0;
+}
+
+.primary-btn.is-busy {
+  border-color: var(--color-gold);
+  color: var(--color-gold-bright);
+}
+
+.primary-btn.is-busy .primary-btn__scan {
+  opacity: 1;
+  animation: scan 1100ms linear infinite;
+}
+
+@keyframes scan {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(350%);
+  }
 }
 
 .control-panel::-webkit-scrollbar {
@@ -369,5 +688,15 @@ body {
     height: auto;
     border-left: none;
     border-top: 1px solid var(--panel-border);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

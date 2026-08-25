@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Signature Ribbon Poster — render benchmark</title>
+    <style>
+      body {
+        margin: 0;
+        background: #111;
+        color: #eee;
+        font: 13px ui-monospace, monospace;
+      }
+      #canvases {
+        display: flex;
+        gap: 8px;
+        padding: 8px;
+      }
+      canvas {
+        width: 300px;
+        height: 424px;
+        background: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="canvases">
+      <canvas id="new-canvas"></canvas>
+      <canvas id="legacy-canvas"></canvas>
+    </div>
+    <pre id="out">running…</pre>
+    <script type="module" src="./bench.ts"></script>
+  </body>
+</html>
