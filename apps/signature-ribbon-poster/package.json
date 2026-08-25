@@ -11,7 +11,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "bench": "playwright test --config=playwright.bench.config.ts"
+    "bench": "node bench/run.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

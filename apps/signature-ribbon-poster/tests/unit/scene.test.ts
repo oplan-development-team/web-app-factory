@@ -19,7 +19,7 @@ function scene(): {
 describe("composeScene", () => {
   it("fills the whole surface with the background colour first", () => {
     const { target, core, bloom } = scene();
-    composeScene(target, { width: 800, height: 1200, backgroundHex: "#0b1220", core, bloom });
+    composeScene(target, { width: 800, height: 1200, backgroundHex: "#0b1220", body: core, bloom });
 
     const fill = target.ops("fillRect")[0]!;
     expect(fill.args).toEqual([0, 0, 800, 1200]);
@@ -29,7 +29,7 @@ describe("composeScene", () => {
 
   it("paints the background before any ribbon layer", () => {
     const { target, core, bloom } = scene();
-    composeScene(target, { width: 800, height: 1200, backgroundHex: "#0a0908", core, bloom });
+    composeScene(target, { width: 800, height: 1200, backgroundHex: "#0a0908", body: core, bloom });
 
     const order = target.calls.map((call) => call.op);
     expect(order.indexOf("fillRect")).toBeLessThan(order.indexOf("drawImage"));
@@ -37,7 +37,7 @@ describe("composeScene", () => {
 
   it("adds the bloom levels and then the core, all additively (FR-004.2)", () => {
     const { target, core, bloom } = scene();
-    composeScene(target, { width: 800, height: 1200, backgroundHex: "#0a0908", core, bloom });
+    composeScene(target, { width: 800, height: 1200, backgroundHex: "#0a0908", body: core, bloom });
 
     const draws = target.ops("drawImage");
     expect(draws).toHaveLength(PREVIEW_BLOOM_LEVELS.length + 1);
@@ -49,19 +49,19 @@ describe("composeScene", () => {
 
   it("draws the core at full opacity so the ribbon keeps a crisp centre", () => {
     const { target, core, bloom } = scene();
-    composeScene(target, { width: 800, height: 1200, backgroundHex: "#0a0908", core, bloom });
+    composeScene(target, { width: 800, height: 1200, backgroundHex: "#0a0908", body: core, bloom });
     expect(target.ops("drawImage").at(-1)!.state.globalAlpha).toBe(1);
   });
 
   it("stretches the core to the requested surface size", () => {
     const { target, core, bloom } = scene();
-    composeScene(target, { width: 640, height: 905, backgroundHex: "#0a0908", core, bloom });
+    composeScene(target, { width: 640, height: 905, backgroundHex: "#0a0908", body: core, bloom });
     expect(target.ops("drawImage").at(-1)!.args.slice(1)).toEqual([0, 0, 640, 905]);
   });
 
   it("leaves the context in a neutral state for whatever draws next", () => {
     const { target, core, bloom } = scene();
-    composeScene(target, { width: 800, height: 1200, backgroundHex: "#0a0908", core, bloom });
+    composeScene(target, { width: 800, height: 1200, backgroundHex: "#0a0908", body: core, bloom });
     expect(target.globalCompositeOperation).toBe("source-over");
     expect(target.globalAlpha).toBe(1);
   });
@@ -73,7 +73,7 @@ describe("composeScene", () => {
       width: 800,
       height: 1200,
       backgroundHex: "#1a0a10",
-      core: new FakeCanvas(800, 1200),
+      body: new FakeCanvas(800, 1200),
       bloom: new BloomPipeline(factory, PREVIEW_BLOOM_LEVELS),
     });
     expect(target.ops("fillRect")).toHaveLength(1);

@@ -15,5 +15,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true
   },
-  "include": ["src", "tests", "bench", "vite.config.ts", "playwright.config.ts", "playwright.bench.config.ts"]
+  "include": ["src", "tests", "bench", "vite.config.ts", "playwright.config.ts"]
 }

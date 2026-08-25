@@ -67,22 +67,27 @@ export async function renderPoster(
   const preset = resolveResolution(request.resolutionId);
   const { width, height } = preset;
 
-  const core = deps.createCanvas(width, height);
-  const painter = new RibbonPainter(require2d(core), {
+  const painterOptions = {
     scale: width / POSTER_WIDTH,
     maxSpeed: request.maxSpeed,
     width,
     height,
-  });
-  painter.repaint(request.strokes);
+  };
+
+  const body = deps.createCanvas(width, height);
+  new RibbonPainter(require2d(body), { ...painterOptions, pass: "body" }).repaint(request.strokes);
 
   const bloom = new BloomPipeline(deps.createCanvas, EXPORT_BLOOM_LEVELS);
   bloom.resize(width, height);
-  bloom.update(core);
+  bloom.update(body);
 
   const output = deps.createCanvas(width, height) as EncodableCanvas;
   const ctx = require2d(output);
-  composeScene(ctx, { width, height, backgroundHex: request.backgroundHex, core, bloom });
+  composeScene(ctx, { width, height, backgroundHex: request.backgroundHex, body, bloom });
+
+  // The highlight goes straight onto the output rather than onto a layer of its
+  // own: at Archival size a full-resolution extra layer costs ~70MB for nothing.
+  new RibbonPainter(ctx, { ...painterOptions, pass: "highlight" }).appendPending(request.strokes);
 
   if (request.caption.trim().length > 0) {
     await deps.loadFonts();

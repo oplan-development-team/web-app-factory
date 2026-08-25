@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { RibbonPainter } from "../../src/render/ribbon-painter";
+import { RibbonPainter, type RibbonPass } from "../../src/render/ribbon-painter";
 import { responseToMaxSpeed } from "../../src/core/ribbon-metrics";
 import type { Stroke } from "../../src/core/stroke";
 import { FakeCtx } from "../helpers/fake-canvas";
@@ -13,12 +13,13 @@ function makeStroke(points: [number, number, number][], colorId: Stroke["colorId
   };
 }
 
-function painterOn(ctx: FakeCtx, scale = 1): RibbonPainter {
+function painterOn(ctx: FakeCtx, scale = 1, pass: RibbonPass = "body"): RibbonPainter {
   return new RibbonPainter(ctx, {
     scale,
     maxSpeed: MAX_SPEED,
     width: 1800 * scale,
     height: 2545 * scale,
+    pass,
   });
 }
 
@@ -100,29 +101,63 @@ describe("RibbonPainter — speed response", () => {
     );
   });
 
-  it("paints a core pass and a brighter hot-core pass per segment (FR-004.1)", () => {
-    const ctx = new FakeCtx();
-    painterOn(ctx).repaint([makeStroke([[0, 0, 0], [100, 0, 0], [200, 0, 0]])]);
-    const strokes = ctx.ops("stroke");
-    // 2 segments (around p1 and p2) x 2 passes
-    expect(strokes).toHaveLength(4);
-    const [core, hot] = strokes;
-    expect(hot!.state.lineWidth as number).toBeLessThan(core!.state.lineWidth as number);
-    expect(String(hot!.state.strokeStyle)).not.toBe(String(core!.state.strokeStyle));
+  it("paints exactly one pass per segment, on its own layer (FR-004.1)", () => {
+    const strokes3 = [makeStroke([[0, 0, 0], [100, 0, 0], [200, 0, 0]])];
+
+    const bodyCtx = new FakeCtx();
+    painterOn(bodyCtx, 1, "body").repaint(strokes3);
+    const highlightCtx = new FakeCtx();
+    painterOn(highlightCtx, 1, "highlight").repaint(strokes3);
+
+    // 2 segments (around p1 and p2), one stroke call each.
+    expect(bodyCtx.ops("stroke")).toHaveLength(2);
+    expect(highlightCtx.ops("stroke")).toHaveLength(2);
   });
 
-  it("never emits a NaN colour channel for the hot core", () => {
+  it("makes the highlight narrower and lighter than the body", () => {
+    const strokes3 = [makeStroke([[0, 0, 0], [100, 0, 0], [200, 0, 0]])];
+    const bodyCtx = new FakeCtx();
+    painterOn(bodyCtx, 1, "body").repaint(strokes3);
+    const highlightCtx = new FakeCtx();
+    painterOn(highlightCtx, 1, "highlight").repaint(strokes3);
+
+    const body = bodyCtx.ops("stroke")[0]!;
+    const highlight = highlightCtx.ops("stroke")[0]!;
+    expect(highlight.state.lineWidth as number).toBeLessThan(body.state.lineWidth as number);
+    expect(String(highlight.state.strokeStyle)).not.toBe(String(body.state.strokeStyle));
+  });
+
+  it("keeps the body in the pure ribbon hue, so the bloom built from it stays gold (NFR-001.6)", () => {
     const ctx = new FakeCtx();
-    painterOn(ctx).repaint([makeStroke([[0, 0, 0], [100, 0, 0], [200, 0, 0]])]);
+    painterOn(ctx, 1, "body").repaint([makeStroke([[0, 0, 0], [100, 0, 0], [200, 0, 0]])]);
     for (const call of ctx.ops("stroke")) {
-      expect(String(call.state.strokeStyle)).not.toContain("NaN");
+      expect(String(call.state.strokeStyle)).toMatch(/^rgba\(217, 172, 76,/);
     }
   });
 
-  it("uses additive blending so overlapping ribbons brighten (FR-004.2)", () => {
+  it("never emits a NaN colour channel", () => {
+    for (const pass of ["body", "highlight"] as const) {
+      const ctx = new FakeCtx();
+      painterOn(ctx, 1, pass).repaint([makeStroke([[0, 0, 0], [100, 0, 0], [200, 0, 0]])]);
+      for (const call of ctx.ops("stroke")) {
+        expect(String(call.state.strokeStyle)).not.toContain("NaN");
+      }
+    }
+  });
+
+  it("draws the lone-point dot on the body layer only", () => {
+    const bodyCtx = new FakeCtx();
+    painterOn(bodyCtx, 1, "body").repaint([makeStroke([[100, 200, 0]])]);
+    const highlightCtx = new FakeCtx();
+    painterOn(highlightCtx, 1, "highlight").repaint([makeStroke([[100, 200, 0]])]);
+    expect(bodyCtx.ops("arc")).toHaveLength(1);
+    expect(highlightCtx.ops("arc")).toHaveLength(0);
+  });
+
+  it("does not blend additively within a layer, which would clip joints to white (NFR-001.6)", () => {
     const ctx = new FakeCtx();
     painterOn(ctx).repaint([makeStroke([[0, 0, 0], [100, 0, 0], [200, 0, 0]])]);
-    expect(ctx.ops("stroke")[0]!.state.globalCompositeOperation).toBe("lighter");
+    expect(ctx.ops("stroke")[0]!.state.globalCompositeOperation).toBe("source-over");
   });
 
   it("uses round caps and joins (FR-004.4)", () => {
@@ -150,6 +185,7 @@ describe("RibbonPainter — speed response", () => {
       maxSpeed: responseToMaxSpeed(100),
       width: 1800,
       height: 2545,
+      pass: "body",
     });
     painter.repaint([makeStroke([[0, 0, 0.8], [100, 0, 0.8], [200, 0, 0.8]])]);
     const after = ctx.ops("stroke")[0]!.state.lineWidth as number;

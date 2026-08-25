@@ -1,7 +1,7 @@
 import { POSTER_HEIGHT, POSTER_WIDTH } from "../core/poster";
 import type { Stroke } from "../core/stroke";
 import { BloomPipeline, PREVIEW_BLOOM_LEVELS } from "./bloom";
-import { RibbonPainter } from "./ribbon-painter";
+import { RibbonPainter, type RibbonPaintOptions, type RibbonPass } from "./ribbon-painter";
 import { composeScene } from "./scene";
 import { type CanvasFactory, type CanvasLike, type Ctx2D, require2d } from "./types";
 
@@ -51,9 +51,10 @@ export class LiveRenderer {
   private readonly createCanvas: CanvasFactory;
   private readonly bloom: BloomPipeline;
 
-  // Both are built by buildLayers(), which the constructor always runs.
-  private core!: CanvasLike;
-  private painter!: RibbonPainter;
+  // All built by buildLayers(), which the constructor always runs.
+  private body!: CanvasLike;
+  private highlight!: CanvasLike;
+  private painters!: readonly RibbonPainter[];
 
   private backgroundHex: string;
   private maxSpeed: number;
@@ -72,9 +73,9 @@ export class LiveRenderer {
     this.buildLayers(backingSize(options.cssWidth, options.pixelRatio));
   }
 
-  /** The core layer, exposed so the benchmark can drive it directly. */
-  get coreCanvas(): CanvasLike {
-    return this.core;
+  /** The ribbon body layer, exposed for benchmarking and inspection. */
+  get bodyCanvas(): CanvasLike {
+    return this.body;
   }
 
   /**
@@ -94,15 +95,24 @@ export class LiveRenderer {
     this.display.width = width;
     this.display.height = height;
 
-    this.core = this.createCanvas(width, height);
-    this.painter = new RibbonPainter(require2d(this.core), {
-      scale: width / POSTER_WIDTH,
-      maxSpeed: this.maxSpeed,
-      width,
-      height,
-    });
+    this.body = this.createCanvas(width, height);
+    this.highlight = this.createCanvas(width, height);
+    this.painters = [
+      new RibbonPainter(require2d(this.body), this.painterOptions(size, "body")),
+      new RibbonPainter(require2d(this.highlight), this.painterOptions(size, "highlight")),
+    ];
     this.bloom.resize(width, height);
     this.dirty = "full";
+  }
+
+  private painterOptions(size: BackingSize, pass: RibbonPass): RibbonPaintOptions {
+    return {
+      scale: size.width / POSTER_WIDTH,
+      maxSpeed: this.maxSpeed,
+      width: size.width,
+      height: size.height,
+      pass,
+    };
   }
 
   setBackground(hex: string): void {
@@ -118,12 +128,9 @@ export class LiveRenderer {
       return;
     }
     this.maxSpeed = maxSpeed;
-    this.painter.setOptions({
-      scale: this.display.width / POSTER_WIDTH,
-      maxSpeed,
-      width: this.display.width,
-      height: this.display.height,
-    });
+    const size = { width: this.display.width, height: this.display.height };
+    this.painters[0]?.setOptions(this.painterOptions(size, "body"));
+    this.painters[1]?.setOptions(this.painterOptions(size, "highlight"));
     this.markDirty("full");
   }
 
@@ -155,20 +162,23 @@ export class LiveRenderer {
       return false;
     }
 
-    if (this.dirty === "full") {
-      this.painter.repaint(this.strokes, this.openTail);
-    } else {
-      this.painter.appendPending(this.strokes, this.openTail);
+    for (const painter of this.painters) {
+      if (this.dirty === "full") {
+        painter.repaint(this.strokes, this.openTail);
+      } else {
+        painter.appendPending(this.strokes, this.openTail);
+      }
     }
     this.dirty = "none";
 
-    this.bloom.update(this.core);
+    this.bloom.update(this.body);
     composeScene(this.displayCtx, {
       width: this.display.width,
       height: this.display.height,
       backgroundHex: this.backgroundHex,
-      core: this.core,
+      body: this.body,
       bloom: this.bloom,
+      highlight: this.highlight,
     });
     return true;
   }

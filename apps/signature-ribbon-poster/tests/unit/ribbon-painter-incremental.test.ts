@@ -4,7 +4,13 @@ import { responseToMaxSpeed } from "../../src/core/ribbon-metrics";
 import type { RibbonPoint, Stroke } from "../../src/core/stroke";
 import { FakeCtx } from "../helpers/fake-canvas";
 
-const OPTIONS = { scale: 1, maxSpeed: responseToMaxSpeed(50), width: 1800, height: 2545 };
+const OPTIONS = {
+  scale: 1,
+  maxSpeed: responseToMaxSpeed(50),
+  width: 1800,
+  height: 2545,
+  pass: "body" as const,
+};
 
 function point(x: number): RibbonPoint {
   return { x, y: 0, t: x, speed: 0.5 };
@@ -14,16 +20,9 @@ function growing(count: number): Stroke {
   return { colorId: "gold", points: Array.from({ length: count }, (_, i) => point(i * 10)) };
 }
 
-/**
- * Segments actually committed to the layer, identified by their control point.
- * Each segment paints a core pass and a hot-core pass over the same path, so only
- * every other path counts as a distinct segment.
- */
+/** Segments actually committed to the layer, identified by their control point. */
 function paintedControls(ctx: FakeCtx): number[] {
-  return ctx
-    .ops("quadraticCurveTo")
-    .filter((_, index) => index % 2 === 0)
-    .map((call) => call.args[0] as number);
+  return ctx.ops("quadraticCurveTo").map((call) => call.args[0] as number);
 }
 
 describe("RibbonPainter — incremental drawing", () => {
@@ -111,11 +110,11 @@ describe("RibbonPainter — incremental drawing", () => {
     const ctx = new FakeCtx();
     const painter = new RibbonPainter(ctx, OPTIONS);
     painter.appendPending([growing(3)], true);
-    ctx.globalCompositeOperation = "source-over";
+    ctx.globalCompositeOperation = "lighter";
     ctx.lineCap = "butt";
     painter.appendPending([growing(4)], true);
     const last = ctx.ops("stroke").at(-1)!;
-    expect(last.state.globalCompositeOperation).toBe("lighter");
+    expect(last.state.globalCompositeOperation).toBe("source-over");
     expect(last.state.lineCap).toBe("round");
   });
 
@@ -125,7 +124,7 @@ describe("RibbonPainter — incremental drawing", () => {
     painter.appendPending([growing(500)], true);
     ctx.reset();
     painter.appendPending([growing(501)], true);
-    // One new segment => two stroke passes, no matter how long the stroke already is.
-    expect(ctx.ops("stroke")).toHaveLength(2);
+    // One new segment => one stroke call, no matter how long the stroke already is.
+    expect(ctx.ops("stroke")).toHaveLength(1);
   });
 });

@@ -167,25 +167,41 @@ describe("LiveRenderer — dirty tracking", () => {
 });
 
 describe("LiveRenderer — composition", () => {
-  it("rebuilds the bloom from the core layer each rendered frame", () => {
+  // Layers are allocated in order: body, highlight, then one per bloom level.
+  const BODY = 0;
+  const HIGHLIGHT = 1;
+  const FIRST_BLOOM = 2;
+
+  it("builds the bloom from the body layer, never from the whitened highlight (NFR-001.6)", () => {
     const { renderer, created } = setup();
     renderer.setStrokes([strokeOf(4)], false);
     renderer.render();
-    const bloomLayer = created[1]!;
-    expect(bloomLayer.ctx.ops("drawImage")[0]!.args[0]).toBe(created[0]);
+    const source = created[FIRST_BLOOM]!.ctx.ops("drawImage")[0]!.args[0];
+    expect(source).toBe(created[BODY]);
+    expect(source).not.toBe(created[HIGHLIGHT]);
   });
 
-  it("composites background, bloom and core onto the display canvas", () => {
+  it("composites background, bloom, body and highlight onto the display canvas", () => {
     const { renderer, display, created } = setup();
     renderer.setStrokes([strokeOf(4)], false);
     renderer.render();
     expect(display.ctx.ops("fillRect")).toHaveLength(1);
-    expect(display.ctx.ops("drawImage").at(-1)!.args[0]).toBe(created[0]);
+    const draws = display.ctx.ops("drawImage").map((call) => call.args[0]);
+    expect(draws.at(-2)).toBe(created[BODY]);
+    expect(draws.at(-1)).toBe(created[HIGHLIGHT]);
   });
 
-  it("exposes the core layer for benchmarking and export reuse", () => {
+  it("paints both the body and the highlight for every frame", () => {
     const { renderer, created } = setup();
-    expect(renderer.coreCanvas).toBe(created[0]);
+    renderer.setStrokes([strokeOf(4)], false);
+    renderer.render();
+    expect(created[BODY]!.ctx.ops("stroke").length).toBeGreaterThan(0);
+    expect(created[HIGHLIGHT]!.ctx.ops("stroke").length).toBeGreaterThan(0);
+  });
+
+  it("exposes the body layer for benchmarking and inspection", () => {
+    const { renderer, created } = setup();
+    expect(renderer.bodyCanvas).toBe(created[BODY]);
   });
 });
 
