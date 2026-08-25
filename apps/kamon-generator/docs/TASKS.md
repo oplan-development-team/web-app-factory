@@ -3,9 +3,8 @@
 対応 SPEC: `./SPEC.md` / PLAN: `./PLAN.md`
 1 タスク = 1 コミット。
 
-Phase A〜E（T01〜T21、生成モデル・描画・永続化・書き出し）は完了済み。
-UI 層（`src/main.ts` / `index.html` / `style.css`）はまだプロトタイプ当時のままで、
-差し替えた `lib` の API と接続されていない。ここから Phase F 以降で置き換える。
+実装中の判断で登録簿が変わった箇所は SPEC 3.2.3 に記録している
+（`雁金` を落として `蔦` を入れ、4 モチーフの適合構成を狭めた）。
 
 ---
 
@@ -20,8 +19,8 @@ UI 層（`src/main.ts` / `index.html` / `style.css`）はまだプロトタイ�
 
 - [x] **T05** `lib/geometry.ts`: 極座標・パス組み立て・円弧・数値整形。単体テスト先行 — FR-120.1
 - [x] **T06** `lib/motifs/types.ts`: Motif / MotifGeometry の契約と、白抜きを含む evenodd パス組み立てヘルパ — FR-101, FR-120
-- [x] **T07** `lib/motifs/plants.ts`: 柏・桐・桔梗・花菱・沢瀉・橘 の 6 モチーフ — FR-120
-- [x] **T08** `lib/motifs/creatures.ts`: 鷹の羽・蝶・雁金 — FR-120
+- [x] **T07** `lib/motifs/plants.ts`: 柏・桐・桔梗・花菱・沢瀉・橘・蔦 の 7 モチーフ — FR-120
+- [x] **T08** `lib/motifs/creatures.ts`: 鷹の羽・蝶 — FR-120
 - [x] **T09** `lib/motifs/objects.ts`: 扇・源氏車 — FR-120, FR-101.2
 - [x] **T10** `lib/motifs/geometric.ts`: 菱・巴・目結 — FR-120
 - [x] **T11** `lib/motifs/index.ts`: 登録簿と、全モチーフ共通の不変条件テスト（パス構文・白抜きの内包・最小線幅） — AC-03, AC-11
@@ -47,18 +46,18 @@ UI 層（`src/main.ts` / `index.html` / `style.css`）はまだプロトタイ�
 
 ## Phase F — UI
 
-- [ ] **T22** `ui/dom.ts`（検査付き取得）・`ui/status.ts`（aria-live） — NFR-008.2, FR-603
-- [ ] **T23** `index.html` を新 UI 構成へ更新（紋名見出し・PNG/SVG 書き出し・帳を空にする・状態面） — FR-150.1, FR-301.5, FR-500
-- [ ] **T24** `ui/crestStage.ts`: 4 状態の状態機械と描画 — FR-500
-- [ ] **T25** `ui/plateBook.ts`: 図版帖の DOM（`<button>` 化・重複抑止・スクロール） — FR-300, FR-601
-- [ ] **T26** `ui/app.ts` + `main.ts`: 配線・デバウンス・最新要求優先 — FR-001.4, FR-501.1
-- [ ] **T27** `style.css`: 紋の主役化、状態面、reduced-motion、レスポンシブの調整 — FR-500.2〜4, NFR-005, NFR-006
+- [x] **T22** `ui/dom.ts`（検査付き取得）・`ui/status.ts`（aria-live） — NFR-008.2, FR-603
+- [x] **T23** `index.html` を新 UI 構成へ更新（紋名見出し・PNG/SVG 書き出し・帳を空にする・状態面） — FR-150.1, FR-301.5, FR-500
+- [x] **T24** `ui/crestStage.ts`: 4 状態の状態機械と描画 — FR-500
+- [x] **T25** `ui/plateBook.ts`: 図版帖の DOM（`<button>` 化・重複抑止・スクロール） — FR-300, FR-601
+- [x] **T26** `ui/app.ts` + `main.ts`: 配線・デバウンス・最新要求優先 — FR-001.4, FR-501.1
+- [x] **T27** `style.css`: 紋の主役化、状態面、reduced-motion、レスポンシブの調整 — FR-500.2〜4, NFR-005, NFR-006
 
 ## Phase G — テスト仕上げ
 
-- [ ] **T28** 統合テスト（jsdom）: 状態遷移・配色切替・図版帖・永続化の往復 — AC-12〜19
-- [ ] **T29** Playwright E2E: 生成 → 次の紋 → 図版帖 → 配色 → 書き出し → 再読み込み復元、3 ブラウザ — AC-14〜24
-- [ ] **T30** カバレッジ 80% 達成と不足分の補強 — NFR-008.4, AC-28
+- [x] **T28** 統合テスト（jsdom）: 状態遷移・配色切替・図版帖・永続化の往復 — AC-12〜19
+- [x] **T29** Playwright E2E: 生成 → 次の紋 → 図版帖 → 配色 → 書き出し → 再読み込み復元、3 ブラウザ — AC-14〜24
+- [x] **T30** カバレッジ 80% 達成と不足分の補強 — NFR-008.4, AC-28
 
 ## Phase H — 検証と仕上げ
 
