@@ -6,6 +6,7 @@ export default defineConfig({
     environment: "node",
     // 統合テストは各ファイル先頭の `@vitest-environment jsdom` で切り替える
     include: ["tests/unit/**/*.test.ts", "tests/integration/**/*.test.ts"],
+    setupFiles: ["tests/setup.ts"],
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],
