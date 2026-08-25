@@ -51,8 +51,8 @@
 
 ## Phase F — 検証
 
-- [ ] **T30** 統合テスト: studio × renderer × draft の結合、主要導線 — NFR-002.1
+- [x] **T30** 統合テスト: studio × renderer × draft の結合、主要導線 — NFR-002.1
 - [x] **T31** E2E（Playwright）: 描画 / 色変更 / Undo・Redo / キャプション / 書き出し / 復元 / リサイズ — NFR-002.4
 - [x] **T32** ベンチマーク（`bench/`）: 新旧比較の実測と README への記載 — NFR-001.5, NFR-001.8
-- [ ] **T33** カバレッジ 80% 達成の確認と不足分の補完 — AC-13
+- [x] **T33** カバレッジ 80% 達成の確認と不足分の補完 — AC-13
 - [ ] **T34** README 更新 / Docker ビルド確認 — NFR-008
