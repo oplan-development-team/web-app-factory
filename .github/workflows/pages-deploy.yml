@@ -1,0 +1,100 @@
+name: deploy previews to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - ".github/workflows/pages-deploy.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build every Pages-deployable app into _site/<slug>/
+        run: |
+          set -eu
+          mkdir -p _site
+          deployed_slugs=()
+
+          for deploy_json in apps/*/deploy.json; do
+            [ -f "$deploy_json" ] || continue
+            app_dir="$(dirname "$deploy_json")"
+            slug="$(basename "$app_dir")"
+            is_pages="$(node -e "console.log(!!JSON.parse(require('fs').readFileSync('$deploy_json','utf8')).pages)")"
+
+            if [ "$is_pages" != "true" ]; then
+              echo "skip: $slug (deploy.json pages=false)"
+              continue
+            fi
+
+            echo "building: $slug"
+            (
+              cd "$app_dir"
+              npm ci
+              npm run build
+            )
+
+            if [ ! -d "$app_dir/dist" ]; then
+              echo "::error::$slug has deploy.json{pages:true} but 'npm run build' produced no dist/ directory"
+              exit 1
+            fi
+
+            mkdir -p "_site/$slug"
+            cp -r "$app_dir/dist/." "_site/$slug/"
+            deployed_slugs+=("$slug")
+          done
+
+          printf '%s\n' "${deployed_slugs[@]:-}" > /tmp/deployed_slugs.txt
+
+      - name: Generate landing index.html
+        run: |
+          set -eu
+          {
+            echo "<!doctype html><html lang=\"ja\"><head><meta charset=\"utf-8\">"
+            echo "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+            echo "<title>web-app-factory — previews</title>"
+            echo "<style>"
+            echo "body{font-family:ui-monospace,'IBM Plex Mono',monospace;background:#f5f3ee;color:#1a1a1a;max-width:640px;margin:4rem auto;padding:0 1.5rem;line-height:1.6}"
+            echo "h1{font-size:1.1rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid #1a1a1a;padding-bottom:.75rem}"
+            echo "ul{list-style:none;padding:0}"
+            echo "li{padding:.6rem 0;border-bottom:1px solid #dedbd1}"
+            echo "a{color:#1a1a1a}"
+            echo "</style></head><body>"
+            echo "<h1>web-app-factory — previews</h1><ul>"
+            while IFS= read -r slug; do
+              [ -n "$slug" ] || continue
+              echo "<li><a href=\"./$slug/\">$slug</a></li>"
+            done < /tmp/deployed_slugs.txt
+            echo "</ul></body></html>"
+          } > _site/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

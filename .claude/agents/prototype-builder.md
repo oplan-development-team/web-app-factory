@@ -16,6 +16,10 @@ tools: [Read, Write, Edit, Bash, Grep, Glob, Skill]
 3. `npm run build`（またはそれに相当するコマンド）が実際に通り、開発サーバーを起動して操作できる状態まで仕上げる。
 4. README.md を置き、使い方と「app-factoryパイプラインによる自律生成プロトタイプであること」を一言書く。
 5. `Dockerfile`（と`.dockerignore`）を用意する。プロトタイプであってもコンテナ化は省略しない（`.claude/CLAUDE.md`の「デプロイの方針」参照）。バックエンド不要な静的サイトであれば、マルチステージ構成（build stageでビルド→runtime stageで`nginx:alpine`が`dist/`を配信、`EXPOSE 80`）で十分。実際に`docker build`が通ることを確認してから返す（`docker run`での起動確認まではプロトタイプでは必須としないが、ビルドは必ず通すこと）。README.mdにも起動コマンドを書き添える。
+6. `apps/<slug>/deploy.json` を置く（GitHub PagesプレビューをCIが機械的に判定するための設定。`PROJECTS.md`は人間向けプローズなのでCIから解析しない方針）。
+   - バックエンド不要・完全クライアントサイドで、`npm run build`が`dist/`ディレクトリに静的サイト一式を出力するなら `{"pages": true}`
+   - サーバープロセスが必要、または`npm run build`が`dist/`を生成しない構成なら `{"pages": false, "reason": "<理由>"}`
+   - Vite使用時は`vite.config.ts`に`base: './'`を設定すること（GitHub Pagesのプロジェクトサイトはサブパス配信になるため、絶対パス`/`のままだとアセット読み込みが壊れる）
 
 ## プロトタイプゆえの割り切り
 

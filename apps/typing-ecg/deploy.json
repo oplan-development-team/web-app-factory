@@ -1,0 +1,4 @@
+{
+  "pages": false,
+  "reason": "ビルド(build.js)がdist/を生成せず、現状の静的配信構成はDockerfileでの直接COPY前提のため（バックエンドは不要だが、Pagesワークフローのdist/契約に未対応）"
+}
