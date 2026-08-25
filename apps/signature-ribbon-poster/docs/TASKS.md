@@ -41,7 +41,7 @@
 
 ## Phase E — UI
 
-- [ ] **T23** `app/ui/toast.ts`: トースト（成功 / エラー、`role="status"`、自動消滅） — NFR-005.3, NFR-005.4, NFR-006.2
+- [x] **T23** `app/ui/toast.ts`: トースト（成功 / エラー、`role="status"`、自動消滅） — NFR-005.3, NFR-005.4, NFR-006.2
 - [ ] **T24** `app/ui/swatches.ts`: 色選択 radiogroup（矢印キー対応） — NFR-006.1
 - [ ] **T25** `app/ui/response-slider.ts`: レスポンススライダー（Calm/Balanced/Volatile） — FR-013.1, FR-013.4
 - [ ] **T26** `app/ui/resolution-picker.ts`: 解像度セレクタ（セグメント + ゴールド下線） — FR-010.1, FR-010.2, NFR-004.4
