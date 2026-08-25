@@ -45,7 +45,7 @@
 - [x] **T24** `app/ui/swatches.ts`: 色選択 radiogroup（矢印キー対応） — NFR-006.1
 - [x] **T25** `app/ui/response-slider.ts`: レスポンススライダー（Calm/Balanced/Volatile） — FR-013.1, FR-013.4
 - [x] **T26** `app/ui/resolution-picker.ts`: 解像度セレクタ（セグメント + ゴールド下線） — FR-010.1, FR-010.2, NFR-004.4
-- [ ] **T27** `app/ui/restore-banner.ts`: ドラフト復元バナー（復元 / 破棄） — FR-011.2
+- [x] **T27** `app/ui/restore-banner.ts`: ドラフト復元バナー（復元 / 破棄） — FR-011.2
 - [ ] **T28** `index.html` / `style.css`: 新規 UI のマークアップと意匠を追加する — NFR-004, NFR-005.5, NFR-005.6
 - [ ] **T29** `main.ts`: 全体の配線、キーボードショートカット、空/ローディング状態 — FR-014, NFR-005.1, NFR-005.2
 
