@@ -3,43 +3,47 @@
 対応 SPEC: `./SPEC.md` / PLAN: `./PLAN.md`
 1 タスク = 1 コミット。
 
+Phase A〜E（T01〜T21、生成モデル・描画・永続化・書き出し）は完了済み。
+UI 層（`src/main.ts` / `index.html` / `style.css`）はまだプロトタイプ当時のままで、
+差し替えた `lib` の API と接続されていない。ここから Phase F 以降で置き換える。
+
 ---
 
 ## Phase A — 基盤
 
-- [ ] **T01** `vite.config.ts` を追加（`base: './'`）。`tsconfig` に `strict` + `noUncheckedIndexedAccess` を設定。npm scripts を整備 — NFR-002.2, NFR-008.1
-- [ ] **T02** Vitest + jsdom + v8 カバレッジを導入し、しきい値 80% を設定 — NFR-008.3, NFR-008.4
-- [ ] **T03** `lib/constants.ts`・`lib/palette.ts` を新設し、寸法・配色を単一情報源化 — FR-110, FR-200
-- [ ] **T04** `lib/hash.ts` に NFC 正規化とサロゲート安全なハッシュを入れ、単体テストを先に書く — FR-002.1〜3, AC-08, AC-09
+- [x] **T01** `vite.config.ts` を追加（`base: './'`）。`tsconfig` に `strict` + `noUncheckedIndexedAccess` を設定。npm scripts を整備 — NFR-002.2, NFR-008.1
+- [x] **T02** Vitest + jsdom + v8 カバレッジを導入し、しきい値 80% を設定 — NFR-008.3, NFR-008.4
+- [x] **T03** `lib/constants.ts`・`lib/palette.ts` を新設し、寸法・配色を単一情報源化 — FR-110, FR-200
+- [x] **T04** `lib/hash.ts` に NFC 正規化とサロゲート安全なハッシュを入れ、単体テストを先に書く — FR-002.1〜3, AC-08, AC-09
 
 ## Phase B — 幾何とモチーフ
 
-- [ ] **T05** `lib/geometry.ts`: 極座標・パス組み立て・円弧・数値整形。単体テスト先行 — FR-120.1
-- [ ] **T06** `lib/motifs/types.ts`: Motif / MotifGeometry の契約と、白抜きを含む evenodd パス組み立てヘルパ — FR-101, FR-120
-- [ ] **T07** `lib/motifs/plants.ts`: 柏・桐・桔梗・花菱・沢瀉・橘 の 6 モチーフ — FR-120
-- [ ] **T08** `lib/motifs/creatures.ts`: 鷹の羽・蝶・雁金 — FR-120
-- [ ] **T09** `lib/motifs/objects.ts`: 扇・源氏車 — FR-120, FR-101.2
-- [ ] **T10** `lib/motifs/geometric.ts`: 菱・巴・目結 — FR-120
-- [ ] **T11** `lib/motifs/index.ts`: 登録簿と、全モチーフ共通の不変条件テスト（パス構文・白抜きの内包・最小線幅） — AC-03, AC-11
+- [x] **T05** `lib/geometry.ts`: 極座標・パス組み立て・円弧・数値整形。単体テスト先行 — FR-120.1
+- [x] **T06** `lib/motifs/types.ts`: Motif / MotifGeometry の契約と、白抜きを含む evenodd パス組み立てヘルパ — FR-101, FR-120
+- [x] **T07** `lib/motifs/plants.ts`: 柏・桐・桔梗・花菱・沢瀉・橘 の 6 モチーフ — FR-120
+- [x] **T08** `lib/motifs/creatures.ts`: 鷹の羽・蝶・雁金 — FR-120
+- [x] **T09** `lib/motifs/objects.ts`: 扇・源氏車 — FR-120, FR-101.2
+- [x] **T10** `lib/motifs/geometric.ts`: 菱・巴・目結 — FR-120
+- [x] **T11** `lib/motifs/index.ts`: 登録簿と、全モチーフ共通の不変条件テスト（パス構文・白抜きの内包・最小線幅） — AC-03, AC-11
 
 ## Phase C — 構成と組み立て
 
-- [ ] **T12** `lib/enclosure.ts`: 外郭 5 種の幾何と `R_INNER`。単体テスト — FR-110
-- [ ] **T13** `lib/composition.ts`: 放射／単独／違い／連環 の配置解決 — FR-130
-- [ ] **T14** `lib/naming.ts`: 紋名の組み立て。単体テスト — FR-150
-- [ ] **T15** `lib/kamon.ts`: `buildKamonStructure` を新モデルへ全面置換 — FR-101〜FR-140
-- [ ] **T16** 性質テスト: 100 シード × 3 バリアントで FR-101〜104 の不変条件を全数検証 — AC-01〜06, AC-10
+- [x] **T12** `lib/enclosure.ts`: 外郭 5 種の幾何と `R_INNER`。単体テスト — FR-110
+- [x] **T13** `lib/composition.ts`: 放射／単独／違い／連環 の配置解決 — FR-130
+- [x] **T14** `lib/naming.ts`: 紋名の組み立て。単体テスト — FR-150
+- [x] **T15** `lib/kamon.ts`: `buildKamonStructure` を新モデルへ全面置換 — FR-101〜FR-140
+- [x] **T16** 性質テスト: 100 シード × 3 バリアントで FR-101〜104 の不変条件を全数検証 — AC-01〜06, AC-10
 
 ## Phase D — 描画
 
-- [ ] **T17** `lib/render.ts`: 構造 + 配色 → SVG。対称複製を変換で行う — FR-104.2, FR-200.1, FR-602
-- [ ] **T18** `lib/draftGuide.ts`: 割り出し線（empty / drafting 用の面） — FR-500
-- [ ] **T19** 描画のスナップショットテストと、配色差替で `d` が不変であることの検証 — AC-13
+- [x] **T17** `lib/render.ts`: 構造 + 配色 → SVG。対称複製を変換で行う — FR-104.2, FR-200.1, FR-602
+- [x] **T18** `lib/draftGuide.ts`: 割り出し線（empty / drafting 用の面） — FR-500
+- [x] **T19** 描画のスナップショットテストと、配色差替で `d` が不変であることの検証 — AC-13
 
 ## Phase E — 永続化と書き出し
 
-- [ ] **T20** `lib/storage.ts`: 図版帖の保存・読み込み・上限 60・破損時の切り捨て・利用不可時の降格 — FR-301, AC-16〜19
-- [ ] **T21** `lib/exportImage.ts`: SVG / PNG 書き出しとファイル名生成 — FR-400, AC-20〜22
+- [x] **T20** `lib/storage.ts`: 図版帖の保存・読み込み・上限 60・破損時の切り捨て・利用不可時の降格 — FR-301, AC-16〜19
+- [x] **T21** `lib/exportImage.ts`: SVG / PNG 書き出しとファイル名生成 — FR-400, AC-20〜22
 
 ## Phase F — UI
 
