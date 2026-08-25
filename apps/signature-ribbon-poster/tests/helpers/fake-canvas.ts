@@ -45,7 +45,7 @@ export class FakeCtx implements Ctx2D {
   imageSmoothingEnabled = true;
   imageSmoothingQuality: ImageSmoothingQuality = "low";
 
-  /** Width returned by {@link measureText} per character. */
+  /** Width per character at a 10px font, scaled by the current font size. */
   charWidth = 10;
 
   private filterValue = "none";
@@ -124,8 +124,10 @@ export class FakeCtx implements Ctx2D {
     this.record("fillText", text, x, y);
   }
 
+  /** Text width scales with the font size, so shrink-to-fit logic is exercised realistically. */
   measureText(text: string): { readonly width: number } {
-    return { width: text.length * this.charWidth };
+    const size = Number(/(\d+(?:\.\d+)?)px/.exec(this.font)?.[1] ?? 10);
+    return { width: text.length * this.charWidth * (size / 10) };
   }
 
   createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient {
