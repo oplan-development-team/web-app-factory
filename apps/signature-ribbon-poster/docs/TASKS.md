@@ -30,7 +30,7 @@
 - [x] **T15** `render/bloom.ts`: 2 段ブルームの生成と合成（`ctx.filter` フォールバック付き） — NFR-001.1, E-16
 - [x] **T16** `render/scene.ts`: 背景 → ブルーム → コア の合成 — FR-004.2
 - [x] **T17** `render/caption.ts`: キャプション焼き込み（比率ベース・幅超過時の縮小と切り詰め） — FR-007.3, FR-007.5, E-07
-- [ ] **T18** `render/live-renderer.ts`: レイヤー管理・解像度決定・rAF ループ・リサイズ — NFR-001.3, NFR-001.7, E-02
+- [x] **T18** `render/live-renderer.ts`: レイヤー管理・解像度決定・rAF ループ・リサイズ — NFR-001.3, NFR-001.7, E-02
 
 ## Phase D — app（状態・入力・書き出し）
 
