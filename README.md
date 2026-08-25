@@ -17,7 +17,7 @@
 | ハーフトーンQR | [Pages](https://oplan-development-team.github.io/web-app-factory/halftone-qr/) | 完成 |
 | QRコードデザインツール | [Pages](https://oplan-development-team.github.io/web-app-factory/qr-code-designer/) | 完成 |
 | オリジナル家紋ジェネレーター「家紋帳」 | [Pages](https://oplan-development-team.github.io/web-app-factory/kamon-generator/) | 完成 |
-| 署名のリボン光跡 | [Pages](https://oplan-development-team.github.io/web-app-factory/signature-ribbon-poster/) | 進行中（本実装は別ブランチで検証中） |
+| 署名のリボン光跡 | [Pages](https://oplan-development-team.github.io/web-app-factory/signature-ribbon-poster/) | 完成 |
 | 架空の美術館キャプションジェネレーター | [Pages](https://oplan-development-team.github.io/web-app-factory/museum-caption-generator/) | プロトタイプ（採否待ち） |
 | タイピング心電図 | — （Pages未対応、下記参照） | 保留 |
 
