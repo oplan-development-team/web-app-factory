@@ -2,18 +2,18 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="名前や誕生日をシードに、左右・点対称の幾何学紋様を自動生成するオリジナル家紋ジェネレーター。家紋帳の見開きページを開く体験でSVG書き出しができます。"
+      content="名前や誕生日をシードに、正円のなかへ左右対称・点対称の紋様を決定的に生成するオリジナル家紋ジェネレーター。家紋帳の見開きページを開く体験で、SVG・PNG に書き出せます。"
     />
     <meta name="theme-color" content="#f3ecdb" />
     <title>オリジナル家紋ジェネレーター — 家紋帳</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Noto+Serif+JP:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+JP:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -22,11 +22,11 @@
       <header class="masthead">
         <p class="masthead-eyebrow">Original Crest Archive</p>
         <h1 class="masthead-title">家紋帳</h1>
-        <p class="masthead-sub">名前や誕生日から、あなただけの紋様を編む。</p>
+        <p class="masthead-sub">名前や誕生日から、あなただけの紋様を割り出す。</p>
       </header>
 
       <main class="book" aria-label="家紋帳 見開きページ">
-        <!-- 左ページ: 入力と生成履歴 -->
+        <!-- 左ページ: 紋を編む -->
         <section class="page page-left" aria-labelledby="left-page-heading">
           <p class="page-folio page-folio-left" aria-hidden="true">左之丁</p>
           <h2 id="left-page-heading" class="page-heading">紋を編む</h2>
@@ -34,72 +34,123 @@
           <form id="seed-form" class="seed-form" autocomplete="off">
             <div class="field">
               <label for="input-name">名前</label>
-              <input id="input-name" name="name" type="text" placeholder="例）水野 蒼" maxlength="40" />
+              <input
+                id="input-name"
+                name="name"
+                type="text"
+                placeholder="例）水野 蒼"
+                maxlength="40"
+              />
             </div>
             <div class="field">
               <label for="input-birthday">誕生日・記念日など</label>
-              <input id="input-birthday" name="birthday" type="text" placeholder="例）1998-04-12" maxlength="40" />
+              <input
+                id="input-birthday"
+                name="birthday"
+                type="text"
+                placeholder="例）1998-04-12"
+                maxlength="40"
+              />
             </div>
-            <p class="field-hint">入力した文字を種として、その場で紋様が育ちます。</p>
+            <p class="field-hint">入力した文字を種にして、その場で紋を割り出します。</p>
           </form>
 
-          <div class="palette-select" role="group" aria-label="配色を選ぶ">
+          <div class="palette-select" role="group" aria-label="色目を選ぶ">
             <span class="palette-select-label">色目</span>
             <div class="palette-swatches" id="palette-swatches"></div>
           </div>
 
-          <div class="next-pattern-row">
-            <button id="next-pattern-btn" type="button" class="btn-outline" disabled>
-              <span>次のパターンへ</span>
-            </button>
-            <p class="next-pattern-hint">同じ種のまま、別の紋様を呼び出します。</p>
+          <div class="next-crest-row">
+            <button id="next-crest-btn" type="button" class="btn-outline" disabled>次の紋へ</button>
+            <p class="next-crest-hint">同じ種のまま、別の割り出しを試します。</p>
           </div>
 
-          <div class="history-block">
-            <h3 class="history-heading">図版帖<span class="history-count" id="history-count"></span></h3>
-            <p id="history-empty" class="history-empty">まだ紋がありません。名前や誕生日を入れると、ここに記録されていきます。</p>
-            <ol id="history-list" class="history-list" hidden></ol>
-          </div>
+          <section class="plate-book" aria-labelledby="plate-book-heading">
+            <h3 id="plate-book-heading" class="plate-book-heading">
+              図版帖<span class="plate-book-count" id="plate-book-count"></span>
+            </h3>
+
+            <p id="plate-book-empty" class="plate-book-empty">
+              まだ一葉もありません。名前や誕生日を書き入れると、割り出した紋がここに綴じられます。
+            </p>
+
+            <ol id="plate-list" class="plate-list" hidden></ol>
+
+            <div class="plate-book-foot">
+              <p class="plate-book-note">この端末のブラウザにのみ保存されます。</p>
+              <div class="clear-book" id="clear-book">
+                <button id="clear-book-btn" type="button" class="btn-quiet" hidden>
+                  帳を空にする
+                </button>
+                <div class="clear-book-confirm" id="clear-book-confirm" hidden>
+                  <span class="clear-book-ask">綴じた紋をすべて捨てますか。</span>
+                  <button id="clear-book-yes" type="button" class="btn-quiet is-danger">
+                    空にする
+                  </button>
+                  <button id="clear-book-no" type="button" class="btn-quiet">やめる</button>
+                </div>
+              </div>
+            </div>
+          </section>
         </section>
 
         <!-- 綴じ目 -->
-        <div class="spine" aria-hidden="true">
-          <div class="spine-shadow"></div>
-        </div>
+        <div class="spine" aria-hidden="true"><div class="spine-shadow"></div></div>
 
-        <!-- 右ページ: 選択中の家紋を大きく表示 -->
+        <!-- 右ページ: 割り出した紋 -->
         <section class="page page-right" aria-labelledby="right-page-heading">
           <p class="page-folio page-folio-right" aria-hidden="true">右之丁</p>
-          <h2 id="right-page-heading" class="visually-hidden">選択中の家紋</h2>
+          <h2 id="right-page-heading" class="visually-hidden">割り出した紋</h2>
 
-          <div class="crest-stage">
-            <div id="crest-mount" class="crest-mount" aria-live="polite"></div>
-            <p id="crest-placeholder-text" class="crest-placeholder-text">
-              名前や誕生日を左のページに書き入れると、<br />紋がここに生まれます。
+          <div class="crest-stage" id="crest-stage" data-state="empty">
+            <div class="crest-mount" id="crest-mount"></div>
+
+            <p class="stage-note stage-note-empty">
+              左の丁に名前を書き入れると、<br />ここに紋が立ち上がります。
             </p>
-          </div>
-
-          <div id="crest-caption" class="crest-caption" hidden>
-            <p class="crest-caption-line" id="crest-plate-label"></p>
-            <p class="crest-caption-line" id="crest-desc"></p>
-            <p class="crest-caption-seed" id="crest-seed-echo"></p>
-          </div>
-
-          <div class="right-page-footer">
-            <p id="download-status" class="download-status" role="status" aria-live="polite"></p>
-            <button id="download-btn" type="button" class="stamp-btn" disabled aria-label="表示中の家紋をSVGで書き出す">
-              <span class="stamp-btn-frame">
-                <span class="stamp-btn-text">書<br />出</span>
-              </span>
+            <p class="stage-note stage-note-drafting">割り出しています</p>
+            <p class="stage-note stage-note-error" id="stage-error" role="alert"></p>
+            <button id="retry-btn" type="button" class="btn-outline stage-retry">
+              割り出し直す
             </button>
+          </div>
+
+          <div class="crest-caption" id="crest-caption" hidden>
+            <h3 class="crest-name" id="crest-name"></h3>
+            <p class="crest-spec" id="crest-spec"></p>
+            <p class="crest-seed" id="crest-seed"></p>
+          </div>
+
+          <div class="colophon">
+            <p class="colophon-status" id="status-region" role="status" aria-live="polite"></p>
+            <div class="seals">
+              <button
+                id="export-svg-btn"
+                type="button"
+                class="seal seal-relief"
+                disabled
+                aria-label="表示中の紋を SVG で書き出す"
+              >
+                <span class="seal-face">SVG</span>
+              </button>
+              <button
+                id="export-png-btn"
+                type="button"
+                class="seal seal-intaglio"
+                disabled
+                aria-label="表示中の紋を PNG で書き出す"
+              >
+                <span class="seal-face">PNG</span>
+              </button>
+            </div>
           </div>
         </section>
       </main>
 
-      <p id="error-banner" class="error-banner" role="alert" hidden></p>
-
       <footer class="site-footer">
-        <p>生成・書き出しはすべてこの端末内のブラウザで完結します。入力内容がサーバーへ送信されることはありません。</p>
+        <p>
+          割り出し・書き出しはすべてこの端末のブラウザで完結します。入力した名前がサーバーへ送られることはありません。
+        </p>
       </footer>
     </div>
     <script type="module" src="/src/main.ts"></script>
