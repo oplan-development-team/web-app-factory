@@ -29,8 +29,10 @@ idea-scoutが生成したアイディア候補を、独立した立場から厳�
 
 **最終回答（StructuredOutput）を返す前に**、次のBashコマンドを実行してログを1件残すこと。箇条書き（`- `）形式で書く。**問題なく完了していれば「結果」の1行で十分**。候補全体の質が低かった、評価に迷った候補があった等の気づきがあれば行を追加する。
 
+ファイル名には、依頼プロンプトに含まれる `runId` をそのまま使うこと。見当たらない場合のみ`unassigned-run`を使う。
+
 ```bash
 LOG_DIR="$(git rev-parse --show-toplevel)/.claude/logs/app-factory"
 mkdir -p "$LOG_DIR"
-printf '\n### [%s] idea-critic — <一言サマリー>\n%s\n' "$(date +%H:%M:%S)" $'- 結果: <評価件数・最高/最低評価だった候補を簡潔に>' >> "$LOG_DIR/$(date +%Y-%m-%d).md"
+printf '\n### [%s] idea-critic — <一言サマリー>\n%s\n' "$(date +%H:%M:%S)" $'- 結果: <評価件数・最高/最低評価だった候補を簡潔に>' >> "$LOG_DIR/<runId>.md"
 ```

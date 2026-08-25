@@ -36,8 +36,10 @@ Design QA・Verifyの指摘を受けて再度呼ばれることがある。そ�
 
 **最終回答（StructuredOutput）を返す前に**、次のBashコマンドを実行してログを1件残すこと。箇条書き（`- `）形式で書く。**初回実装で問題なく完了していれば「結果」の1行で十分**。修正パス（Review & Fix由来）の場合や、実装中に判断に迷った・想定外の問題に当たった場合は、原因と対処、次回に活かせる気づきを行として追加する。
 
+ファイル名には、依頼プロンプトに含まれる `runId` をそのまま使うこと。見当たらない場合のみ`unassigned-run`を使う。
+
 ```bash
 LOG_DIR="$(git rev-parse --show-toplevel)/.claude/logs/app-factory"
 mkdir -p "$LOG_DIR"
-printf '\n### [%s] prototype-builder（<初回実装 または 修正パスr番号>） — <一言サマリー>\n%s\n' "$(date +%H:%M:%S)" $'- 結果: <やったことを簡潔に>' >> "$LOG_DIR/$(date +%Y-%m-%d).md"
+printf '\n### [%s] prototype-builder（<初回実装 または 修正パスr番号>） — <一言サマリー>\n%s\n' "$(date +%H:%M:%S)" $'- 結果: <やったことを簡潔に>' >> "$LOG_DIR/<runId>.md"
 ```

@@ -31,7 +31,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: true
           claude_args: |
-            --allowedTools "Bash,Read,Write,Edit,Glob,Grep,Skill,Workflow,TodoWrite,TaskList,TaskGet,TaskOutput"
+            --allowedTools "Bash,Read,Write,Edit,Glob,Grep,Skill,Workflow,TodoWrite,TaskList,TaskGet,TaskOutput,WebSearch,WebFetch"
           prompt: |
             これはNew_Service_App（GitHubリポジトリ: oplan-development-team/web-app-factory）という
             プロジェクトの自律プロトタイピング・パイプラインを実行するジョブです。

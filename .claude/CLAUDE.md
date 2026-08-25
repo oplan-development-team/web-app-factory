@@ -112,7 +112,7 @@ New_Service_App/
 
 ### 活動ログ
 
-各エージェントは作業の最後に`pipeline-log`スキルの手順で、`.claude/logs/app-factory/<YYYY-MM-DD>.md`に1見出し分の活動記録を残す。`Workflow`の戻り値だけでは各エージェントの判断が追いにくいため、この簡易ログで経緯を追えるようにしている。
+各エージェントは作業の最後に`pipeline-log`スキルの手順で、`.claude/logs/app-factory/<runId>.md`に1見出し分の活動記録を残す（`runId`は実行ごとに一意な識別子。完了後にslug名へリネームする）。`Workflow`の戻り値だけでは各エージェントの判断が追いにくいため、この簡易ログで経緯を追えるようにしている。
 
 ### 実行結果の扱い
 

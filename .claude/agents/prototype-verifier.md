@@ -29,8 +29,10 @@ prototype-builderが作ったものが、報告通りに実際に動くかを機
 
 **最終回答（StructuredOutput）を返す前に**、次のBashコマンドを実行してログを1件残すこと。箇条書き（`- `）形式で書く。**合格で問題がなければ「結果」の1行で十分**。不合格の場合（npm/Dockerどちらでも）、または気になる点があれば、`- 問題: ...`・`- 気づき/改善案: ...`を行として追加し、具体的に書く。
 
+ファイル名には、依頼プロンプトに含まれる `runId` をそのまま使うこと。見当たらない場合のみ`unassigned-run`を使う。
+
 ```bash
 LOG_DIR="$(git rev-parse --show-toplevel)/.claude/logs/app-factory"
 mkdir -p "$LOG_DIR"
-printf '\n### [%s] prototype-verifier — <合格 または 不合格>\n%s\n' "$(date +%H:%M:%S)" $'- 結果: <合否と一言（npm build / docker build 双方の結果を含める）>' >> "$LOG_DIR/$(date +%Y-%m-%d).md"
+printf '\n### [%s] prototype-verifier — <合格 または 不合格>\n%s\n' "$(date +%H:%M:%S)" $'- 結果: <合否と一言（npm build / docker build 双方の結果を含める）>' >> "$LOG_DIR/<runId>.md"
 ```

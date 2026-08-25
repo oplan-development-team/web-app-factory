@@ -113,6 +113,13 @@ const LENSES = [
 // そのアイディアをそのままConceptフェーズから走らせる（ユーザー自身のアイディアを起点にする経路）。
 const seedIdea = (args && args.seedIdea) ? args.seedIdea : null
 
+// args.runId: 呼び出し側がWorkflow実行前にBashで生成した一意な識別子（例: 20260825-030512-8421）。
+// 各エージェントはこれを活動ログのファイル名に使う（.claude/logs/app-factory/<runId>.md）。
+// 日付だけをキーにすると、同じ日に複数ブランチが並行実行した際にログファイルがコンフリクトするため、
+// スクリプト自身はDate.now()/Math.random()を使えない制約もあり、実行ごとの一意性は呼び出し側に持たせている。
+const runId = (args && args.runId) ? args.runId : 'unassigned-run'
+const runIdNote = ` ログファイル識別子(runId): ${runId}（ログ command のファイル名にそのまま使うこと）。`
+
 const QUALITY_BAR = 7
 const MAX_IDEATE_ROUNDS = 2
 
@@ -138,7 +145,7 @@ if (seedIdea) {
         `割り当てレンズ:「${lens.label}」(${lens.brief})。` +
         `まずリポジトリルートの PROJECTS.md と apps/ ディレクトリを確認し、既存のアイディア・完成済み・進行中のアプリと重複しないようにしてください。` +
         `対象は個人が数時間〜1日程度で作り切れる規模。外部有料APIキーや継続的なインフラ費用が前提のものは避けてください。` +
-        feedbackNote,
+        feedbackNote + runIdNote,
         { agentType: 'idea-scout', label: `scout:${lens.key}:r${round}`, phase: 'Ideate', schema: IDEAS_SCHEMA }
       )
     ))
@@ -150,7 +157,7 @@ if (seedIdea) {
     critiques = await parallel([0, 1].map(i => () =>
       agent(
         `次のアイディア候補それぞれを、(1)プロトタイプとして数時間〜1日で作り切れるか (2)独自性 (3)実際に使われる/見てもらえそうか ` +
-        `の観点で0〜10点で採点してください。厳しめに、疑わしきは低く採点してください。候補一覧: ${JSON.stringify(allIdeas)}`,
+        `の観点で0〜10点で採点してください。厳しめに、疑わしきは低く採点してください。候補一覧: ${JSON.stringify(allIdeas)}` + runIdNote,
         { agentType: 'idea-critic', label: `critic:${i}:r${round}`, phase: 'Critique', schema: CRITIQUE_SCHEMA }
       )
     ))
@@ -197,7 +204,7 @@ const concept = await agent(
   `リポジトリルートの apps/ 配下の既存ディレクトリ名と衝突しないkebab-caseのslugを決めてください。` +
   `スタイル方向は曖昧な「クリーンでミニマル」を禁止し、エディトリアル/ネオブルータリズム/ガラスモーフィズム/` +
   `ダーク or ライトラグジュアリー/ベント/スクロールテリング/スイス/レトロフューチャリズム等から具体的に1つ選んでください。` +
-  `技術スタックは依存が少なく短時間で作り切れるもの（素のHTML/CSS/JS、またはVite+TS程度）を優先してください。`,
+  `技術スタックは依存が少なく短時間で作り切れるもの（素のHTML/CSS/JS、またはVite+TS程度）を優先してください。` + runIdNote,
   { agentType: 'concept-developer', phase: 'Concept', schema: CONCEPT_SCHEMA }
 )
 log(`コンセプト確定: ${concept.title} / ${concept.styleDirection} / apps/${concept.slug}/`)
@@ -208,7 +215,7 @@ let build = await agent(
   `実装前に frontend-design スキルを必ず呼び出し、指定のスタイル方向を具体的なビジュアル方針(配色・タイポグラフィ・` +
   `レイアウトの理由)まで固めてから実装してください。コンセプト: ${JSON.stringify(concept)}。` +
   `プロトタイプなので網羅的なテストは不要ですが、npm run build 等が実際に通り、起動して操作できる状態まで仕上げてください。` +
-  `README.md に、これがapp-factoryパイプラインによる自律生成プロトタイプであることを一言書き添えてください。`,
+  `README.md に、これがapp-factoryパイプラインによる自律生成プロトタイプであることを一言書き添えてください。` + runIdNote,
   { agentType: 'prototype-builder', phase: 'Build', schema: BUILD_SCHEMA }
 )
 log(`実装完了: ${build.dirPath}`)
@@ -220,12 +227,12 @@ const QA_PROMPT =
   `禁止パターン(画一的なカードグリッド/中央寄せグラデーションブロブのヒーロー/ライブラリのデフォルトそのまま/` +
   `単調な余白・角丸・影/グレー基調+差し色1色だけ 等)に当てはまっていないか、` +
   `階層・リズム・奥行き・タイポグラフィ・意味のある配色・作り込まれたhover/focus/active状態のうち` +
-  `最低4項目を満たしているかを、実際にコードと画面を確認して厳しく判定してください。疑わしい場合はpassed=falseとしてください。`
+  `最低4項目を満たしているかを、実際にコードと画面を確認して厳しく判定してください。疑わしい場合はpassed=falseとしてください。` + runIdNote
 const VERIFY_PROMPT =
   `リポジトリルートの apps/${concept.slug}/ を実際にビルド・起動し、主要機能を操作して動作確認してください。` +
   `コンソールエラーの有無、375/768/1440幅での見た目の破綻の有無を確認してください。` +
   `また、apps/${concept.slug}/Dockerfile を使って実際に \`docker build\` が成功するかを独立に確認し、結果をdockerBuildOkとして報告してください。` +
-  `確認後は起動したプロセス・作成したDockerイメージ/コンテナを必ず終了・削除してください。`
+  `確認後は起動したプロセス・作成したDockerイメージ/コンテナを必ず終了・削除してください。` + runIdNote
 
 let qaRounds = []
 let verify = null
@@ -260,7 +267,7 @@ for (let round = 1; round <= MAX_REVIEW_ROUNDS; round++) {
   log(`ラウンド${round}: 指摘があったためprototype-builderに修正を差し戻します`)
   build = await agent(
     `リポジトリルートの apps/${concept.slug}/ の実装に対して、Design QAとVerifyから次の指摘が出ています。指摘箇所を修正してください。` +
-    `指摘内容: ${JSON.stringify(fixNotes)}。無関係な変更は加えず、指摘の解消に集中してください。修正後、npm run build 等が通ることを確認してください。`,
+    `指摘内容: ${JSON.stringify(fixNotes)}。無関係な変更は加えず、指摘の解消に集中してください。修正後、npm run build 等が通ることを確認してください。` + runIdNote,
     { agentType: 'prototype-builder', label: `fix:r${round}`, phase: 'Review & Fix', schema: BUILD_SCHEMA }
   )
 }
