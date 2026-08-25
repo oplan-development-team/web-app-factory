@@ -1,8 +1,15 @@
 /* ==========================================================================
-   オリジナル家紋ジェネレーター — 家紋帳エディトリアル
-   配色: 和紙のオフホワイト背景 + 墨の本文 + 朱(#C33A2E)を唯一の差し色に。
-   書体: 日本語=Noto Serif JP / 英数字=Cormorant Garamond。
-   レイアウト: 見開き本（左=入力・履歴、右=大きな家紋）+ 中央の綴じ目影。
+   家紋帳 — オリジナル家紋ジェネレーター
+
+   方向: エディトリアル（和装本の図版帖）。カード・角丸・均一グリッドを使わず、
+   階層はヘアラインと余白の強弱、そして文字サイズの落差だけでつくる。
+
+   配色: 和紙のオフホワイトを地、墨を文字、朱を唯一の差し色とする。
+         朱は装飾では使わず、機能（現在地・主要操作・割り出し線・エラー・
+         フォーカス）に限って差す。
+   書体: 日本語 = Noto Serif JP / 欧文・数字 = Cormorant Garamond。
+         図版番号と種の控えはイタリックにして、本文と役割を分ける。
+   構図: 左丁 = 編む（入力・図版帖）／綴じ目の影／右丁 = 大きな紋 1 点。
    ========================================================================== */
 
 :root {
@@ -16,14 +23,34 @@
   --paper: #fbf7ec;
   --paper-edge: #e7dcc2;
   --hairline: rgba(74, 66, 54, 0.22);
+  --hairline-soft: rgba(74, 66, 54, 0.12);
   --shadow-warm: rgba(96, 68, 32, 0.22);
 
   --font-jp: "Noto Serif JP", "Hiragino Mincho ProN", serif;
   --font-latin: "Cormorant Garamond", var(--font-jp);
+
+  /* 余白は等間隔にせず、丁の中の段落ごとに強弱をつけるための段階を持たせる */
+  --space-tight: 10px;
+  --space-step: 18px;
+  --space-block: 30px;
+  --space-section: 44px;
+
+  --duration-fast: 140ms;
+  --duration-ink: 220ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * {
   box-sizing: border-box;
+}
+
+/*
+ * `hidden` 属性は UA スタイルの `display: none` でしかないため、作者側で
+ * `display` を指定したクラス（.clear-book-confirm など）に負けて消えなくなる。
+ * 属性で隠す箇所が複数あるので、ここで一度だけ優先させる。
+ */
+[hidden] {
+  display: none !important;
 }
 
 html,
@@ -49,7 +76,7 @@ body {
   margin: -1px;
   padding: 0;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
 }
@@ -60,11 +87,18 @@ body {
   padding: min(7vh, 68px) 24px 48px;
 }
 
-/* ---------- masthead ---------- */
+.boot-error {
+  margin: 0;
+  padding: 16px 24px;
+  background: var(--vermillion-deep);
+  color: var(--washi-1);
+  font-size: 14px;
+}
+
+/* ---------- 題字 ---------- */
 
 .masthead {
-  text-align: left;
-  margin: 0 0 40px 4px;
+  margin: 0 0 var(--space-section) 4px;
   max-width: 30em;
 }
 
@@ -83,7 +117,6 @@ body {
   font-size: clamp(30px, 4.2vw, 42px);
   font-weight: 700;
   letter-spacing: 0.14em;
-  color: var(--ink);
 }
 
 .masthead-sub {
@@ -93,7 +126,7 @@ body {
   letter-spacing: 0.03em;
 }
 
-/* ---------- book spread ---------- */
+/* ---------- 見開き ---------- */
 
 .book {
   position: relative;
@@ -109,25 +142,30 @@ body {
 .page {
   position: relative;
   background: var(--paper);
-  padding: 52px 44px 48px;
   display: flex;
   flex-direction: column;
-  min-height: 640px;
+  min-height: 680px;
+  /* グリッド項目の既定は min-width:auto。中身の最小幅より縮まず、狭い画面で丁が
+     はみ出す。Firefox / WebKit で顕著に出る（Chromium だけ見ていると気付かない） */
+  min-width: 0;
 }
 
+/* 左右で内寸を変える。編む丁は詰めて、紋を置く丁は広く取る */
 .page-left {
+  padding: 52px 40px 40px 44px;
   border-radius: 3px 0 0 3px;
   border-right: 1px solid var(--paper-edge);
 }
 
 .page-right {
+  padding: 52px 48px 40px 44px;
   border-radius: 0 3px 3px 0;
-  align-items: stretch;
 }
 
 .page-folio {
   position: absolute;
   top: 20px;
+  margin: 0;
   font-family: var(--font-latin);
   font-size: 12px;
   letter-spacing: 0.18em;
@@ -139,19 +177,17 @@ body {
 }
 
 .page-folio-right {
-  right: 44px;
+  right: 48px;
 }
 
 .page-heading {
-  margin: 4px 0 26px;
+  margin: 4px 0 var(--space-block);
   font-size: 19px;
   font-weight: 600;
   letter-spacing: 0.1em;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--hairline);
 }
-
-/* spine: 中央の綴じ目 */
 
 .spine {
   position: relative;
@@ -170,13 +206,13 @@ body {
   background: radial-gradient(ellipse 60% 100% at 50% 50%, rgba(30, 20, 8, 0.32), transparent 72%);
 }
 
-/* ---------- 左ページ: フォーム ---------- */
+/* ---------- 左丁: 入力 ---------- */
 
 .seed-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  margin-bottom: 28px;
+  gap: var(--space-step);
+  margin-bottom: var(--space-block);
 }
 
 .field {
@@ -194,13 +230,19 @@ body {
 .field input {
   font-family: var(--font-jp);
   font-size: 16px;
+  /* input は既定で size=20 相当の固有幅（約 346px）を持ち、これが丁全体の
+     最小幅を押し上げる。明示的に外さないと 320px 幅で横スクロールが出る */
+  min-width: 0;
+  width: 100%;
   color: var(--ink);
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--hairline);
   padding: 8px 2px 10px;
   outline: none;
-  transition: border-color 160ms ease, background-color 160ms ease;
+  transition:
+    border-color var(--duration-fast) ease,
+    background-color var(--duration-fast) ease;
 }
 
 .field input::placeholder {
@@ -222,13 +264,12 @@ body {
   margin: 2px 0 0;
   font-size: 12.5px;
   color: var(--ink-faint);
-  letter-spacing: 0.02em;
 }
 
-/* ---------- 色目（配色プリセット） ---------- */
+/* ---------- 色目 ---------- */
 
 .palette-select {
-  margin-bottom: 26px;
+  margin-bottom: var(--space-block);
 }
 
 .palette-select-label {
@@ -236,7 +277,7 @@ body {
   font-size: 12.5px;
   letter-spacing: 0.1em;
   color: var(--ink-soft);
-  margin-bottom: 10px;
+  margin-bottom: var(--space-tight);
 }
 
 .palette-swatches {
@@ -249,7 +290,7 @@ body {
   border: 1px solid var(--hairline);
   background: var(--washi-1);
   padding: 8px 6px 7px;
-  width: 64px;
+  width: 66px;
   cursor: pointer;
   font-family: var(--font-jp);
   color: var(--ink-soft);
@@ -257,7 +298,9 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  transition: transform 140ms ease, border-color 140ms ease;
+  transition:
+    transform var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
 }
 
 .palette-swatch:hover {
@@ -265,11 +308,17 @@ body {
   border-color: var(--ink-faint);
 }
 
+.palette-swatch:active {
+  transform: translateY(0);
+}
+
+/* 見本の丸は、地色の上に紋の色で点を打って「その色目で紋が乗る」ことを示す */
 .palette-swatch-chip {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  background-image: radial-gradient(circle at 50% 50%, currentColor 0 42%, transparent 43%);
 }
 
 .palette-swatch-label {
@@ -281,20 +330,15 @@ body {
 
 .palette-swatch[aria-pressed="true"] {
   color: var(--ink);
+  border-color: var(--vermillion-deep);
 }
 
 .palette-swatch[aria-pressed="true"] .palette-swatch-label::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: auto 0 0 0;
   height: 2px;
   background: var(--vermillion);
-}
-
-.palette-swatch[aria-pressed="true"] {
-  border-color: var(--vermillion-deep);
 }
 
 .palette-swatch:focus-visible {
@@ -302,10 +346,10 @@ body {
   outline-offset: 2px;
 }
 
-/* ---------- 次のパターンへ ---------- */
+/* ---------- 次の紋へ ---------- */
 
-.next-pattern-row {
-  margin-bottom: 30px;
+.next-crest-row {
+  margin-bottom: var(--space-section);
 }
 
 .btn-outline {
@@ -316,10 +360,14 @@ body {
   color: var(--vermillion-deep);
   background: transparent;
   border: 1px solid var(--vermillion-deep);
+  /* 角を一つだけ落として、既製のボタンに見えないようにする */
   clip-path: polygon(0 0, 100% 0, 100% 84%, 97% 100%, 0 100%);
   padding: 10px 22px;
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease, transform 120ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 120ms ease;
 }
 
 .btn-outline:hover:not(:disabled) {
@@ -342,95 +390,109 @@ body {
   outline-offset: 3px;
 }
 
-.next-pattern-hint {
+.next-crest-hint {
   margin: 8px 0 0;
   font-size: 12px;
   color: var(--ink-faint);
 }
 
-/* ---------- 図版帖（履歴） ---------- */
+/* ---------- 図版帖 ---------- */
 
-.history-block {
+.plate-book {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
 }
 
-.history-heading {
-  margin: 0 0 4px;
+.plate-book-heading {
+  margin: 0;
   font-size: 14px;
   letter-spacing: 0.1em;
   color: var(--ink-soft);
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 10px;
 }
 
-.history-count {
+.plate-book-count {
   font-family: var(--font-latin);
-  font-size: 12px;
-  color: var(--ink-faint);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--vermillion-deep);
+  letter-spacing: 0.08em;
 }
 
-.history-empty {
+.plate-book-empty {
   font-size: 13px;
   color: var(--ink-faint);
-  line-height: 1.9;
+  line-height: 1.95;
   border-top: 1px dashed var(--hairline);
-  padding-top: 16px;
-  margin-top: 10px;
+  padding-top: var(--space-step);
+  margin: var(--space-tight) 0 0;
 }
 
-.history-list {
+.plate-list {
   list-style: none;
-  margin: 10px 0 0;
+  margin: var(--space-tight) 0 0;
   padding: 0;
   border-top: 1px solid var(--hairline);
   overflow-y: auto;
-  max-height: 420px;
+  /* 葉が増えても丁の高さが伸び続けないようにする（FR-501.2） */
+  max-height: 340px;
 }
 
-.history-item {
+.plate-row {
+  border-bottom: 1px solid var(--hairline-soft);
+}
+
+.plate-item {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px 4px;
-  border-bottom: 1px solid var(--hairline);
-  cursor: pointer;
-  background: transparent;
   width: 100%;
-  border-left: none;
-  border-right: none;
-  border-top: none;
+  padding: 10px 6px 10px 4px;
+  border: none;
+  border-left: 2px solid transparent;
+  background: transparent;
   text-align: left;
-  transition: background-color 150ms ease, transform 150ms ease;
+  cursor: pointer;
   font-family: var(--font-jp);
+  transition:
+    background-color 150ms ease,
+    transform 150ms var(--ease-out),
+    border-color 150ms ease;
 }
 
-.history-item:hover {
+.plate-item:hover {
   background: rgba(195, 58, 46, 0.05);
   transform: translateX(4px);
 }
 
-.history-item:focus-visible {
+.plate-item:active {
+  transform: translateX(2px);
+}
+
+.plate-item:focus-visible {
   outline: 2px solid var(--vermillion);
   outline-offset: -2px;
 }
 
-.history-item[aria-current="true"] {
-  background: rgba(195, 58, 46, 0.08);
+.plate-item[aria-current="true"] {
+  border-left-color: var(--vermillion);
+  background: rgba(195, 58, 46, 0.07);
 }
 
-.history-plate-no {
+.plate-no {
   font-family: var(--font-latin);
-  font-size: 15px;
+  font-style: italic;
+  font-size: 16px;
   color: var(--vermillion-deep);
   width: 26px;
   flex: none;
 }
 
-.history-thumb {
+.plate-thumb {
   width: 46px;
   height: 46px;
   flex: none;
@@ -438,21 +500,94 @@ body {
   overflow: hidden;
   border: 1px solid var(--hairline);
   background: var(--washi-1);
-}
-
-.history-thumb svg {
-  width: 100%;
-  height: 100%;
   display: block;
 }
 
-.history-desc {
-  font-size: 12.5px;
-  color: var(--ink-soft);
-  line-height: 1.5;
+.plate-thumb svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* SVG の図形がクリックの当たり判定を奪わないようにする（ブラウザ差が出やすい） */
+  pointer-events: none;
 }
 
-/* ---------- 右ページ: 家紋表示 ---------- */
+.plate-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.plate-name {
+  font-size: 14px;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+}
+
+.plate-sub {
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+.plate-book-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: var(--space-step);
+  padding-top: var(--space-tight);
+  border-top: 1px solid var(--hairline-soft);
+}
+
+.plate-book-note {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+.btn-quiet {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 2px 0;
+  font-family: var(--font-jp);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+  cursor: pointer;
+  border-bottom: 1px solid var(--hairline);
+  transition:
+    color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+}
+
+.btn-quiet:hover {
+  color: var(--vermillion-deep);
+  border-bottom-color: var(--vermillion);
+}
+
+.btn-quiet:focus-visible {
+  outline: 2px solid var(--vermillion);
+  outline-offset: 3px;
+}
+
+.btn-quiet.is-danger {
+  color: var(--vermillion-deep);
+  border-bottom-color: var(--vermillion);
+}
+
+.clear-book-confirm {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.clear-book-ask {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+/* ---------- 右丁: 紋 ---------- */
 
 .crest-stage {
   flex: 1;
@@ -460,30 +595,62 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 22px;
-  padding: 12px 0 8px;
+  gap: var(--space-step);
+  padding: 8px 0;
 }
 
+/* 状態が変わっても領域が動かないよう、寸法を先に確保する（FR-500.3） */
 .crest-mount {
-  width: min(360px, 78%);
+  width: min(340px, 76%);
   aspect-ratio: 1 / 1;
-  transition: opacity 200ms ease, transform 200ms ease;
-}
-
-.crest-mount.is-empty {
-  opacity: 0;
-  position: absolute;
-  pointer-events: none;
+  flex: none;
 }
 
 .crest-mount svg {
   width: 100%;
   height: 100%;
   display: block;
-  filter: drop-shadow(0 10px 22px rgba(70, 48, 20, 0.16));
 }
 
-@keyframes crest-appear {
+[data-state="ready"] .crest-mount svg {
+  filter: drop-shadow(0 12px 24px rgba(70, 48, 20, 0.18));
+}
+
+[data-state="empty"] .crest-mount,
+[data-state="error"] .crest-mount {
+  opacity: 0.55;
+}
+
+/* 割り出し中は作図線がゆっくり回る。汎用スピナーではなく作図の所作を見せる */
+@keyframes draft-turn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes draft-breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+[data-state="drafting"] .crest-mount {
+  animation: draft-breathe 1.6s ease-in-out infinite;
+}
+
+[data-state="drafting"] .crest-mount svg {
+  animation: draft-turn 7s linear infinite;
+}
+
+/* 割り出し線の上に墨が入る。これが体験上の主要モーメント（FR-500.2） */
+@keyframes ink-in {
   from {
     opacity: 0;
     transform: scale(0.965);
@@ -494,80 +661,144 @@ body {
   }
 }
 
-.crest-mount.is-updating svg {
-  animation: crest-appear 220ms ease both;
+[data-state="ready"] .crest-mount.is-inked svg {
+  animation: ink-in var(--duration-ink) var(--ease-out) both;
 }
 
-.crest-placeholder-text {
+/* 状態ごとの添え書き。DOM は常に置いたまま表示だけ切り替える */
+.stage-note {
   margin: 0;
   text-align: center;
   font-size: 13.5px;
   line-height: 2;
   color: var(--ink-faint);
-  max-width: 22em;
+  max-width: 24em;
+  display: none;
 }
+
+[data-state="empty"] .stage-note-empty,
+[data-state="drafting"] .stage-note-drafting,
+[data-state="error"] .stage-note-error {
+  display: block;
+}
+
+.stage-note-drafting {
+  font-family: var(--font-latin);
+  font-style: italic;
+  letter-spacing: 0.2em;
+  color: var(--vermillion-deep);
+}
+
+.stage-note-error {
+  color: var(--vermillion-deep);
+  border-top: 1px solid var(--vermillion);
+  border-bottom: 1px solid var(--vermillion);
+  padding: 12px 18px;
+  line-height: 1.8;
+}
+
+.stage-retry {
+  display: none;
+}
+
+[data-state="error"] .stage-retry {
+  display: inline-block;
+}
+
+/* ---------- 紋名と諸元 ---------- */
 
 .crest-caption {
   text-align: center;
-  margin: 4px 0 8px;
+  margin-top: var(--space-tight);
 }
 
-.crest-caption-line {
-  margin: 0 0 6px;
-  font-size: 13.5px;
-  letter-spacing: 0.04em;
+/* この丁でいちばん大きな文字。紋と紋名の落差で階層をつくる */
+.crest-name {
+  margin: 0;
+  font-size: clamp(26px, 3.4vw, 40px);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1.3;
+  /* 紋の真下に置き、字間の余白で紋と地続きに見せる */
+  text-indent: 0.16em;
+}
+
+.crest-spec {
+  margin: var(--space-tight) 0 0;
+  font-size: 12px;
+  letter-spacing: 0.08em;
   color: var(--ink-soft);
 }
 
-#crest-plate-label {
+.crest-seed {
+  margin: 6px 0 0;
   font-family: var(--font-latin);
-  color: var(--vermillion-deep);
-  letter-spacing: 0.14em;
-  font-size: 13px;
-}
-
-.crest-caption-seed {
-  margin: 0;
-  font-size: 12px;
-  color: var(--ink-faint);
   font-style: italic;
-  font-family: var(--font-latin);
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  letter-spacing: 0.04em;
 }
 
-.right-page-footer {
+/* ---------- 奥付（状態表示と落款） ---------- */
+
+.colophon {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 14px;
-  margin-top: 12px;
+  justify-content: space-between;
+  gap: var(--space-step);
+  margin-top: var(--space-block);
+  padding-top: var(--space-step);
+  border-top: 1px solid var(--hairline-soft);
 }
 
-.download-status {
+.colophon-status {
+  margin: 0;
   font-size: 12.5px;
-  color: var(--vermillion-deep);
-  min-height: 1.4em;
+  line-height: 1.7;
   letter-spacing: 0.03em;
+  color: var(--ink-soft);
+  /* 通知が出入りしても奥付の高さが動かないようにする */
+  min-height: 2.4em;
+  flex: 1;
 }
 
-/* 角印風の書き出しボタン */
+.colophon-status[data-tone="success"] {
+  color: var(--vermillion-deep);
+}
 
-.stamp-btn {
+.colophon-status[data-tone="error"] {
+  color: var(--vermillion-deep);
+  border-left: 2px solid var(--vermillion);
+  padding-left: 10px;
+}
+
+/* 落款: 朱文（塗り）と白文（陰刻）を並べる。様式の差で主従を表す */
+.seals {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: none;
+}
+
+.seal {
+  position: relative;
   appearance: none;
   border: none;
   background: transparent;
-  cursor: pointer;
   padding: 0;
-  transform: rotate(-2.2deg);
-  transition: transform 160ms ease;
+  cursor: pointer;
+  transition:
+    transform 160ms var(--ease-out),
+    opacity var(--duration-fast) ease;
 }
 
-.stamp-btn-frame {
+.seal-face {
   display: grid;
   place-items: center;
-  width: 68px;
-  height: 68px;
-  background: var(--vermillion);
-  color: var(--washi-1);
+  font-family: var(--font-latin);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  /* 印面の縁を不揃いにして、押した印のかすれを出す */
   clip-path: polygon(
     3% 6%,
     36% 0%,
@@ -582,84 +813,66 @@ body {
     4% 60%,
     0% 30%
   );
-  box-shadow: inset 0 0 0 1.5px rgba(255, 250, 240, 0.35), 0 8px 18px -8px rgba(156, 44, 34, 0.55);
 }
 
-.stamp-btn-text {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.05em;
-  line-height: 1.3;
-  text-align: center;
+.seal-relief {
+  transform: rotate(-2.2deg);
 }
 
-.stamp-btn:hover:not(:disabled) {
-  transform: rotate(0deg) scale(1.04);
+.seal-relief .seal-face {
+  width: 66px;
+  height: 66px;
+  font-size: 15px;
+  background: var(--vermillion);
+  color: var(--washi-1);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 250, 240, 0.35);
 }
 
-.stamp-btn:active:not(:disabled) {
-  transform: rotate(0deg) scale(0.95);
+.seal-intaglio {
+  transform: rotate(1.6deg);
 }
 
-.stamp-btn:disabled {
+.seal-intaglio .seal-face {
+  width: 54px;
+  height: 54px;
+  font-size: 12.5px;
+  background: var(--washi-1);
+  color: var(--vermillion-deep);
+  box-shadow: inset 0 0 0 2.5px var(--vermillion-deep);
+}
+
+.seal:hover:not(:disabled) {
+  transform: rotate(0deg) scale(1.05);
+}
+
+.seal:active:not(:disabled) {
+  transform: rotate(0deg) scale(0.94);
+}
+
+.seal:disabled {
   cursor: not-allowed;
+  opacity: 0.35;
 }
 
-.stamp-btn:disabled .stamp-btn-frame {
-  background: var(--ink-faint);
-  box-shadow: none;
-}
-
-.stamp-btn:focus-visible {
+.seal:focus-visible {
   outline: 2px solid var(--vermillion-deep);
   outline-offset: 4px;
 }
 
-@keyframes stamp-pulse {
-  from {
-    opacity: 0.55;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(1.9);
-  }
-}
-
-.stamp-btn.is-stamped::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 8px;
-  border: 2px solid var(--vermillion);
-  animation: stamp-pulse 560ms ease-out;
-}
-
-.stamp-btn {
-  position: relative;
-}
-
-/* ---------- エラー・フッター ---------- */
-
-.error-banner {
-  margin: 18px 4px 0;
-  padding: 12px 16px;
-  border: 1px solid var(--vermillion-deep);
-  background: rgba(195, 58, 46, 0.06);
-  color: var(--vermillion-deep);
-  font-size: 13.5px;
-  border-radius: 2px;
-}
+/* ---------- 奥書 ---------- */
 
 .site-footer {
-  margin: 28px 4px 0;
+  margin: var(--space-block) 4px 0;
   font-size: 12px;
   color: var(--ink-faint);
   letter-spacing: 0.02em;
 }
 
-/* ---------- レスポンシブ ---------- */
+.site-footer p {
+  margin: 0;
+}
+
+/* ---------- 折り返し ---------- */
 
 @media (max-width: 900px) {
   .book {
@@ -682,33 +895,82 @@ body {
     background: radial-gradient(ellipse 100% 60% at 50% 50%, rgba(30, 20, 8, 0.32), transparent 72%);
   }
 
-  .page-left,
-  .page-right {
+  .page {
+    min-height: auto;
     border-radius: 0;
     border-right: none;
   }
 
-  .page {
-    padding: 40px 26px 36px;
-    min-height: auto;
+  .page-left {
+    padding: 40px 26px 30px;
+  }
+
+  .page-right {
+    padding: 40px 26px 34px;
+  }
+
+  .page-folio-left {
+    left: 26px;
+  }
+
+  .page-folio-right {
+    right: 26px;
+  }
+
+  .plate-list {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 460px) {
+  #app {
+    padding: 32px 14px 32px;
+  }
+
+  .page-left,
+  .page-right {
+    padding: 36px 18px 28px;
+  }
+
+  .page-folio-left {
+    left: 18px;
+  }
+
+  .page-folio-right {
+    right: 18px;
+  }
+
+  .crest-mount {
+    width: min(280px, 88%);
+  }
+
+  .palette-swatches {
+    flex-wrap: wrap;
+  }
+
+  .colophon {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .plate-book-foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .clear-book-confirm {
+    flex-wrap: wrap;
+    gap: 8px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .crest-mount,
-  .btn-outline,
-  .history-item,
-  .stamp-btn,
-  .palette-swatch {
-    transition: none;
-  }
-
-  .crest-mount.is-updating svg {
-    animation: none;
-  }
-
-  .stamp-btn.is-stamped::after {
-    animation: none;
-    display: none;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }
