@@ -18,6 +18,7 @@
 | QRコードデザインツール | [Pages](https://oplan-development-team.github.io/web-app-factory/qr-code-designer/) | 完成 |
 | オリジナル家紋ジェネレーター「家紋帳」 | [Pages](https://oplan-development-team.github.io/web-app-factory/kamon-generator/) | 完成 |
 | 署名のリボン光跡 | [Pages](https://oplan-development-team.github.io/web-app-factory/signature-ribbon-poster/) | 完成 |
+| クリップボード詩人（Clipboard Poet） | [Pages](https://oplan-development-team.github.io/web-app-factory/clipboard-poet/) | プロトタイプ（採否待ち） |
 | 架空の美術館キャプションジェネレーター | [Pages](https://oplan-development-team.github.io/web-app-factory/museum-caption-generator/) | プロトタイプ（採否待ち） |
 | 声の地層（Voice Strata Poster） | [Pages](https://oplan-development-team.github.io/web-app-factory/voice-strata-poster/) | プロトタイプ（採否待ち） |
 | タイピング心電図 | — （Pages未対応、下記参照） | 保留 |
