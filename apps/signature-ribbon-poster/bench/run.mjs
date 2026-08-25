@@ -33,7 +33,10 @@ function startDevServer() {
 }
 
 const server = await startDevServer();
-const browser = await chromium.launch();
+// Headed, so the canvas is GPU-accelerated. Headless Chromium rasterises canvas
+// in software, where `shadowBlur` is so much slower that the comparison stops
+// describing anything a real user would experience.
+const browser = await chromium.launch({ headless: false });
 const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
 page.on("pageerror", (error) => console.error("page error:", error.message));
 
@@ -54,7 +57,14 @@ for (const points of POINT_COUNTS) {
 
 const round = (value) => Math.round(value * 1000) / 1000;
 
+const gpu = await page.evaluate(() => {
+  const gl = document.createElement("canvas").getContext("webgl");
+  const info = gl?.getExtension("WEBGL_debug_renderer_info");
+  return info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : "unknown";
+});
+
 console.log("");
+console.log(`renderer: ${gpu}`);
 console.log(`viewport width: ${CSS_WIDTH}px CSS, dpr ${await page.evaluate(() => devicePixelRatio)}`);
 console.log(
   `backing store: new ${results[0].newBackingPx.toLocaleString()}px vs prototype ${results[0].legacyBackingPx.toLocaleString()}px ` +
