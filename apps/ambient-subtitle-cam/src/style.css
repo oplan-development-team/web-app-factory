@@ -1,0 +1,572 @@
+/* ==========================================================================
+   Ambient Subtitle Cam — ダークラグジュアリー × フィルムノワール上映室
+   配色: マットブラック + シャンパンゴールド/真鍮 + 差し色REDのRECランプ
+   タイポ: Playfair Display(見出し/字幕的な品格) / IBM Plex Mono(タイムコード・数値)
+           / Inter(操作卓の実用テキスト)
+   ========================================================================== */
+
+:root {
+  --bg: #09080a;
+  --bg-deep: #050405;
+  --panel: #15110d;
+  --panel-alt: #1c1611;
+  --panel-groove: #0e0b08;
+
+  --brass: #8a6d3c;
+  --brass-line: #6b5330;
+  --gold: #c9a668;
+  --gold-bright: #f0dcae;
+  --gold-dim: #7a6238;
+
+  --text: #f3ede0;
+  --text-dim: #b3a68c;
+  --text-faint: #7c7263;
+
+  --rec: #e2453c;
+  --rec-glow: rgba(226, 69, 60, 0.55);
+
+  --font-display: 'Playfair Display', 'Times New Roman', serif;
+  --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
+  --font-ui: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+
+  --radius-sm: 3px;
+  --radius-md: 5px;
+
+  --shadow-deep: 0 40px 70px -30px rgba(0, 0, 0, 0.9);
+  --shadow-inset-brass: inset 0 0 0 1px rgba(201, 166, 104, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 120% 90% at 50% -10%, rgba(60, 46, 24, 0.25), transparent 55%),
+    radial-gradient(ellipse 130% 100% at 50% 110%, rgba(0, 0, 0, 0.7), transparent 60%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* -------------------------------------------------------------------------
+   Marquee (header) — 上映プログラムの表題札のような佇まい
+   ------------------------------------------------------------------------- */
+
+.house {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 48px) clamp(16px, 4vw, 40px) 64px;
+}
+
+.marquee {
+  padding-bottom: 22px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid rgba(138, 109, 60, 0.35);
+}
+
+.marquee__eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: var(--gold);
+  opacity: 0.85;
+  margin-bottom: 10px;
+}
+
+.marquee__title h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(26px, 3.4vw, 40px);
+  letter-spacing: 0.01em;
+  color: var(--gold-bright);
+  text-shadow: 0 2px 24px rgba(201, 166, 104, 0.18);
+}
+
+.marquee__tagline {
+  margin: 10px 0 0;
+  max-width: 62ch;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+/* -------------------------------------------------------------------------
+   Theater layout — 非対称: スクリーン7 : 操作卓3
+   ------------------------------------------------------------------------- */
+
+.theater {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(300px, 380px);
+  gap: clamp(20px, 3vw, 32px);
+  align-items: start;
+}
+
+@media (max-width: 880px) {
+  .theater {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Stage — スクリーン枠
+   ------------------------------------------------------------------------- */
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.screen-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--bg-deep);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-deep), var(--shadow-inset-brass);
+  isolation: isolate;
+}
+
+.screen-frame::after {
+  /* 額縁の真鍮ラインを一段細く重ねる */
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(201, 166, 104, 0.22);
+  pointer-events: none;
+  z-index: 5;
+}
+
+#stage-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+#source-video {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  opacity: 0;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+}
+
+.stage__caption-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Standby overlay (許可前) */
+
+.screen-standby {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  padding: 24px;
+  background:
+    radial-gradient(ellipse at center, rgba(20, 16, 12, 0.55), rgba(0, 0, 0, 0.92) 75%);
+  transition: opacity 0.5s ease;
+}
+
+.screen-standby[hidden] {
+  display: none;
+}
+
+.standby__reel {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px solid var(--brass);
+  border-top-color: var(--gold-bright);
+  animation: reel-spin 2.2s linear infinite;
+  margin-bottom: 4px;
+}
+
+@keyframes reel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.standby__title {
+  font-family: var(--font-mono);
+  letter-spacing: 0.3em;
+  font-size: 12px;
+  color: var(--gold);
+  margin: 0;
+}
+
+.standby__body {
+  margin: 0;
+  max-width: 38ch;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.standby__privacy {
+  margin: 6px 0 0;
+  max-width: 42ch;
+  font-size: 12px;
+  color: var(--text-faint);
+  line-height: 1.6;
+}
+
+.standby__error {
+  margin: 4px 0 0;
+  max-width: 42ch;
+  font-size: 13px;
+  color: #ff9d8f;
+  line-height: 1.6;
+}
+
+/* -------------------------------------------------------------------------
+   Console — 映写室の操作卓
+   ------------------------------------------------------------------------- */
+
+.console {
+  background:
+    repeating-linear-gradient(
+      128deg,
+      rgba(255, 255, 255, 0.012) 0px,
+      rgba(255, 255, 255, 0.012) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    linear-gradient(180deg, var(--panel-alt), var(--panel) 60%, var(--panel-groove));
+  border: 1px solid rgba(138, 109, 60, 0.3);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-deep), var(--shadow-inset-brass);
+  padding: 4px clamp(16px, 2vw, 22px) 18px;
+}
+
+.console__section {
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(138, 109, 60, 0.2);
+}
+
+.console__section:last-child {
+  border-bottom: none;
+}
+
+.console__section--footer {
+  padding-top: 14px;
+}
+
+.console__heading {
+  margin: 0 0 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  color: var(--gold);
+  opacity: 0.9;
+}
+
+.console__hint {
+  margin: -4px 0 10px;
+  font-size: 12px;
+  color: var(--text-faint);
+  line-height: 1.5;
+}
+
+.console__status {
+  min-height: 16px;
+  margin: 10px 0 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gold-bright);
+}
+
+.console__privacy {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--text-faint);
+}
+
+.console__privacy strong {
+  color: var(--text-dim);
+}
+
+/* Mood switch */
+
+.mood-switch {
+  display: flex;
+  gap: 6px;
+  background: var(--panel-groove);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.mood-switch__btn {
+  flex: 1;
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 6px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mood-switch__btn:hover {
+  color: var(--gold-bright);
+}
+
+.mood-switch__btn.is-active {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold) 55%, var(--gold-dim));
+  color: #1a1208;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset, 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.mood-switch__btn:focus-visible,
+.btn:focus-visible,
+input[type='range']:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 2px;
+}
+
+/* Sliders (dials) */
+
+.dial {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.dial:last-of-type {
+  margin-bottom: 10px;
+}
+
+.dial__label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12.5px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.dial__value {
+  font-family: var(--font-mono);
+  color: var(--gold-bright);
+  font-size: 12.5px;
+}
+
+input[type='range'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--brass-line), var(--brass));
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+input[type='range']::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--brass-line), var(--brass));
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #2b2216, #0f0c08 70%);
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 166, 104, 0.12), 0 2px 5px rgba(0, 0, 0, 0.6);
+  transition: box-shadow 0.15s ease;
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #2b2216, #0f0c08 70%);
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 166, 104, 0.12), 0 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+input[type='range']:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(201, 166, 104, 0.22), 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+/* Level meters */
+
+.meter-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.meter {
+  flex: 1;
+  height: 5px;
+  background: var(--panel-groove);
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.meter__fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold-bright));
+  transition: width 0.08s linear;
+}
+
+/* Cue buttons */
+
+.cue-row {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: filter 0.15s ease, transform 0.08s ease, box-shadow 0.15s ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn--cue {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 8px;
+  font-size: 12.5px;
+  color: var(--text);
+  background: linear-gradient(180deg, #241c12, #14100a);
+  border: 1px solid rgba(138, 109, 60, 0.4);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+.btn--cue:hover {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+}
+
+.cue-key {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  border-radius: 50%;
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+}
+
+/* Brass buttons (primary actions) */
+
+.btn--brass {
+  display: block;
+  width: 100%;
+  padding: 11px 14px;
+  font-size: 12.5px;
+  letter-spacing: 0.03em;
+  color: #1a1208;
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold) 55%, var(--gold-dim));
+  border: 1px solid rgba(255, 226, 170, 0.5);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 6px 14px -6px rgba(0, 0, 0, 0.7);
+  margin-bottom: 10px;
+}
+
+.btn--brass:last-child {
+  margin-bottom: 0;
+}
+
+.btn--brass:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn--brass:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.6) brightness(0.55);
+  color: rgba(20, 16, 10, 0.7);
+}
+
+.capture-row {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Recording state pulse on clip button */
+.btn--brass.is-recording {
+  animation: rec-pulse 1s ease-in-out infinite;
+}
+
+@keyframes rec-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.25);
+  }
+}
+
+@media (max-width: 480px) {
+  .cue-row {
+    flex-direction: column;
+  }
+}

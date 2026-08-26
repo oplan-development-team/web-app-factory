@@ -22,6 +22,7 @@
 | 声の地層（Voice Strata Poster） | [Pages](https://oplan-development-team.github.io/web-app-factory/voice-strata-poster/) | プロトタイプ（採否待ち） |
 | レシート詩集ジェネレーター | [Pages](https://oplan-development-team.github.io/web-app-factory/receipt-poem-generator/) | プロトタイプ（採否待ち） |
 | サイアノタイプ・ポスターメーカー | [Pages](https://oplan-development-team.github.io/web-app-factory/cyanotype-poster-maker/) | プロトタイプ（採否待ち） |
+| アンビエント映画字幕オーバーレイ | [Pages](https://oplan-development-team.github.io/web-app-factory/ambient-subtitle-cam/) | プロトタイプ（採否待ち、mainに未マージのためPagesは未デプロイ） |
 | タイピング心電図 | — （Pages未対応、下記参照） | 保留 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
