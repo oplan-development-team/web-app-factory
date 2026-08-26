@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="写真をプルシアンブルーの誤差拡散ハーフトーンに変換し、植物標本ラベル付きのサイアノタイプ風ポスターとして書き出すツール" />
+    <title>サイアノタイプ・ポスターメーカー | Herbarium Archive — Prussian Process</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Special+Elite&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <header class="site-header">
+        <div class="plaque">
+          <p class="plaque-eyebrow">Herbarium Archive — No. VII / Prussian Process</p>
+          <h1 class="plaque-title">サイアノタイプ・ポスターメーカー</h1>
+          <p class="plaque-sub">Cyanotype Specimen Sheet Composer — 全処理はブラウザ内で完結し、画像は外部へ送信されません</p>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="control-rail" aria-label="制作コントロール">
+          <section class="rail-card" id="cardUpload">
+            <h2 class="rail-card__title">01 — 標本の採取<span class="rail-card__title-en">Specimen Intake</span></h2>
+            <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="画像をドラッグ&ドロップ、またはクリックして選択">
+              <p class="dropzone__label">ここに写真をドラッグ&ドロップ</p>
+              <p class="dropzone__sub">または クリックしてファイルを選択（JPEG / PNG）</p>
+              <input type="file" id="fileInput" accept="image/jpeg,image/png" hidden />
+            </div>
+            <p class="field-hint" id="uploadFileName" hidden></p>
+          </section>
+
+          <section class="rail-card" id="cardTone" hidden>
+            <h2 class="rail-card__title">02 — 濃淡の調整<span class="rail-card__title-en">Tonal Register</span></h2>
+            <label class="slider-field">
+              <span class="slider-field__label">コントラスト<output id="outContrast">0</output></span>
+              <input type="range" id="rangeContrast" min="-100" max="100" value="20" step="1" />
+            </label>
+            <label class="slider-field">
+              <span class="slider-field__label">感光しきい値<output id="outThreshold">128</output></span>
+              <input type="range" id="rangeThreshold" min="60" max="200" value="128" step="1" />
+            </label>
+          </section>
+
+          <section class="rail-card" id="cardInk" hidden>
+            <h2 class="rail-card__title">03 — 発色の選択<span class="rail-card__title-en">Ink &amp; Ground</span></h2>
+            <div class="swatch-group" id="inkSwatches" role="radiogroup" aria-label="インクと紙の組み合わせ"></div>
+          </section>
+
+          <section class="rail-card" id="cardTexture" hidden>
+            <h2 class="rail-card__title">04 — 質感の再現<span class="rail-card__title-en">Surface &amp; Wash</span></h2>
+            <label class="slider-field">
+              <span class="slider-field__label">藍液のムラ<output id="outMottle">55</output></span>
+              <input type="range" id="rangeMottle" min="0" max="100" value="55" step="1" />
+            </label>
+            <label class="slider-field">
+              <span class="slider-field__label">紙の繊維目<output id="outGrain">40</output></span>
+              <input type="range" id="rangeGrain" min="0" max="100" value="40" step="1" />
+            </label>
+            <label class="slider-field">
+              <span class="slider-field__label">周辺減光<output id="outVignette">45</output></span>
+              <input type="range" id="rangeVignette" min="0" max="100" value="45" step="1" />
+            </label>
+            <fieldset class="edge-style">
+              <legend>感光域の縁</legend>
+              <label class="radio-pill">
+                <input type="radio" name="edgeStyle" value="straight" />
+                <span>直線マスク</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="edgeStyle" value="rough" checked />
+                <span>ラフな手塗り縁</span>
+              </label>
+            </fieldset>
+          </section>
+
+          <section class="rail-card" id="cardLayout" hidden>
+            <h2 class="rail-card__title">05 — 台紙の形式<span class="rail-card__title-en">Sheet Format</span></h2>
+            <fieldset class="edge-style">
+              <legend>レイアウト</legend>
+              <label class="radio-pill">
+                <input type="radio" name="layout" value="vertical" checked />
+                <span>縦長標本シート</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="layout" value="square" />
+                <span>正方形</span>
+              </label>
+            </fieldset>
+          </section>
+
+          <section class="rail-card" id="cardLabel" hidden>
+            <h2 class="rail-card__title">06 — 標本ラベル<span class="rail-card__title-en">Accession Label</span></h2>
+            <label class="text-field">
+              <span class="text-field__label">学名（イタリック）</span>
+              <input type="text" id="fieldTitle" value="Herbarium Specimen" />
+            </label>
+            <label class="text-field">
+              <span class="text-field__label">和名・通称</span>
+              <input type="text" id="fieldSubtitle" placeholder="例）ヤブツバキ" />
+            </label>
+            <label class="text-field">
+              <span class="text-field__label">採集地</span>
+              <input type="text" id="fieldLocality" placeholder="例）長崎県 出島" />
+            </label>
+            <div class="text-field-row">
+              <label class="text-field">
+                <span class="text-field__label">緯度</span>
+                <input type="text" id="fieldLat" inputmode="decimal" placeholder="35.6812" />
+              </label>
+              <label class="text-field">
+                <span class="text-field__label">経度</span>
+                <input type="text" id="fieldLon" inputmode="decimal" placeholder="139.7671" />
+              </label>
+            </div>
+            <button type="button" class="btn-ghost" id="btnGeolocate">
+              現在地から緯度経度を取得
+            </button>
+            <p class="field-hint" id="geoStatus" role="status" hidden></p>
+            <label class="text-field">
+              <span class="text-field__label">採集日</span>
+              <input type="date" id="fieldDate" />
+            </label>
+            <label class="text-field">
+              <span class="text-field__label">標本番号</span>
+              <input type="text" id="fieldSpecimenNo" />
+            </label>
+          </section>
+
+          <section class="rail-card rail-card--export" id="cardExport" hidden>
+            <h2 class="rail-card__title">07 — 書き出し<span class="rail-card__title-en">Plate Export</span></h2>
+            <fieldset class="edge-style">
+              <legend>解像度倍率</legend>
+              <label class="radio-pill">
+                <input type="radio" name="scale" value="1" />
+                <span>1×</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="scale" value="2" checked />
+                <span>2×</span>
+              </label>
+              <label class="radio-pill">
+                <input type="radio" name="scale" value="3" />
+                <span>3×</span>
+              </label>
+            </fieldset>
+            <button type="button" class="btn-primary" id="btnExport" disabled>
+              高解像度PNGを書き出す
+            </button>
+            <p class="field-hint" id="exportStatus" role="status" hidden></p>
+          </section>
+        </aside>
+
+        <section class="stage" aria-label="プレビュー">
+          <div class="stage-surface">
+            <div class="canvas-frame" id="canvasFrame">
+              <canvas id="previewCanvas" width="900" height="1200"></canvas>
+              <div class="stage-empty" id="stageEmpty">
+                <p class="stage-empty__mark">Plate&nbsp;—&nbsp;Unexposed</p>
+                <p class="stage-empty__body">写真を採取すると、ここにサイアノタイプ標本シートが現れます。</p>
+              </div>
+              <div class="stage-loading" id="stageLoading" hidden>
+                <span class="stage-loading__dot"></span>
+                <span id="stageLoadingText">感光処理中…</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <p>
+          app-factoryパイプラインによる自律生成プロトタイプです。画像処理・ラベル情報はすべてブラウザ内で完結し、外部へは送信されません。
+        </p>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,138 @@
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------- Header: wall plaque, asymmetric, not centered ---------- */
+
+.site-header {
+  padding: var(--space-lg) var(--space-xl) var(--space-md);
+  border-bottom: 1px solid var(--room-line);
+}
+
+.plaque {
+  max-width: 44rem;
+  padding-left: var(--space-md);
+  border-left: 3px solid var(--brass);
+}
+
+.plaque-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brass-bright);
+  margin-bottom: var(--space-xs);
+}
+
+.plaque-title {
+  font-size: var(--text-display);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--room-text);
+}
+
+.plaque-sub {
+  margin-top: var(--space-xs);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--room-text-dim);
+  max-width: 38rem;
+}
+
+/* ---------- Workspace: asymmetric two-pane ---------- */
+
+.workspace {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) 1fr;
+  gap: var(--space-lg);
+  padding: var(--space-lg) var(--space-xl);
+  align-items: start;
+}
+
+.control-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  position: sticky;
+  top: var(--space-lg);
+  max-height: calc(100vh - 2 * var(--space-lg));
+  overflow-y: auto;
+  padding-right: var(--space-xs);
+  scrollbar-width: thin;
+  scrollbar-color: var(--brass-dim) transparent;
+}
+
+.stage {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.stage-surface {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 40%, rgba(0, 0, 0, 0.35), transparent 70%),
+    var(--room-panel);
+  border: 1px solid var(--room-line);
+  border-radius: var(--radius-card);
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.4);
+}
+
+.canvas-frame {
+  position: relative;
+  max-width: 100%;
+  max-height: 74vh;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.25),
+    0 20px 44px rgba(0, 0, 0, 0.45);
+}
+
+.canvas-frame canvas {
+  max-height: 74vh;
+  width: auto;
+  height: auto;
+  background: var(--card-paper);
+}
+
+.stage-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  padding: var(--space-md) var(--space-xl) var(--space-lg);
+  border-top: 1px solid var(--room-line);
+}
+
+.site-footer p {
+  font-size: var(--text-xs);
+  color: var(--room-text-dim);
+  max-width: 56rem;
+}
+
+@media (max-width: 900px) {
+  .workspace {
+    grid-template-columns: 1fr;
+    padding: var(--space-md);
+  }
+
+  .control-rail {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .site-header {
+    padding: var(--space-md);
+  }
+}
