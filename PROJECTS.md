@@ -90,6 +90,8 @@ sdd-managerによる本実装が完了し、mainにマージ済み（[Pagesプ�
 
 既知の制約: 構成の出現比率に偏りあり（`crossed`は鷹の羽のみ、`ring`は菱・目結のみ対応のため構造的に少数）。割り出し表示に最短260msの意図的な待ちあり（`prefers-reduced-motion`では即時）。
 
+**発展版に着手**: ユーザー画像アップロード・投稿・reactionを含むコミュニティサイトへ拡張する案は、継続運用・複数ユーザー管理・継続インフラ費用が前提のため中規模以上と判断し、別リポジトリ `../kamon-composer/`（Vite+React / Supabase）で着手（2026-08-26）。外郭・構成・座標計算ロジックは移植済み。本アプリ（`apps/kamon-generator/`）自体はこのまま完成・独立稼働のアプリとして残る。
+
 ### 署名のリボン光跡（Signature Ribbon Poster）（`apps/signature-ribbon-poster/`）
 
 sdd-managerによる本実装が完了し、mainにマージ済み（[Pagesプレビュー](https://oplan-development-team.github.io/web-app-factory/signature-ribbon-poster/)）。マウス/タッチ/ペンで描いた署名・一筆書きのストロークを、速度に応じて太さと発光の強さが変わる「リボン」として暗い背景に描画し、任意のキャプション（署名者名・日付）付きの一枚のポスターとして高解像度PNGで書き出せるツール。ダークラグジュアリー・スタイル。技術スタックはVite + TypeScript（Canvas 2D API直描画）。
