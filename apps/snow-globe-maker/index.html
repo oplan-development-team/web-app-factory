@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="写真か手描きイラストを封じ込めたガラスのスノードームを、その場で作って揺らせる贈り物メーカー。すべて端末内で完結し、ポストカードとして書き出せます。"
+    />
+    <meta name="theme-color" content="#f7f1e6" />
+    <title>アトリエ・ド・ネージュ | スノードーム・メーカー</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <header class="site-header">
+        <p class="eyebrow">Atelier de Neige — 硝子細工の贈り物工房</p>
+        <h1 class="site-title">スノードーム・メーカー</h1>
+        <p class="site-sub">写真か落書きを閉じ込めて、その場でひとつだけのドームを仕立てます。揺らすと雪が舞います。</p>
+      </header>
+
+      <main class="showroom">
+        <!-- 陳列ニッチ：ドーム本体 -->
+        <section class="display-case" aria-label="スノードームのプレビュー">
+          <div class="niche">
+            <div class="niche-spotlight" aria-hidden="true"></div>
+            <div id="dome-rig" class="dome-rig">
+              <canvas id="dome-canvas" width="440" height="440" aria-label="スノードームのプレビュー。ドラッグして揺らせます"></canvas>
+              <div id="dome-tap-hint" class="dome-tap-hint">ドラッグ、またはタップして揺らす</div>
+            </div>
+            <div id="pedestal" class="pedestal" data-material="gold">
+              <div class="pedestal-top"></div>
+              <div class="pedestal-body"></div>
+              <div class="plaque">
+                <span class="plaque-no">No. 001</span>
+                <span class="plaque-label">Handmade to Order</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="motion-controls">
+            <button id="motion-permission-btn" type="button" class="btn btn-ghost" hidden>
+              端末を振って揺らせるようにする
+            </button>
+            <p id="motion-status" class="motion-status" role="status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <!-- 制作カウンター -->
+        <section class="atelier-counter" aria-label="ドームの中身とつくり方">
+          <div class="counter-tabs" role="tablist" aria-label="シーンの作り方">
+            <button id="tab-photo" class="counter-tab" role="tab" aria-selected="true" aria-controls="panel-photo">写真を入れる</button>
+            <button id="tab-draw" class="counter-tab" role="tab" aria-selected="false" aria-controls="panel-draw">落書きする</button>
+          </div>
+
+          <div id="panel-photo" class="counter-panel" role="tabpanel" aria-labelledby="tab-photo">
+            <label id="dropzone" class="dropzone" for="file-input">
+              <svg class="dropzone-icon" viewBox="0 0 48 48" aria-hidden="true">
+                <rect x="6" y="8" width="36" height="28" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5" />
+                <circle cx="16" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.5" />
+                <path d="M6 30l10-9 8 7 6-5 12 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+              </svg>
+              <span class="dropzone-text">写真をドラッグ、またはタップして選択</span>
+              <span class="dropzone-hint">JPEG / PNG / WebP・処理はすべて端末内で完結します</span>
+            </label>
+            <input id="file-input" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp" />
+            <p id="photo-error" class="field-error" role="alert" hidden></p>
+
+            <div id="photo-editor" class="photo-editor" hidden>
+              <div id="photo-crop-stage" class="photo-crop-stage">
+                <canvas id="photo-crop-canvas" width="400" height="400"></canvas>
+                <div class="crop-mask" aria-hidden="true"></div>
+              </div>
+              <label class="slider-row">
+                <span>ズーム</span>
+                <input id="photo-zoom" type="range" min="1" max="3" step="0.01" value="1" />
+              </label>
+              <p class="field-hint">画像をドラッグして位置を調整できます</p>
+              <button id="photo-change-btn" type="button" class="btn btn-outline btn-small">別の写真を選ぶ</button>
+            </div>
+          </div>
+
+          <div id="panel-draw" class="counter-panel" role="tabpanel" aria-labelledby="tab-draw" hidden>
+            <div class="draw-stage">
+              <canvas id="draw-canvas" width="400" height="400"></canvas>
+            </div>
+            <div class="draw-tools">
+              <div class="tool-group" role="group" aria-label="ブラシの色">
+                <button class="swatch-btn is-active" type="button" data-color="#2E2620" style="--sw:#2E2620" aria-label="黒"></button>
+                <button class="swatch-btn" type="button" data-color="#B23A48" style="--sw:#B23A48" aria-label="赤"></button>
+                <button class="swatch-btn" type="button" data-color="#3E6B52" style="--sw:#3E6B52" aria-label="緑"></button>
+                <button class="swatch-btn" type="button" data-color="#3C5A8A" style="--sw:#3C5A8A" aria-label="青"></button>
+                <button class="swatch-btn" type="button" data-color="#AD8A54" style="--sw:#AD8A54" aria-label="金"></button>
+                <button class="swatch-btn" type="button" data-color="#FFFFFF" style="--sw:#FFFFFF" aria-label="白"></button>
+              </div>
+              <div class="tool-group" role="group" aria-label="道具">
+                <button id="tool-brush" class="tool-btn is-active" type="button" data-tool="brush">ブラシ</button>
+                <button id="tool-eraser" class="tool-btn" type="button" data-tool="eraser">消しゴム</button>
+              </div>
+              <div class="tool-group" role="group" aria-label="スタンプ">
+                <button class="stamp-btn" type="button" data-stamp="⛄">⛄</button>
+                <button class="stamp-btn" type="button" data-stamp="🎄">🎄</button>
+                <button class="stamp-btn" type="button" data-stamp="🏠">🏠</button>
+                <button class="stamp-btn" type="button" data-stamp="⭐">⭐</button>
+                <button class="stamp-btn" type="button" data-stamp="❤️">❤️</button>
+              </div>
+              <button id="draw-clear-btn" type="button" class="btn btn-outline btn-small">全部消す</button>
+            </div>
+          </div>
+
+          <div class="material-picker" role="group" aria-label="台座の素材">
+            <span class="picker-label">台座</span>
+            <button class="material-btn is-active" type="button" data-material="gold">ゴールド</button>
+            <button class="material-btn" type="button" data-material="silver">シルバー</button>
+            <button class="material-btn" type="button" data-material="rosewood">ローズウッド</button>
+          </div>
+
+          <div class="material-picker" role="group" aria-label="舞う粒子のスタイル">
+            <span class="picker-label">中の粒子</span>
+            <button class="particle-btn is-active" type="button" data-particle="snow">雪</button>
+            <button class="particle-btn" type="button" data-particle="glitter">ゴールドグリッター</button>
+            <button class="particle-btn" type="button" data-particle="confetti">紙吹雪</button>
+          </div>
+
+          <button id="export-btn" type="button" class="wax-seal-btn">
+            <span class="wax-seal-btn-inner">
+              <span class="wax-seal-btn-text">ポストカードに<br />書き出す</span>
+            </span>
+          </button>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <p>写真・イラストが端末の外に送信されることはありません。すべての合成はブラウザの中だけで行われます。</p>
+      </footer>
+    </div>
+
+    <!-- ポストカード書き出しモーダル -->
+    <div id="postcard-modal" class="postcard-modal" role="dialog" aria-modal="true" aria-labelledby="postcard-modal-title" hidden>
+      <div class="postcard-modal-backdrop" id="postcard-modal-backdrop"></div>
+      <div class="postcard-modal-panel">
+        <h2 id="postcard-modal-title" class="postcard-modal-title">ポストカードを仕上げる</h2>
+        <label class="postcard-message-field">
+          <span>ひとことメッセージ（任意・40字まで）</span>
+          <input id="postcard-message" type="text" maxlength="40" placeholder="Happy Holidays" />
+        </label>
+        <div class="postcard-preview-frame">
+          <canvas id="postcard-canvas" width="900" height="1350"></canvas>
+        </div>
+        <div class="postcard-modal-actions">
+          <button id="postcard-close-btn" type="button" class="btn btn-ghost">閉じる</button>
+          <button id="postcard-download-btn" type="button" class="btn btn-primary">PNGで保存</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
