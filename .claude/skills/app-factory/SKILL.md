@@ -59,10 +59,11 @@ Workflowの戻り値を鵜呑みにせず、必ず次を行ってから報告す
 1. `apps/<slug>/` が実際に存在し、README・package.json・`deploy.json`等、実装らしい中身が入っているかを確認する（`ls` で十分）
 2. `qaPassed` が `false`、または `verify.overallOk` が `false` の場合は、その旨を隠さずユーザーに伝える（機械的に握りつぶさない）
 3. `PROJECTS.md` の「アイディア」セクションに採用元と同名の項目があれば取り除き、「プロトタイプ」セクション（無ければ「進行中」の直後に新設する）に、タイトル・一言概要・ディレクトリパス・スタイル方向・QA/Verify結果の要約を追記する
-4. `.claude/logs/app-factory/<runId>.md` を `.claude/logs/app-factory/<slug>.md` にリネームする（`git mv`）。後から見返すときにslug名の方が探しやすいための整理で、必須ではないが行っておく
-5. **生成されたブランチはmainに直接マージしてよい**（`git merge --no-ff` 等）。採否の判断そのものはPROJECTS.mdのステータス（「プロトタイプ」＝採否待ち）で表現するものであり、マージの有無とは切り離して扱う方針（マージ＝採用ではない）。マージ後は `origin/main` にpushする。
-6. `apps/<slug>/deploy.json` の `pages` が `true` なら、ルート `README.md` の一覧テーブルに `https://oplan-development-team.github.io/web-app-factory/<slug>/` へのリンクを1行追加する（実際のデプロイはmainへのpushをトリガーに `.github/workflows/pages-deploy.yml` が行う。この場に完了を待つ必要はない）。`pages` が `false` の場合はREADMEに「Pages未対応」の旨だけ一言添える。
-7. ユーザーには、出たアイディア候補（採用されなかったものも含め何が出たか）・採用理由・プロトタイプの場所・QA/Verifyの結果・Pagesプレビューの有無を簡潔に報告する
+4. **生成されたブランチはmainに直接マージしてよい**（`git merge --no-ff` 等）。採否の判断そのものはPROJECTS.mdのステータス（「プロトタイプ」＝採否待ち）で表現するものであり、マージの有無とは切り離して扱う方針（マージ＝採用ではない）。マージ後は `origin/main` にpushする。
+5. `apps/<slug>/deploy.json` の `pages` が `true` なら、ルート `README.md` の一覧テーブルに `https://oplan-development-team.github.io/web-app-factory/<slug>/` へのリンクを1行追加する（実際のデプロイはmainへのpushをトリガーに `.github/workflows/pages-deploy.yml` が行う。この場に完了を待つ必要はない）。`pages` が `false` の場合はREADMEに「Pages未対応」の旨だけ一言添える。
+6. ユーザーには、出たアイディア候補（採用されなかったものも含め何が出たか）・採用理由・プロトタイプの場所・QA/Verifyの結果・Pagesプレビューの有無を簡潔に報告する
+
+**`.claude/logs/app-factory/<runId>.md` のリネームは行わない。** `.claude/` 配下のファイルへの`mv`/`git mv`はClaude Codeの「sensitive file」保護に引っかかり、権限確認プロンプトが出る。対話セッションなら自分で承認すればよいが、Routines等の無人実行では誰も承認できずセッションが`requires_action`のまま永久に停止し、後続のPROJECTS.md追記・マージ・pushが一切行われなくなる（2026-08-25〜26のバッチ実行で3件がこれで停止し、生成物が未コミットのまま失われた）。ログファイル名は`<runId>.md`のまま固定でよい——runIdとslugの対応はログ本文（concept-developerの「結果」行）に残るため、リネームしなくても追跡できる。
 
 ## 制約
 
