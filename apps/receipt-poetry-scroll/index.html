@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>レシート詩集ポスター | Receipt Poetry Scroll</title>
+    <meta
+      name="description"
+      content="行区切りのテキストを貼るだけで、それっぽい値段がつく感熱紙ロール風の一枚詩ポスターに刷り上げるツール。"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,600;1,500&family=DotGothic16&family=Zen+Old+Mincho:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="stage">
+      <header class="stage__intro">
+        <p class="stage__eyebrow">RECEIPT POETRY SCROLL</p>
+        <h1 class="stage__title">レシート詩集ポスター</h1>
+        <p class="stage__lead">
+          買い物リストも、やることリストも。貼ればそれっぽい値段がつく。
+        </p>
+      </header>
+
+      <div class="workspace">
+        <section class="panel" aria-label="入力と操作">
+          <div class="field">
+            <div class="field__label-row">
+              <label for="lines-input">品名になる行を貼り付ける</label>
+              <button id="insert-sample" type="button" class="link-btn">
+                サンプルを試す
+              </button>
+            </div>
+            <textarea
+              id="lines-input"
+              rows="10"
+              placeholder="牛乳&#10;食パン&#10;卵1パック&#10;締め切りを一つ延ばす&#10;自分を許すこと"
+              aria-describedby="lines-help"
+            ></textarea>
+            <p id="lines-help" class="field__help">
+              1行につき1品。空行は自動でスキップされます。
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="store-name-input">店名</label>
+            <div class="store-name-row">
+              <input
+                id="store-name-input"
+                type="text"
+                maxlength="24"
+                autocomplete="off"
+              />
+              <button id="regen-store-name" type="button" class="btn btn--ghost">
+                店名を生成
+              </button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="reroll-prices" type="button" class="btn btn--gold">
+              値段を引き直す
+            </button>
+            <button id="download-png" type="button" class="btn btn--primary" disabled>
+              PNGで刷り上げる
+            </button>
+          </div>
+
+          <p id="status-msg" class="status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="display" aria-label="レシートプレビュー">
+          <div class="spotlight" aria-hidden="true"></div>
+
+          <div class="roll-wrap">
+            <div id="receipt-empty" class="empty-state">
+              <p class="empty-state__title">まだ何も刷られていません</p>
+              <p class="empty-state__body">
+                左のテキストエリアに行を貼り付けると、ここに一枚の詩が繰り出されます。
+              </p>
+            </div>
+
+            <div id="receipt" class="receipt" hidden>
+              <div class="receipt__edge receipt__edge--top" aria-hidden="true"></div>
+              <div class="receipt__body" id="receipt-body"></div>
+              <div class="receipt__edge receipt__edge--bottom" aria-hidden="true"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
