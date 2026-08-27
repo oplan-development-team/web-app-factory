@@ -5,3 +5,10 @@ dist-ssr
 .git
 .gitignore
 README.md
+docs
+tests
+coverage
+test-results
+playwright-report
+playwright.config.ts
+vitest.config.ts
