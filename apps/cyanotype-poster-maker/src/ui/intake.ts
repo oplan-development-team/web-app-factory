@@ -86,7 +86,13 @@ export interface DropzoneNodes {
 export function bindDropzone(nodes: DropzoneNodes, onFile: (file: File) => void): void {
   const { dropzone, fileInput } = nodes;
 
-  dropzone.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('click', (event) => {
+    // ファイル入力はドロップゾーンの内側にあるため、`fileInput.click()` が
+    // 発火させた click がここまで上がってくる。素通しすると同じハンドラが
+    // 再帰的に走り、ファイル選択が二重に開く。
+    if (event.target === fileInput) return;
+    fileInput.click();
+  });
   dropzone.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();

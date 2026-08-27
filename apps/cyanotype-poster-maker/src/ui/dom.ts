@@ -1,7 +1,9 @@
 /** DOM 参照の集約。取得に失敗したら起動時点で分かるようにする。 */
 
 export function el<T extends HTMLElement>(id: string, root: ParentNode = document): T {
-  const found = root.querySelector<T>(`#${CSS.escape(id)}`);
+  // 属性セレクタで引く。`#id` 記法は CSS.escape が要るが、jsdom には
+  // CSS グローバルが無い。属性セレクタなら同じ結果を移植性よく得られる。
+  const found = root.querySelector<T>(`[id="${id}"]`);
   if (!found) throw new Error(`要素が見つかりません: #${id}`);
   return found;
 }
