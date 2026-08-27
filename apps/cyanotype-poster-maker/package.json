@@ -1,15 +1,23 @@
 {
   "name": "cyanotype-poster-maker",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^26.3.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "jsdom": "^28.0.0",
     "typescript": "~6.0.2",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "vitest": "^4.0.0"
   }
 }

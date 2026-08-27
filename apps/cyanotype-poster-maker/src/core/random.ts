@@ -5,7 +5,9 @@
  * for the coherent, organic irregularity this piece needs.
  */
 
-export function mulberry32(seed: number): () => number {
+export type Rng = () => number;
+
+export function mulberry32(seed: number): Rng {
   let a = seed >>> 0;
   return () => {
     a = (a + 0x6d2b79f5) >>> 0;
@@ -14,6 +16,28 @@ export function mulberry32(seed: number): () => number {
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+/** [min, max) の浮動小数 */
+export function randFloat(rng: Rng, min: number, max: number): number {
+  return min + rng() * (max - min);
+}
+
+/** [min, max] の整数 */
+export function randInt(rng: Rng, min: number, max: number): number {
+  return Math.min(max, min + Math.floor(rng() * (max - min + 1)));
+}
+
+/** 配列から 1 つ決定的に選ぶ */
+export function pick<T>(rng: Rng, items: readonly T[]): T {
+  if (items.length === 0) throw new Error('pick: 候補が空です');
+  const index = Math.min(items.length - 1, Math.floor(rng() * items.length));
+  return items[index] as T;
+}
+
+/** -amount 〜 +amount の揺らぎ */
+export function jitter(rng: Rng, amount: number): number {
+  return (rng() * 2 - 1) * amount;
 }
 
 function hash2(x: number, y: number, seed: number): number {

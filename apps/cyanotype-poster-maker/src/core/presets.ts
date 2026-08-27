@@ -24,8 +24,10 @@ export const INK_PRESETS: InkPreset[] = [
   },
 ];
 
+export const DEFAULT_INK_PRESET = INK_PRESETS[0] as InkPreset;
+
 export function getInkPreset(id: string): InkPreset {
-  return INK_PRESETS.find((preset) => preset.id === id) ?? INK_PRESETS[0];
+  return INK_PRESETS.find((preset) => preset.id === id) ?? DEFAULT_INK_PRESET;
 }
 
 interface LayoutSize {
