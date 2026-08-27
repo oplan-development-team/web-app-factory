@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="写真をプルシアンブルーの誤差拡散ハーフトーンに変換し、植物標本ラベル付きのサイアノタイプ風ポスターとして書き出すツール" />
+    <meta
+      name="description"
+      content="写真や所蔵の植物図案をプルシアンブルーの誤差拡散ハーフトーンに変換し、植物標本ラベル付きのサイアノタイプ風ポスターとして書き出すツール"
+    />
     <title>サイアノタイプ・ポスターメーカー | Herbarium Archive — Prussian Process</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,26 +22,70 @@
         <div class="plaque">
           <p class="plaque-eyebrow">Herbarium Archive — No. VII / Prussian Process</p>
           <h1 class="plaque-title">サイアノタイプ・ポスターメーカー</h1>
-          <p class="plaque-sub">Cyanotype Specimen Sheet Composer — 全処理はブラウザ内で完結し、画像は外部へ送信されません</p>
+          <p class="plaque-sub">
+            Cyanotype Specimen Sheet Composer — 全処理はブラウザ内で完結し、画像は外部へ送信されません
+          </p>
         </div>
       </header>
 
       <main class="workspace">
         <aside class="control-rail" aria-label="制作コントロール">
-          <section class="rail-card" id="cardUpload">
+          <section class="rail-card rail-card--intake" id="cardIntake">
             <h2 class="rail-card__title">01 — 標本の採取<span class="rail-card__title-en">Specimen Intake</span></h2>
-            <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="画像をドラッグ&ドロップ、またはクリックして選択">
-              <p class="dropzone__label">ここに写真をドラッグ&ドロップ</p>
-              <p class="dropzone__sub">または クリックしてファイルを選択（JPEG / PNG）</p>
-              <input type="file" id="fileInput" accept="image/jpeg,image/png" hidden />
+
+            <div class="intake-tabs" role="tablist" aria-label="図案の入手先">
+              <button
+                type="button"
+                class="intake-tab is-active"
+                id="tabArchive"
+                role="tab"
+                aria-selected="true"
+                aria-controls="paneArchive"
+              >
+                所蔵標本<em>Archive</em>
+              </button>
+              <button
+                type="button"
+                class="intake-tab"
+                id="tabUpload"
+                role="tab"
+                aria-selected="false"
+                aria-controls="paneUpload"
+                tabindex="-1"
+              >
+                持ち込み<em>Own</em>
+              </button>
             </div>
-            <p class="field-hint" id="uploadFileName" hidden></p>
+
+            <div class="intake-pane" id="paneArchive" role="tabpanel" aria-labelledby="tabArchive">
+              <p class="plate-book__head">Plate Book — Holdings, VI sheets</p>
+              <div class="plate-book" id="plateBook" role="radiogroup" aria-label="所蔵標本の図案"></div>
+              <button type="button" class="btn-ghost" id="btnReseed" disabled>
+                別個体を採取<span class="btn-ghost__en">Re-collect</span>
+              </button>
+              <p class="field-hint" id="archiveStatus" role="status" hidden></p>
+            </div>
+
+            <div class="intake-pane" id="paneUpload" role="tabpanel" aria-labelledby="tabUpload" hidden>
+              <div
+                class="dropzone"
+                id="dropzone"
+                tabindex="0"
+                role="button"
+                aria-label="画像をドラッグ&amp;ドロップ、またはクリックして選択"
+              >
+                <p class="dropzone__label">ここに写真をドラッグ&amp;ドロップ</p>
+                <p class="dropzone__sub">または クリックしてファイルを選択（JPEG / PNG）</p>
+                <input type="file" id="fileInput" accept="image/jpeg,image/png" hidden />
+              </div>
+              <p class="field-hint" id="uploadStatus" role="status" hidden></p>
+            </div>
           </section>
 
           <section class="rail-card" id="cardTone" hidden>
             <h2 class="rail-card__title">02 — 濃淡の調整<span class="rail-card__title-en">Tonal Register</span></h2>
             <label class="slider-field">
-              <span class="slider-field__label">コントラスト<output id="outContrast">0</output></span>
+              <span class="slider-field__label">コントラスト<output id="outContrast">20</output></span>
               <input type="range" id="rangeContrast" min="-100" max="100" value="20" step="1" />
             </label>
             <label class="slider-field">
@@ -98,7 +145,7 @@
             <h2 class="rail-card__title">06 — 標本ラベル<span class="rail-card__title-en">Accession Label</span></h2>
             <label class="text-field">
               <span class="text-field__label">学名（イタリック）</span>
-              <input type="text" id="fieldTitle" value="Herbarium Specimen" />
+              <input type="text" id="fieldTitle" placeholder="Herbarium Specimen" />
             </label>
             <label class="text-field">
               <span class="text-field__label">和名・通称</span>
@@ -118,9 +165,7 @@
                 <input type="text" id="fieldLon" inputmode="decimal" placeholder="139.7671" />
               </label>
             </div>
-            <button type="button" class="btn-ghost" id="btnGeolocate">
-              現在地から緯度経度を取得
-            </button>
+            <button type="button" class="btn-ghost" id="btnGeolocate">現在地から緯度経度を取得</button>
             <p class="field-hint" id="geoStatus" role="status" hidden></p>
             <label class="text-field">
               <span class="text-field__label">採集日</span>
@@ -149,9 +194,7 @@
                 <span>3×</span>
               </label>
             </fieldset>
-            <button type="button" class="btn-primary" id="btnExport" disabled>
-              高解像度PNGを書き出す
-            </button>
+            <button type="button" class="btn-primary" id="btnExport" disabled>高解像度PNGを書き出す</button>
             <p class="field-hint" id="exportStatus" role="status" hidden></p>
           </section>
         </aside>
@@ -159,10 +202,12 @@
         <section class="stage" aria-label="プレビュー">
           <div class="stage-surface">
             <div class="canvas-frame" id="canvasFrame">
-              <canvas id="previewCanvas" width="900" height="1200"></canvas>
+              <canvas id="previewCanvas" width="900" height="1200" data-render-count="0"></canvas>
               <div class="stage-empty" id="stageEmpty">
                 <p class="stage-empty__mark">Plate&nbsp;—&nbsp;Unexposed</p>
-                <p class="stage-empty__body">写真を採取すると、ここにサイアノタイプ標本シートが現れます。</p>
+                <p class="stage-empty__body">
+                  所蔵標本を選ぶか、写真を採取すると、ここにサイアノタイプ標本シートが現れます。
+                </p>
               </div>
               <div class="stage-loading" id="stageLoading" hidden>
                 <span class="stage-loading__dot"></span>
@@ -175,7 +220,8 @@
 
       <footer class="site-footer">
         <p>
-          app-factoryパイプラインによる自律生成プロトタイプです。画像処理・ラベル情報はすべてブラウザ内で完結し、外部へは送信されません。
+          画像処理・図案生成・ラベル情報はすべてブラウザ内で完結し、外部へは送信されません。所蔵標本の図案は
+          Anna Atkins のフォトグラムに倣い、シードから手続き的に生成しています。
         </p>
       </footer>
     </div>
