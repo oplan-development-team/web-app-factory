@@ -21,7 +21,7 @@
 | 架空の美術館キャプションジェネレーター | [Pages](https://oplan-development-team.github.io/web-app-factory/museum-caption-generator/) | プロトタイプ（採否待ち） |
 | 声の地層（Voice Strata Poster） | [Pages](https://oplan-development-team.github.io/web-app-factory/voice-strata-poster/) | プロトタイプ（採否待ち） |
 | レシート詩集ジェネレーター | [Pages](https://oplan-development-team.github.io/web-app-factory/receipt-poem-generator/) | プロトタイプ（採否待ち） |
-| サイアノタイプ・ポスターメーカー | [Pages](https://oplan-development-team.github.io/web-app-factory/cyanotype-poster-maker/) | プロトタイプ（採否待ち） |
+| サイアノタイプ・ポスターメーカー | [Pages](https://oplan-development-team.github.io/web-app-factory/cyanotype-poster-maker/) | 完成 |
 | レシート詩集ポスター（Receipt Poetry Scroll） | [Pages](https://oplan-development-team.github.io/web-app-factory/receipt-poetry-scroll/) | プロトタイプ（採否待ち） |
 | タイピング心電図 | — （Pages未対応、下記参照） | 保留 |
 
