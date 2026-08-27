@@ -1,10 +1,11 @@
+import { type Ctx2D, clamp01, hexToRgba } from './ctx2d';
+
 /**
- * Radial darkening applied over a rectangular region — mimics the
- * uneven light exposure at the edges of a hand-coated print. `strength`
- * is 0..1.
+ * 感光域に対する放射状の暗化（FR-303）。手塗りの印画で縁ほど露光が
+ * 不均一になる様子を模す。`strength` は 0..1。
  */
 export function applyVignette(
-  ctx: CanvasRenderingContext2D,
+  ctx: Ctx2D,
   x: number,
   y: number,
   w: number,
@@ -18,7 +19,7 @@ export function applyVignette(
   const radius = Math.hypot(w, h) / 2;
   const gradient = ctx.createRadialGradient(cx, cy, radius * 0.4, cx, cy, radius);
   gradient.addColorStop(0, 'rgba(0,0,0,0)');
-  gradient.addColorStop(1, hexToRgba(inkColor, 0.55 * strength));
+  gradient.addColorStop(1, hexToRgba(inkColor, 0.55 * clamp01(strength)));
 
   ctx.save();
   ctx.globalCompositeOperation = 'multiply';
@@ -27,8 +28,8 @@ export function applyVignette(
   ctx.restore();
 }
 
-/** A very faint overall page-age darkening toward the sheet's corners. */
-export function applyPageAge(ctx: CanvasRenderingContext2D, width: number, height: number, inkColor: string): void {
+/** 台紙全体にかかる、ごく淡い経年の四隅暗化（FR-305）。 */
+export function applyPageAge(ctx: Ctx2D, width: number, height: number, inkColor: string): void {
   const gradient = ctx.createRadialGradient(
     width / 2,
     height / 2,
@@ -45,12 +46,4 @@ export function applyPageAge(ctx: CanvasRenderingContext2D, width: number, heigh
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, width, height);
   ctx.restore();
-}
-
-function hexToRgba(hex: string, alpha: number): string {
-  const clean = hex.replace('#', '');
-  const r = parseInt(clean.substring(0, 2), 16);
-  const g = parseInt(clean.substring(2, 4), 16);
-  const b = parseInt(clean.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }

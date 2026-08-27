@@ -8,7 +8,7 @@
  * 「収まるまで縮小する」系のロジックがテストを素通りしてしまう。
  */
 
-import type { CanvasFactory, CanvasLike, Ctx2D, GradientLike, ImageDataLike } from '../../src/core/ctx2d';
+import type { CanvasFactory, CanvasLike, Ctx2D, ImageDataLike } from '../../src/core/ctx2d';
 
 export interface DrawCall {
   op: string;
@@ -52,7 +52,8 @@ function initialState(): State {
   };
 }
 
-class FakeGradient implements GradientLike {
+/** CanvasGradient の記録用スタブ。 */
+class FakeGradient {
   readonly stops: Array<{ offset: number; color: string }> = [];
   addColorStop(offset: number, color: string): void {
     this.stops.push({ offset, color });
@@ -265,11 +266,11 @@ export class FakeCtx implements Ctx2D {
     return { width: text.length * size * 0.5 };
   }
 
-  createLinearGradient(): GradientLike {
-    return new FakeGradient();
+  createLinearGradient(): CanvasGradient {
+    return new FakeGradient() as unknown as CanvasGradient;
   }
-  createRadialGradient(): GradientLike {
-    return new FakeGradient();
+  createRadialGradient(): CanvasGradient {
+    return new FakeGradient() as unknown as CanvasGradient;
   }
   createPattern(): CanvasPattern | null {
     return { __fake: 'pattern' } as unknown as CanvasPattern;

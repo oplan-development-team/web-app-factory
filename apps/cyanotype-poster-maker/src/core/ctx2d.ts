@@ -20,10 +20,6 @@ export interface ImageDataLike {
   readonly data: Uint8ClampedArray;
 }
 
-export interface GradientLike {
-  addColorStop(offset: number, color: string): void;
-}
-
 /** キャンバス（本物の HTMLCanvasElement / OffscreenCanvas が適合する） */
 export interface CanvasLike {
   width: number;
@@ -78,8 +74,10 @@ export interface Ctx2D {
   fillText(text: string, x: number, y: number): void;
   measureText(text: string): { width: number };
 
-  createLinearGradient(x0: number, y0: number, x1: number, y1: number): GradientLike;
-  createRadialGradient(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): GradientLike;
+  // 戻り値は DOM の型をそのまま採る。独自の部分型にすると、fillStyle が
+  // 不変（invariant）なプロパティであるために実 context を代入できなくなる。
+  createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient;
+  createRadialGradient(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): CanvasGradient;
   createPattern(image: CanvasLike | CanvasImageSource, repetition: string): CanvasPattern | null;
 
   createImageData(width: number, height: number): ImageDataLike;
