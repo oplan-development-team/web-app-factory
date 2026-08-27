@@ -21,6 +21,9 @@ import {
   wobbleSpine,
 } from './shared';
 
+/** 枝が倒れてよい最大角（ラジアン）。約 63 度。 */
+const MAX_TILT = 1.1;
+
 interface Branch {
   base: Point;
   angle: number;
@@ -56,24 +59,28 @@ function drawBranch(ctx: Ctx2D, branch: Branch, rng: Rng, scale: number, maxDept
       c.lineTo(tip.x, tip.y);
     },
     TONE.rib,
-    Math.max(0.8, width * 0.16),
+    Math.max(0.8, width * 0.2),
     scale * 0.4,
   );
 
   if (depth >= maxDepth) return;
 
-  // 二叉分岐
-  const forks = randInt(rng, 2, 3);
-  const spreadAngle = randFloat(rng, 0.34, 0.62);
-  for (let i = 0; i < forks; i++) {
-    const side = forks === 2 ? (i === 0 ? -1 : 1) : i - 1;
+  // 二叉分岐。名前のとおり必ず 2 本へ割る。3 本以上に割ると、枝どうしが
+  // 重なって全体が一塊の染みに見えてしまう
+  //
+  // 分岐角は深さとともに狭める。一定のまま重ねると角度が累積して枝が
+  // ほぼ水平まで倒れ、描画領域の外へ逃げる（不変条件テストで検出した）
+  const spreadAngle = randFloat(rng, 0.42, 0.66) * (1 - depth * 0.16);
+  for (const side of [-1, 1]) {
+    const nextAngle = angle + side * spreadAngle * randFloat(rng, 0.78, 1.2);
     drawBranch(
       ctx,
       {
         base: tip,
-        angle: angle + side * spreadAngle * randFloat(rng, 0.7, 1.25),
-        length: length * randFloat(rng, 0.55, 0.72),
-        width: width * randFloat(rng, 0.54, 0.68),
+        // 水平を超えて倒れないように留める
+        angle: Math.max(-MAX_TILT, Math.min(MAX_TILT, nextAngle)),
+        length: length * randFloat(rng, 0.7, 0.85),
+        width: width * randFloat(rng, 0.62, 0.74),
         depth: depth + 1,
       },
       rng,
@@ -101,7 +108,7 @@ export const ALGAE: Specimen = {
 
     // 付着器から立ち上がる主軸
     const holdfast: Point = { x: area.x + area.w * randFloat(rng, 0.44, 0.56), y: area.y + area.h * 0.98 };
-    const stipeTop: Point = { x: holdfast.x + area.w * randFloat(rng, -0.06, 0.06), y: area.y + area.h * 0.7 };
+    const stipeTop: Point = { x: holdfast.x + area.w * randFloat(rng, -0.06, 0.06), y: area.y + area.h * 0.8 };
     const stipe = wobbleSpine(holdfast, stipeTop, area.w * randFloat(rng, -0.04, 0.04), 12, rng, area.w * 0.02);
 
     paintOrgan(
@@ -119,9 +126,11 @@ export const ALGAE: Specimen = {
         ctx,
         {
           base: stipeTop,
-          angle: spread * randFloat(rng, 0.26, 0.44),
-          length: area.h * randFloat(rng, 0.2, 0.27),
-          width: area.w * randFloat(rng, 0.075, 0.105),
+          angle: spread * randFloat(rng, 0.3, 0.5),
+          // 葉は細長い披針形にする。幅を取りすぎると隣の枝と癒着して
+          // 分岐の構造が読めなくなる
+          length: area.h * randFloat(rng, 0.2, 0.26),
+          width: area.w * randFloat(rng, 0.042, 0.058),
           depth: 1,
         },
         rng,

@@ -36,14 +36,16 @@ function drawPinna(ctx: Ctx2D, base: Point, tip: Point, halfWidth: number, lobes
   for (let i = 0; i < lobes; i++) {
     const t = 0.12 + (i / lobes) * 0.78;
     const anchor = lerpPoint(base, tip, t);
-    const reach = halfWidth * (1.05 - t * 0.55);
-    const forward = 0.18;
+    const reach = halfWidth * (1.5 - t * 0.75);
+    // 裂片は羽軸から直角ではなく、先端側へ倒して出す。直角に出すと
+    // 櫛の歯のような棘に見えてシダの葉に読めない
+    const forward = 0.55;
     for (const side of [1, -1]) {
       const lobeTip: Point = {
         x: anchor.x + nx * reach * side + (dx / len) * reach * forward,
         y: anchor.y + ny * reach * side + (dy / len) * reach * forward,
       };
-      paintOrgan(ctx, (c) => leafOutline(c, anchor, lobeTip, reach * 0.34, 0.45), TONE.blade, scale * 0.7);
+      paintOrgan(ctx, (c) => leafOutline(c, anchor, lobeTip, reach * 0.3, 0.45), TONE.blade, scale * 0.55);
     }
   }
 
@@ -89,7 +91,7 @@ export const FERN: Specimen = {
       scale * 0.8,
     );
 
-    const pairs = randInt(rng, 11, 15);
+    const pairs = randInt(rng, 12, 16);
     const spread = randFloat(rng, 0.42, 0.52);
 
     for (let i = 0; i < pairs; i++) {
@@ -106,7 +108,9 @@ export const FERN: Specimen = {
         const offsetIndex = Math.min(spine.length - 1, index + (side > 0 ? 0 : 1));
         const from = spine[offsetIndex] as Point;
         const pinnaTip: Point = { x: from.x + length * side, y: from.y - rise };
-        drawPinna(ctx, from, pinnaTip, length * 0.17, lobes, scale);
+        // 羽片の半幅は羽片どうしの間隔より小さくする。太らせると隣と癒着して
+        // 一枚のベタになり、羽状複葉に見えなくなる
+        drawPinna(ctx, from, pinnaTip, length * 0.095, lobes, scale);
       }
     }
   },
