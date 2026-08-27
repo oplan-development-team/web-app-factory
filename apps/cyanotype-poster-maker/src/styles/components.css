@@ -338,17 +338,35 @@ input[type='range']::-moz-range-thumb {
 }
 
 .btn-ghost {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
   background: transparent;
   color: var(--process-ink);
   margin-top: var(--space-xs);
 }
 
-.btn-ghost:hover {
+/* 欧文の添え字（Re-collect など）。和文より一段下げて添える */
+.btn-ghost__en {
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.btn-ghost:hover:not(:disabled) {
   background: rgba(18, 58, 99, 0.08);
+  border-color: var(--brass);
+}
+
+.btn-ghost:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .btn-primary:active:not(:disabled),
-.btn-ghost:active {
+.btn-ghost:active:not(:disabled) {
   transform: translateY(1px);
 }
 

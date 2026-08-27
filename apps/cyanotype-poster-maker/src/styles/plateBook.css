@@ -1,0 +1,236 @@
+/* ---------- Intake tabs: card-catalog divider tabs ----------
+   汎用のセグメンテッドコントロールにはしない。索引カードの上に立つ
+   仕切りタブとして組み、選択中のタブだけがカード面と地続きになる。 */
+
+.intake-tabs {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.intake-tab {
+  flex: 0 1 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 7px 14px 8px;
+  border: 1px solid var(--card-rule);
+  border-bottom: none;
+  background: color-mix(in srgb, var(--card-paper) 82%, var(--card-ink) 18%);
+  color: var(--card-ink-soft);
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  /* 実際の仕切りタブのように、上辺だけわずかに丸める */
+  border-radius: 3px 3px 0 0;
+  transition:
+    background-color var(--duration-fast) var(--ease-out-expo),
+    color var(--duration-fast) var(--ease-out-expo),
+    transform var(--duration-fast) var(--ease-out-expo);
+}
+
+.intake-tab em {
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.62;
+}
+
+.intake-tab:hover {
+  color: var(--card-ink);
+  background: color-mix(in srgb, var(--card-paper) 92%, var(--card-ink) 8%);
+}
+
+.intake-tab.is-active {
+  background: var(--card-paper);
+  color: var(--card-ink);
+  /* カード面と地続きに見せるため、下辺を1px被せる */
+  margin-bottom: -1px;
+  padding-bottom: 9px;
+  box-shadow: 0 -2px 0 var(--brass) inset;
+}
+
+.intake-pane {
+  border-top: 1px solid var(--card-rule);
+  padding-top: var(--space-sm);
+}
+
+/* ---------- Plate book ---------- */
+
+.plate-book__head {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--card-ink-soft);
+  margin-bottom: var(--space-xs);
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--card-rule);
+}
+
+.plate-book {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm) var(--space-xs);
+  margin-bottom: var(--space-sm);
+}
+
+.plate {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  /* 手で貼った標本らしく、1枚ずつわずかに傾ける */
+  transition: transform var(--duration-normal) var(--ease-out-expo);
+}
+
+.plate:nth-child(3n + 1) {
+  transform: rotate(-0.55deg);
+}
+
+.plate:nth-child(3n + 2) {
+  transform: rotate(0.4deg);
+}
+
+.plate:nth-child(3n) {
+  transform: rotate(-0.2deg);
+}
+
+.plate__input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.plate__thumb {
+  display: block;
+  position: relative;
+  padding: 5px;
+  background: var(--card-paper);
+  border: 1px solid var(--card-rule);
+  box-shadow: 0 2px 5px -3px rgba(0, 0, 0, 0.5);
+  transition:
+    box-shadow var(--duration-normal) var(--ease-out-expo),
+    border-color var(--duration-fast);
+}
+
+.plate__thumb canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 真鍮の写真コーナー: 選択中だけ左上・右下に留め具が現れる */
+.plate__thumb::before,
+.plate__thumb::after {
+  content: '';
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--brass);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out-expo);
+  pointer-events: none;
+}
+
+.plate__thumb::before {
+  top: -1px;
+  left: -1px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.plate__thumb::after {
+  right: -1px;
+  bottom: -1px;
+  border-left: none;
+  border-top: none;
+}
+
+.plate:hover {
+  transform: rotate(0deg) translateY(-2px);
+}
+
+.plate:hover .plate__thumb {
+  box-shadow: 0 8px 16px -8px rgba(0, 0, 0, 0.6);
+  border-color: var(--brass-dim);
+}
+
+.plate.is-selected {
+  transform: rotate(0deg);
+}
+
+.plate.is-selected .plate__thumb {
+  border-color: var(--brass);
+  box-shadow:
+    0 0 0 1px var(--brass),
+    0 10px 18px -10px rgba(0, 0, 0, 0.65);
+}
+
+.plate.is-selected .plate__thumb::before,
+.plate.is-selected .plate__thumb::after {
+  opacity: 1;
+}
+
+.plate__input:focus-visible + .plate__thumb {
+  outline: 2px solid var(--brass-bright);
+  outline-offset: 3px;
+}
+
+.plate__meta {
+  display: block;
+  margin-top: 6px;
+  line-height: 1.35;
+}
+
+.plate__no {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.1em;
+  color: var(--card-ink-soft);
+}
+
+.plate__sci {
+  display: block;
+  font-style: italic;
+  font-size: var(--text-sm);
+  color: var(--card-ink);
+}
+
+.plate__jp {
+  display: block;
+  font-size: var(--text-2xs);
+  font-variant: small-caps;
+  color: var(--card-ink-soft);
+}
+
+.plate.is-selected .plate__no {
+  color: var(--process-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plate,
+  .plate__thumb,
+  .intake-tab {
+    transition: none;
+  }
+
+  .plate:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .plate-book {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .intake-tab {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
