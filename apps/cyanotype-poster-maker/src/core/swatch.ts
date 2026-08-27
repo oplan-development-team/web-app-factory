@@ -1,4 +1,4 @@
-import { toLuminance } from './grayscale';
+import { NEUTRAL_EXPOSURE, toLuminance } from './grayscale';
 import { floydSteinberg } from './dither';
 import { drawSpecimen } from '../specimens';
 import { createCanvas, hexToRgb, type Ctx2D } from './ctx2d';
@@ -33,8 +33,8 @@ export function renderSpecimenSwatch(
   const { ctx: sourceCtx } = createCanvas(w, h);
   if (!drawSpecimen(sourceCtx, specimenId, seed, w, h)) return false;
 
-  const luminance = toLuminance(sourceCtx.getImageData(0, 0, w, h), contrast);
-  const bits = floydSteinberg(luminance, w, h, threshold);
+  const luminance = toLuminance(sourceCtx.getImageData(0, 0, w, h), contrast, threshold);
+  const bits = floydSteinberg(luminance, w, h, NEUTRAL_EXPOSURE);
 
   const { canvas: inkCanvas, ctx: inkCtx } = createCanvas(w, h);
   const layer = inkCtx.createImageData(w, h);

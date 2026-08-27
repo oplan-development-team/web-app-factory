@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { contrastFactor, toLuminance } from '../../src/core/grayscale';
+import { NEUTRAL_EXPOSURE, contrastFactor, toLuminance } from '../../src/core/grayscale';
 import { floydSteinberg } from '../../src/core/dither';
 import { coverRect, drawCoverFit } from '../../src/core/coverFit';
 import type { ImageDataLike } from '../../src/core/ctx2d';
@@ -66,6 +66,40 @@ describe('輝度化', () => {
     expect(soft[1] as number).toBeGreaterThan(0);
   });
 
+  it('露光を強めると全体が暗くなる（FR-203.3）', () => {
+    const img = imageOf(
+      [
+        [180, 180, 180],
+        [90, 90, 90],
+      ],
+      2,
+    );
+    const neutral = toLuminance(img, 0, NEUTRAL_EXPOSURE);
+    const longer = toLuminance(img, 0, 195);
+    const shorter = toLuminance(img, 0, 60);
+    expect(longer[0] as number).toBeLessThan(neutral[0] as number);
+    expect(shorter[0] as number).toBeGreaterThan(neutral[0] as number);
+  });
+
+  it('露光の既定値は無変換', () => {
+    const img = imageOf([[200, 200, 200]], 1);
+    expect(toLuminance(img, 0)[0]).toBeCloseTo(toLuminance(img, 0, NEUTRAL_EXPOSURE)[0] as number, 5);
+  });
+
+  it('露光を強めても 0..255 を超えない', () => {
+    const img = imageOf(
+      [
+        [0, 0, 0],
+        [255, 255, 255],
+      ],
+      2,
+    );
+    for (const v of toLuminance(img, 100, 200)) {
+      expect(v).toBeGreaterThanOrEqual(0);
+      expect(v).toBeLessThanOrEqual(255);
+    }
+  });
+
   it('範囲外のコントラストは丸められる', () => {
     expect(contrastFactor(500)).toBe(contrastFactor(100));
     expect(contrastFactor(-500)).toBe(contrastFactor(-100));
@@ -95,10 +129,24 @@ describe('Floyd-Steinberg 誤差拡散', () => {
     expect(white.every((b) => b === 0)).toBe(true);
   });
 
-  it('しきい値を上げるとインク画素が増える', () => {
-    const lum = Float32Array.from({ length: 40 * 40 }, (_, i) => 40 + ((i * 13) % 180));
-    const count = (t: number): number => floydSteinberg(lum, 40, 40, t).reduce((a: number, b) => a + b, 0);
-    expect(count(180)).toBeGreaterThan(count(80));
+  it('出力の濃度は入力の明るさに追従し、しきい値ではほとんど動かない', () => {
+    // 誤差拡散は、はみ出した誤差を隣へ送って帳尻を合わせる仕組みなので、
+    // しきい値をどこへ置いても平均濃度は入力に従う。この性質があるため、
+    // 「感光しきい値」は誤差拡散側ではなく露光量として効かせている
+    // （grayscale.toLuminance の exposure）。
+    const lum = new Float32Array(80 * 80).fill(160);
+    const ratio = (t: number): number => floydSteinberg(lum, 80, 80, t).reduce((a: number, b) => a + b, 0) / lum.length;
+    const expected = 1 - 160 / 255;
+    for (const t of [80, 128, 180]) {
+      expect(ratio(t)).toBeCloseTo(expected, 1);
+    }
+  });
+
+  it('露光で輝度を下げるとインク画素が増える', () => {
+    const bright = new Float32Array(60 * 60).fill(180);
+    const dark = new Float32Array(60 * 60).fill(90);
+    const count = (lum: Float32Array): number => floydSteinberg(lum, 60, 60, 128).reduce((a: number, b) => a + b, 0);
+    expect(count(dark)).toBeGreaterThan(count(bright));
   });
 
   it('中間調のベタは、およそ半分がインクになる', () => {

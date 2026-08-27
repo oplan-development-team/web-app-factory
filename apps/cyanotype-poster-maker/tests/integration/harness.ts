@@ -43,7 +43,7 @@ export async function bootHarness(): Promise<Harness> {
     const ctx = new FakeCtx(this.width || 1, this.height || 1);
     contexts.push(ctx);
     return ctx as unknown as CanvasRenderingContext2D;
-  } as HTMLCanvasElement['getContext'];
+  } as unknown as HTMLCanvasElement['getContext'];
 
   if (!('fonts' in document)) {
     Object.defineProperty(document, 'fonts', {

@@ -1,5 +1,5 @@
 import type { EdgeStyle, LabelFields, LayoutId, LayoutMetrics, PosterSource } from '../types';
-import { toLuminance } from './grayscale';
+import { NEUTRAL_EXPOSURE, toLuminance } from './grayscale';
 import { floydSteinberg } from './dither';
 import { drawCoverFit } from './coverFit';
 import { buildEdgeMask } from './edgeMask';
@@ -110,8 +110,11 @@ function renderImagePlate(ctx: Ctx2D, metrics: LayoutMetrics, inkColor: string, 
   if (!paintSourceTones(sourceCtx, source, params.seed, imageW, imageH)) return;
 
   const imageData = sourceCtx.getImageData(0, 0, imageW, imageH);
-  const luminance = toLuminance(imageData, params.contrast);
-  const bits = floydSteinberg(luminance, imageW, imageH, params.threshold);
+  // しきい値は露光量として輝度側へ効かせる。誤差拡散側のしきい値は中立のまま
+  // にする（誤差の帳尻合わせで濃度が入力に追従するため、そこを動かしても
+  // 見た目がほとんど変わらない）
+  const luminance = toLuminance(imageData, params.contrast, params.threshold);
+  const bits = floydSteinberg(luminance, imageW, imageH, NEUTRAL_EXPOSURE);
 
   const { canvas: maskCanvas, pad } = buildEdgeMask(imageW, imageH, params.edgeStyle, params.seed);
   const layerW = imageW + pad * 2;
