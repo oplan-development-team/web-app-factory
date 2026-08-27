@@ -1,4 +1,6 @@
 import type { LabelFields } from '../types';
+import type { Ctx2D } from '../core/ctx2d';
+import { formatCoordinatePair } from './coordinates';
 
 export interface LabelRect {
   x: number;
@@ -7,15 +9,18 @@ export interface LabelRect {
   height: number;
 }
 
+const SERIF = '"EB Garamond", Georgia, serif';
+const MONO = '"Special Elite", "Courier New", monospace';
+
 /**
- * Renders the herbarium accession label onto the canvas: an italic
- * scientific-name title, a plain-serif common-name subrow, a rule,
- * a small-caps locality line, and a typewriter-mono ledger row for
- * date / coordinates / specimen number. Three deliberate type layers
- * echoing a real specimen sheet's mix of hand-lettering and stamped
- * fields.
+ * 受入ラベルを描く（FR-402）。
+ *
+ * イタリックの学名 → 本文セリフの和名 → 罫 → スモールキャップスの産地 →
+ * タイプライター体の台帳欄（日付 / 座標 / 標本番号）という 3 層の書体対比は、
+ * 実際の標本シートが持つ「手書きと押印の混在」を写したもの。ここは意匠の
+ * 中核なので、実装の都合で層を減らさない（NFR-006）。
  */
-export function drawLabel(ctx: CanvasRenderingContext2D, rect: LabelRect, inkColor: string, fields: LabelFields): void {
+export function drawLabel(ctx: Ctx2D, rect: LabelRect, inkColor: string, fields: LabelFields): void {
   const padX = rect.x;
   const rightX = rect.x + rect.width;
   const centerX = rect.x + rect.width / 2;
@@ -24,22 +29,22 @@ export function drawLabel(ctx: CanvasRenderingContext2D, rect: LabelRect, inkCol
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = inkColor;
 
-  // -- Title: italic serif, scientific-name register --
+  // -- 学名: イタリックセリフ --
   const titleSize = Math.max(14, rect.height * 0.155);
   cursorY += titleSize * 0.72;
   drawFittedTitle(ctx, fields.title, padX, cursorY, rect.width, titleSize);
 
-  // -- Subtitle: plain serif --
+  // -- 和名・通称: 本文セリフ --
   const subtitleSize = Math.max(11, rect.height * 0.072);
   cursorY += subtitleSize * 1.6;
   if (fields.subtitle.trim()) {
-    ctx.font = `400 ${subtitleSize}px "EB Garamond", Georgia, serif`;
+    ctx.font = `400 ${subtitleSize}px ${SERIF}`;
     ctx.fillStyle = inkColor;
     ctx.textAlign = 'left';
     ctx.fillText(clampText(fields.subtitle, 60), padX, cursorY);
   }
 
-  // -- Divider rule --
+  // -- 罫 --
   cursorY += rect.height * 0.1;
   ctx.save();
   ctx.globalAlpha = 0.45;
@@ -51,23 +56,22 @@ export function drawLabel(ctx: CanvasRenderingContext2D, rect: LabelRect, inkCol
   ctx.stroke();
   ctx.restore();
 
-  // -- Locality: small-caps serif --
+  // -- 産地: スモールキャップス --
   cursorY += rect.height * 0.11;
   const localitySize = Math.max(11, rect.height * 0.062);
-  ctx.font = `400 ${localitySize}px "EB Garamond", Georgia, serif`;
+  ctx.font = `400 ${localitySize}px ${SERIF}`;
+  const caps = ctx as Ctx2D & { fontVariantCaps?: string };
   const supportsSmallCaps = 'fontVariantCaps' in ctx;
-  const canvasCtx = ctx as CanvasRenderingContext2D & { fontVariantCaps?: string };
-  if (supportsSmallCaps) canvasCtx.fontVariantCaps = 'small-caps';
+  if (supportsSmallCaps) caps.fontVariantCaps = 'small-caps';
   ctx.fillStyle = inkColor;
   ctx.textAlign = 'left';
   ctx.fillText(clampText(fields.locality.trim() || 'Locality not recorded', 70), padX, cursorY);
-  if (supportsSmallCaps) canvasCtx.fontVariantCaps = 'normal';
+  if (supportsSmallCaps) caps.fontVariantCaps = 'normal';
 
-  // -- Mono ledger field labels --
+  // -- 台帳欄の見出し --
   cursorY += rect.height * 0.155;
   const monoSize = Math.max(9.5, rect.height * 0.05);
-  const fieldLabelSize = monoSize * 0.72;
-  ctx.font = `400 ${fieldLabelSize}px "Special Elite", "Courier New", monospace`;
+  ctx.font = `400 ${monoSize * 0.72}px ${MONO}`;
   ctx.globalAlpha = 0.6;
   ctx.textAlign = 'left';
   ctx.fillText('DATE', padX, cursorY);
@@ -77,20 +81,21 @@ export function drawLabel(ctx: CanvasRenderingContext2D, rect: LabelRect, inkCol
   ctx.fillText('SPECIMEN NO.', rightX, cursorY);
   ctx.globalAlpha = 1;
 
-  // -- Mono ledger values --
+  // -- 台帳欄の値 --
   cursorY += monoSize * 1.3;
-  ctx.font = `400 ${monoSize}px "Special Elite", "Courier New", monospace`;
+  ctx.font = `400 ${monoSize}px ${MONO}`;
   ctx.textAlign = 'left';
   ctx.fillText(formatDate(fields.date), padX, cursorY);
   ctx.textAlign = 'center';
-  ctx.fillText(formatCoords(fields.lat, fields.lon), centerX, cursorY);
+  ctx.fillText(formatCoordinatePair(fields.lat, fields.lon), centerX, cursorY);
   ctx.textAlign = 'right';
   ctx.fillText(clampText(fields.specimenNo.trim() || '—', 22), rightX, cursorY);
   ctx.textAlign = 'left';
 }
 
+/** 幅に収まるまで字送りを詰める。 */
 function drawFittedTitle(
-  ctx: CanvasRenderingContext2D,
+  ctx: Ctx2D,
   rawText: string,
   x: number,
   y: number,
@@ -99,30 +104,23 @@ function drawFittedTitle(
 ): void {
   const value = clampText(rawText.trim() || 'Herbarium Specimen', 80);
   let size = baseSize;
-  ctx.font = `italic 500 ${size}px "EB Garamond", Georgia, serif`;
+  ctx.font = `italic 500 ${size}px ${SERIF}`;
   while (ctx.measureText(value).width > maxWidth && size > baseSize * 0.5) {
     size -= 1;
-    ctx.font = `italic 500 ${size}px "EB Garamond", Georgia, serif`;
+    ctx.font = `italic 500 ${size}px ${SERIF}`;
   }
   ctx.textAlign = 'left';
   ctx.fillText(value, x, y);
 }
 
-function clampText(text: string, max: number): string {
+export function clampText(text: string, max: number): string {
   const trimmed = text.trim();
   if (trimmed.length <= max) return trimmed;
   return `${trimmed.slice(0, max - 1)}…`;
 }
 
-function formatDate(value: string): string {
-  if (!value) return '----.--.--';
-  return value.replaceAll('-', '.');
-}
-
-function formatCoords(lat: string, lon: string): string {
-  const latNum = Number(lat);
-  const lonNum = Number(lon);
-  const latStr = lat.trim() && Number.isFinite(latNum) ? `${Math.abs(latNum).toFixed(4)}°${latNum >= 0 ? 'N' : 'S'}` : '--.----°';
-  const lonStr = lon.trim() && Number.isFinite(lonNum) ? `${Math.abs(lonNum).toFixed(4)}°${lonNum >= 0 ? 'E' : 'W'}` : '--.----°';
-  return `${latStr}, ${lonStr}`;
+/** 未入力は伏字で埋め、レイアウトを崩さない（FR-403）。 */
+export function formatDate(value: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) return '----.--.--';
+  return value.trim().replaceAll('-', '.');
 }

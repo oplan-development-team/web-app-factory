@@ -60,6 +60,16 @@ class FakeGradient {
   }
 }
 
+/** 画素バッファの指紋（FNV-1a）。 */
+function checksum(data: Uint8ClampedArray): number {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < data.length; i++) {
+    hash ^= data[i] ?? 0;
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return hash >>> 0;
+}
+
 /** 現在のパスの通過点。図形が領域に収まっているかの検証に使う。 */
 export interface PathBounds {
   minX: number;
@@ -279,11 +289,30 @@ export class FakeCtx implements Ctx2D {
   createImageData(width: number, height: number): ImageDataLike {
     return { width, height, data: new Uint8ClampedArray(width * height * 4) };
   }
+  /**
+   * フェイクは実際にラスタライズしないので、そのまま返すと全画素 0 になり、
+   * 輝度が一様になってしまう。それだと下流（コントラスト・しきい値・誤差拡散）が
+   * 入力によらず同じ結果を返し、パイプラインの結線を検証できない。
+   * 位置から決定的に決まる合成画像を返して、下流を実際に働かせる。
+   */
   getImageData(_x: number, _y: number, w: number, h: number): ImageDataLike {
-    return { width: w, height: h, data: new Uint8ClampedArray(w * h * 4) };
+    const data = new Uint8ClampedArray(w * h * 4);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const idx = (y * w + x) * 4;
+        const value = (Math.imul(x * 374761393 + y * 668265263, 1274126177) >>> 24) & 0xff;
+        data[idx] = value;
+        data[idx + 1] = value;
+        data[idx + 2] = value;
+        data[idx + 3] = 255;
+      }
+    }
+    return { width: w, height: h, data };
   }
   putImageData(data: ImageDataLike, x: number, y: number): void {
-    this.record('putImageData', [data.width, data.height, x, y]);
+    // 画素の中身まで指紋に含める。寸法だけを記録すると、しきい値や
+    // コントラストの変更のように「画素だけが変わる」差分が検出できない。
+    this.record('putImageData', [data.width, data.height, x, y, checksum(data.data)]);
   }
 
   drawImage(image: CanvasLike | CanvasImageSource, ...rest: number[]): void {
@@ -321,6 +350,24 @@ export function fakeCanvasFactory(): CanvasFactory {
     const ctx = new FakeCtx(Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
     return { canvas: ctx.canvas, ctx };
   };
+}
+
+/**
+ * 生成されたオフスクリーンのキャンバスをすべて記録するファクトリ。
+ *
+ * 合成パイプラインは、シードに依存する仕事（図案の作図・誤差拡散・縁マスク）を
+ * すべてオフスクリーンで済ませてから 1 回の drawImage で貼る。そのため
+ * 最前面の context だけを見ても差分が出ない。パイプライン全体の差を見るには
+ * 生成されたキャンバスをまとめて比較する必要がある。
+ */
+export function recordingCanvasFactory(): { factory: CanvasFactory; created: FakeCtx[]; signature: () => string } {
+  const created: FakeCtx[] = [];
+  const factory: CanvasFactory = (width, height) => {
+    const ctx = new FakeCtx(Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
+    created.push(ctx);
+    return { canvas: ctx.canvas, ctx };
+  };
+  return { factory, created, signature: () => created.map((c) => c.signature()).join('\n--\n') };
 }
 
 /** `rgb(r, g, b)` から輝度を取り出す（階調範囲の検証に使う） */
