@@ -9,11 +9,13 @@ export function floydSteinberg(luminance: Float32Array, width: number, height: n
 
   for (let y = 0; y < height; y++) {
     const rowStart = y * width;
+    // 行ごとに走査方向を反転する（ブースト・スキャン、FR-203.1）。
+    // 一定方向で流すと誤差が同じ向きに溜まり、斜めの縞として見えてしまう。
     const forward = y % 2 === 0;
     for (let xi = 0; xi < width; xi++) {
       const x = forward ? xi : width - 1 - xi;
       const idx = rowStart + x;
-      const old = buffer[idx];
+      const old = buffer[idx] ?? 0;
       const isInk = old < threshold;
       bits[idx] = isInk ? 1 : 0;
       const error = old - (isInk ? 0 : 255);
@@ -22,12 +24,12 @@ export function floydSteinberg(luminance: Float32Array, width: number, height: n
       const hasNext = forward ? x + 1 < width : x - 1 >= 0;
       const hasPrev = forward ? x - 1 >= 0 : x + 1 < width;
 
-      if (hasNext) buffer[idx + dir] += (error * 7) / 16;
+      if (hasNext) buffer[idx + dir] = (buffer[idx + dir] ?? 0) + (error * 7) / 16;
       if (y + 1 < height) {
         const nextRow = idx + width;
-        if (hasPrev) buffer[nextRow - dir] += (error * 3) / 16;
-        buffer[nextRow] += (error * 5) / 16;
-        if (hasNext) buffer[nextRow + dir] += (error * 1) / 16;
+        if (hasPrev) buffer[nextRow - dir] = (buffer[nextRow - dir] ?? 0) + (error * 3) / 16;
+        buffer[nextRow] = (buffer[nextRow] ?? 0) + (error * 5) / 16;
+        if (hasNext) buffer[nextRow + dir] = (buffer[nextRow + dir] ?? 0) + (error * 1) / 16;
       }
     }
   }
