@@ -1,0 +1,187 @@
+/* ------------------------------------------------------------ section head */
+
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-bottom: var(--space-xs);
+  border-bottom: 3px double var(--rule-strong);
+  margin-bottom: var(--space-lg);
+}
+
+.section-heading__eyebrow {
+  color: var(--ink-mute);
+  margin-bottom: var(--space-2xs);
+}
+
+.section-heading__title {
+  font-size: var(--text-section);
+  letter-spacing: 0.1em;
+}
+
+.section-heading__lede {
+  margin-top: var(--space-2xs);
+  font-size: var(--text-meta);
+  color: var(--ink-mute);
+}
+
+.section-heading__more {
+  flex: none;
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+  white-space: nowrap;
+  padding-bottom: 0.15rem;
+}
+
+/* -------------------------------------------------------------- author line */
+
+.author-line {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.author-mark {
+  flex: none;
+  border-radius: 50%;
+}
+
+.author-line__name {
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.author-line__by {
+  color: var(--ink-mute);
+}
+
+.author-line--lg .author-line__name {
+  font-size: var(--text-card);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------------ category tag */
+
+.category-tag {
+  display: inline-block;
+  padding: 0.16rem 0.55rem;
+  background-color: var(--paper-shade);
+  border: 1px solid var(--rule);
+  font-size: var(--text-micro);
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) var(--ease-ink),
+    color var(--dur-fast) var(--ease-ink),
+    border-color var(--dur-fast) var(--ease-ink);
+}
+
+.category-tag--link:hover,
+.category-tag--link:focus-visible {
+  background-color: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper-light);
+}
+
+/* ------------------------------------------------------------- empty state */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-sm);
+  padding: var(--space-2xl) var(--space-lg);
+  border: 1px solid var(--rule);
+  background-color: #faf5ea;
+}
+
+.empty-state__mark {
+  width: 72px;
+  height: 56px;
+  color: var(--ink-faint);
+  margin-bottom: var(--space-2xs);
+}
+
+.empty-state--alert .empty-state__mark {
+  color: var(--vermilion);
+}
+
+.empty-state__title {
+  font-size: var(--text-title);
+  font-weight: 700;
+}
+
+.empty-state__description {
+  max-width: 32rem;
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+  line-height: 1.9;
+  margin-bottom: var(--space-xs);
+}
+
+/* ================================================================== tags */
+
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.28rem 0.6rem;
+  border: 1px solid var(--rule-strong);
+  background-color: var(--paper-base);
+  font-size: var(--text-micro);
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  transition:
+    background-color var(--dur-fast) var(--ease-ink),
+    color var(--dur-fast) var(--ease-ink),
+    border-color var(--dur-fast) var(--ease-ink);
+}
+
+.tag-chip__hash {
+  color: var(--vermilion);
+}
+
+/* Small text, so it takes the 4.5:1 token rather than the large-text one. */
+.tag-chip__count {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-mute);
+}
+
+.tag-chip:hover,
+.tag-chip:focus-visible {
+  background-color: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper-light);
+}
+
+.tag-chip:hover .tag-chip__hash,
+.tag-chip:focus-visible .tag-chip__hash,
+.tag-chip:hover .tag-chip__count,
+.tag-chip:focus-visible .tag-chip__count {
+  color: var(--paper-shade);
+}
+
+/* --------------------------------------------------------------- category glyph */
+
+.category-glyph {
+  flex: none;
+  color: var(--ink-soft);
+}

@@ -1,0 +1,530 @@
+/* ============================================================ utility bar */
+
+.site-header {
+  position: relative;
+  z-index: 20;
+  padding-top: var(--space-sm);
+}
+
+.utility-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  padding-bottom: var(--space-sm);
+}
+
+.utility-bar__issue,
+.utility-bar__account {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+  min-width: 0;
+}
+
+.utility-bar__weather-glyph {
+  width: 20px;
+  height: 20px;
+  color: var(--ink-soft);
+}
+
+.utility-bar__temp {
+  font-size: var(--text-card);
+  letter-spacing: 0.02em;
+}
+
+.utility-bar__date {
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.utility-bar__divider {
+  width: 1px;
+  height: 1.05em;
+  background-color: var(--rule-strong);
+}
+
+.utility-bar__link {
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- search box */
+
+.search-box {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--rule-strong);
+  background-color: var(--paper-light);
+  transition: border-color var(--dur-fast) var(--ease-ink);
+}
+
+.search-box:focus-within {
+  border-color: var(--ink);
+}
+
+.search-box__input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.4rem 0.7rem;
+  border: 0;
+  background: transparent;
+  font-size: var(--text-meta);
+  letter-spacing: 0.04em;
+}
+
+.search-box__input::placeholder {
+  color: var(--ink-faint);
+}
+
+.search-box__input:focus {
+  outline: none;
+}
+
+/* Cancel the UA search-field affordances so the field stays square. */
+.search-box__input::-webkit-search-decoration,
+.search-box__input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+.search-box__submit {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.1rem;
+  border: 0;
+  border-left: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-ink),
+    color var(--dur-fast) var(--ease-ink);
+}
+
+.search-box__submit svg {
+  width: 17px;
+  height: 17px;
+}
+
+.search-box__submit:hover,
+.search-box__submit:focus-visible {
+  background-color: var(--ink);
+  color: var(--paper-light);
+}
+
+.search-box--header {
+  width: clamp(11rem, 18vw, 16rem);
+  margin-left: var(--space-xs);
+}
+
+/* --------------------------------------------------------------- masthead */
+
+.masthead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg) 0 var(--space-sm);
+}
+
+.masthead__aside {
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+  line-height: 1.9;
+  letter-spacing: 0.06em;
+  animation-delay: 160ms;
+}
+
+.masthead__aside--right {
+  text-align: right;
+}
+
+.masthead__today {
+  color: var(--ink);
+  margin-bottom: var(--space-2xs);
+}
+
+.masthead__today-note {
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+}
+
+.masthead__center {
+  text-align: center;
+  min-width: 0;
+}
+
+.masthead__logo-link {
+  display: inline-block;
+}
+
+.masthead__logo {
+  display: block;
+  font-family: var(--font-black-letter);
+  font-weight: 700;
+  font-size: clamp(2.05rem, 0.55rem + 6.4vw, 5.4rem);
+  line-height: 1.06;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+  color: var(--ink);
+  transition: color var(--dur-mid) var(--ease-ink);
+}
+
+.masthead__logo-link:hover .masthead__logo,
+.masthead__logo-link:focus-visible .masthead__logo {
+  color: var(--vermilion-deep);
+}
+
+.masthead__catch {
+  margin-top: var(--space-2xs);
+  font-size: var(--text-card);
+  letter-spacing: 0.22em;
+  color: var(--ink-soft);
+  animation-delay: 260ms;
+}
+
+.masthead__closing-rule {
+  animation-delay: 340ms;
+}
+
+/* ========================================================== nav band */
+
+/* The band is inset to the text block, so paper stays visible either side —
+   it reads as a printed rule bar rather than a web site chrome strip. */
+.nav-band {
+  position: relative;
+  z-index: 30;
+  margin-top: var(--space-xs);
+}
+
+.nav-band__inner {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 0;
+  background-color: var(--band);
+  background-image: linear-gradient(180deg, #2c2925 0%, #1d1b18 58%, #24211d 100%);
+  box-shadow: 0 3px 0 -1px rgba(33, 31, 28, 0.2);
+}
+
+.nav-band__list {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  margin: 0;
+  min-width: 0;
+}
+
+.nav-band__item + .nav-band__item {
+  border-left: 1px solid rgba(255, 250, 238, 0.17);
+}
+
+.nav-band__item--dropdown {
+  position: relative;
+}
+
+.nav-band__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 100%;
+  padding: 0.8rem clamp(0.7rem, 1.5vw, 1.55rem);
+  border: 0;
+  background: transparent;
+  color: #f0e9da;
+  font-family: inherit;
+  font-size: var(--text-card);
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-ink),
+    color var(--dur-fast) var(--ease-ink);
+}
+
+.nav-band__link:hover,
+.nav-band__link:focus-visible {
+  background-color: rgba(255, 250, 238, 0.12);
+}
+
+/* Current page inverts to paper — the strongest signal on the band. */
+.nav-band__link--current {
+  background-color: var(--paper-light);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.nav-band__link--current:hover,
+.nav-band__link--current:focus-visible {
+  background-color: var(--paper-base);
+}
+
+.nav-band__caret {
+  font-size: 0.7em;
+  transition: transform var(--dur-fast) var(--ease-ink);
+}
+
+.nav-band__caret--open {
+  transform: rotate(180deg);
+}
+
+/* Emphasised action: the only vermilion block on the band. */
+.nav-band__mypage {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  align-self: stretch;
+  padding: 0.8rem clamp(1rem, 2vw, 1.9rem);
+  background-color: var(--vermilion);
+  color: #fdf7ea;
+  font-size: var(--text-card);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  transition: background-color var(--dur-fast) var(--ease-ink);
+}
+
+.nav-band__mypage:hover,
+.nav-band__mypage:focus-visible {
+  background-color: var(--vermilion-deep);
+}
+
+.nav-band__mypage--current {
+  background-color: var(--paper-light);
+  color: var(--vermilion-deep);
+}
+
+/* ------------------------------------------------------------- dropdown */
+
+.nav-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 40;
+  width: min(30rem, 88vw);
+  padding: var(--space-md);
+  background-color: #faf5ea;
+  border: 1px solid var(--band);
+  border-top: 0;
+  box-shadow: 0 10px 0 -6px rgba(33, 31, 28, 0.18);
+  animation: ink-settle var(--dur-fast) var(--ease-ink) both;
+}
+
+.nav-dropdown[hidden] {
+  display: none;
+}
+
+.nav-dropdown__eyebrow {
+  color: var(--ink-mute);
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--space-xs);
+}
+
+.nav-dropdown__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background-color: var(--rule);
+  margin: 0;
+  border: 1px solid var(--rule);
+}
+
+.nav-dropdown__entry {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0.55rem 0.7rem;
+  background-color: var(--paper-light);
+  font-size: var(--text-meta);
+  transition:
+    background-color var(--dur-fast) var(--ease-ink),
+    color var(--dur-fast) var(--ease-ink);
+}
+
+.nav-dropdown__entry:hover,
+.nav-dropdown__entry:focus-visible {
+  background-color: var(--ink);
+  color: var(--paper-light);
+}
+
+.nav-dropdown__entry:hover .category-glyph,
+.nav-dropdown__entry:focus-visible .category-glyph {
+  color: var(--paper-light);
+}
+
+.nav-dropdown__name {
+  flex: 1;
+  min-width: 0;
+  letter-spacing: 0.06em;
+}
+
+.nav-dropdown__count {
+  font-size: var(--text-micro);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-mute);
+}
+
+.nav-dropdown__entry:hover .nav-dropdown__count,
+.nav-dropdown__entry:focus-visible .nav-dropdown__count {
+  color: var(--paper-shade);
+}
+
+/* ============================================================== footer */
+
+.site-footer {
+  margin-top: var(--space-3xl);
+  padding-bottom: var(--space-2xl);
+}
+
+.site-footer__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-xl);
+  padding: var(--space-xl) 0;
+}
+
+.site-footer__logo {
+  font-family: var(--font-black-letter);
+  font-size: 1.9rem;
+  line-height: 1.2;
+}
+
+.site-footer__catch {
+  margin-top: var(--space-2xs);
+  font-size: var(--text-meta);
+  letter-spacing: 0.16em;
+  color: var(--ink-soft);
+}
+
+.site-footer__note {
+  margin-top: var(--space-md);
+  max-width: 34rem;
+  font-size: var(--text-meta);
+  line-height: 1.95;
+  color: var(--ink-mute);
+}
+
+.site-footer__heading {
+  color: var(--ink-mute);
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--space-sm);
+}
+
+.site-footer__links {
+  display: grid;
+  gap: var(--space-2xs);
+  margin: 0;
+  font-size: var(--text-meta);
+  color: var(--ink-soft);
+}
+
+.site-footer__copyright {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  padding-top: var(--space-md);
+  font-size: var(--text-micro);
+  letter-spacing: 0.12em;
+  color: var(--ink-mute);
+}
+
+/* ============================================================ responsive */
+
+@media (max-width: 1023px) {
+  .masthead {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+    gap: var(--space-sm);
+    padding-top: var(--space-md);
+  }
+
+  .masthead__center {
+    order: -1;
+  }
+
+  .masthead__aside--right {
+    text-align: center;
+  }
+
+  .site-footer__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .site-footer__colophon {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 767px) {
+  .utility-bar {
+    gap: var(--space-xs);
+  }
+
+  .utility-bar__account {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .search-box--header {
+    width: 100%;
+    margin-left: 0;
+    margin-top: var(--space-2xs);
+  }
+}
+
+/* The seven band items stop fitting on one line well before the phone
+   breakpoint. Left to wrap on the desktop layout they leave a dead dark gap
+   beside the マイページ block, so switch to the even-width stacked band here. */
+@media (max-width: 960px) {
+  .nav-band__inner {
+    flex-wrap: wrap;
+    gap: 0;
+  }
+
+  .nav-band__list {
+    width: 100%;
+  }
+
+  .nav-band__item {
+    flex: 1 1 auto;
+  }
+
+  .nav-band__link {
+    width: 100%;
+    justify-content: center;
+    padding: 0.7rem 0.75rem;
+    font-size: var(--text-meta);
+  }
+
+  .nav-band__mypage {
+    width: 100%;
+    justify-content: center;
+    padding: 0.7rem;
+    font-size: var(--text-meta);
+  }
+
+  .nav-dropdown {
+    left: auto;
+    right: 0;
+    width: min(26rem, 92vw);
+  }
+}
+
+@media (max-width: 479px) {
+  .nav-dropdown__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .site-footer__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-lg);
+  }
+}

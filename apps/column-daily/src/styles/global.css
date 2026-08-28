@@ -1,0 +1,371 @@
+@import './tokens.css';
+@import './typography.css';
+
+/* ------------------------------------------------------------------ reset */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+ul,
+ol,
+dl,
+dd {
+  margin: 0;
+}
+
+ul[class],
+ol[class] {
+  list-style: none;
+  padding: 0;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* ------------------------------------------------------- paper atmosphere */
+
+body {
+  min-height: 100vh;
+  color: var(--ink);
+  background-color: var(--paper-base);
+  background-image:
+    radial-gradient(ellipse 78% 52% at 50% -4%, rgba(255, 253, 246, 0.95), transparent 68%),
+    radial-gradient(ellipse 58% 48% at 6% 28%, rgba(211, 195, 166, 0.4), transparent 64%),
+    radial-gradient(ellipse 62% 52% at 97% 66%, rgba(203, 186, 156, 0.36), transparent 66%),
+    linear-gradient(177deg, #f7f2e8 0%, #efe8da 46%, #e8e0d0 100%);
+  background-attachment: fixed;
+}
+
+/* Grain + vignette ride above the whole page so every surface reads as the
+   same sheet of stock. Kept faint enough not to touch text contrast. */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+
+body::before {
+  background-image: var(--grain);
+  background-size: 220px 220px;
+  opacity: 0.055;
+  mix-blend-mode: multiply;
+}
+
+body::after {
+  background: radial-gradient(
+    ellipse 96% 88% at 50% 50%,
+    transparent 58%,
+    rgba(92, 74, 48, 0.16) 100%
+  );
+}
+
+/* ------------------------------------------------------------------ layout */
+
+.page-width {
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-inline: clamp(0.85rem, 0.2rem + 2.4vw, 2.25rem);
+}
+
+/* Grid and flex children need this or long words force horizontal scroll. */
+.min-w-0 {
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------- rules */
+
+.rule {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 0;
+}
+
+.rule--strong {
+  border-top-color: var(--rule-strong);
+}
+
+.rule--double {
+  border: 0;
+  border-top: 3px double var(--rule-strong);
+  margin: 0;
+}
+
+.rule--hair {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  opacity: 0.7;
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------- links */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Ink underline that draws in from the left on hover — the house hover. */
+.ink-link {
+  position: relative;
+  display: inline;
+  background-image: linear-gradient(var(--ink), var(--ink));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition: background-size var(--dur-mid) var(--ease-ink);
+}
+
+.ink-link:hover,
+.ink-link:focus-visible {
+  background-size: 100% 1px;
+}
+
+.ink-link--accent {
+  background-image: linear-gradient(var(--vermilion), var(--vermilion));
+}
+
+/* Headline links settle rather than underline: the title shifts to vermilion. */
+.headline-link {
+  transition: color var(--dur-fast) var(--ease-ink);
+}
+
+.headline-link:hover,
+.headline-link:focus-visible {
+  color: var(--vermilion-deep);
+}
+
+/* --------------------------------------------------------------- surfaces */
+
+/* Panels are printed blocks: hairline rules, zero radius, no float shadow.
+   Texture comes from the page-wide overlay only — a second local grain pass
+   stacks two multiplies and turns warm paper grey. */
+.paper-panel {
+  background-color: #faf5ea;
+  border: 1px solid var(--rule);
+}
+
+.paper-panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--paper-shade);
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+.paper-panel__title {
+  font-size: var(--text-section);
+  letter-spacing: 0.08em;
+}
+
+.paper-panel__body {
+  padding: var(--space-md);
+}
+
+/* --------------------------------------------------------------- controls */
+
+.press-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: 0.55rem 1.35rem;
+  border: 1px solid var(--band);
+  border-radius: 0;
+  background-color: var(--band);
+  color: var(--paper-light);
+  font-family: inherit;
+  font-size: var(--text-meta);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  /* Pressed into the sheet, never floated above it. */
+  transition:
+    transform var(--dur-fast) var(--ease-press),
+    background-color var(--dur-fast) var(--ease-ink);
+}
+
+.press-button:hover,
+.press-button:focus-visible {
+  background-color: var(--vermilion-deep);
+  border-color: var(--vermilion-deep);
+}
+
+.press-button:active {
+  transform: translate3d(0, 1px, 0);
+}
+
+.press-button--accent {
+  background-color: var(--vermilion);
+  border-color: var(--vermilion);
+}
+
+.press-button--ghost {
+  background-color: transparent;
+  color: var(--ink);
+  border-color: var(--rule-strong);
+}
+
+.press-button--ghost:hover,
+.press-button--ghost:focus-visible {
+  background-color: var(--ink);
+  color: var(--paper-light);
+  border-color: var(--ink);
+}
+
+.field-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 0;
+  background-color: var(--paper-light);
+  color: var(--ink);
+  font-size: var(--text-body);
+  transition: border-color var(--dur-fast) var(--ease-ink);
+}
+
+.field-input:hover {
+  border-color: var(--ink-faint);
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.field-input[aria-invalid='true'] {
+  border-color: var(--vermilion);
+  background-color: var(--vermilion-wash);
+}
+
+/* ------------------------------------------------------------------ focus */
+
+:focus-visible {
+  outline: 2px solid var(--vermilion);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-md);
+  top: 0;
+  z-index: 150;
+  padding: 0.5rem 1rem;
+  background-color: var(--band);
+  color: var(--paper-light);
+  font-size: var(--text-meta);
+  letter-spacing: 0.1em;
+  transform: translate3d(0, -140%, 0);
+  transition: transform var(--dur-fast) var(--ease-ink);
+}
+
+.skip-link:focus-visible {
+  transform: translate3d(0, 0, 0);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ----------------------------------------------------------------- motion */
+
+/* The one memorable moment: the front page comes off the press. */
+@keyframes ink-settle {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes rule-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes plate-press {
+  from {
+    opacity: 0;
+    transform: scale(1.012);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.print-in {
+  animation: ink-settle var(--dur-slow) var(--ease-ink) both;
+}
+
+.draw-rule {
+  transform-origin: left center;
+  animation: rule-draw var(--dur-slow) var(--ease-ink) both;
+}
+
+.plate-in {
+  animation: plate-press var(--dur-slow) var(--ease-ink) both;
+}
+
+/* Route changes get a short settle so the page does not snap. */
+.route-fade {
+  animation: ink-settle var(--dur-mid) var(--ease-ink) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

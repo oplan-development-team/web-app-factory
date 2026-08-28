@@ -1,0 +1,195 @@
+.article-page__header {
+  padding-bottom: var(--space-lg);
+  border-bottom: 3px double var(--rule-strong);
+}
+
+.article-page__tagline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.article-page__series-badge {
+  font-size: var(--text-micro);
+  letter-spacing: 0.1em;
+  color: var(--vermilion-deep);
+  padding: 0.16rem 0.5rem;
+  border: 1px solid currentColor;
+}
+
+.article-page__title {
+  font-size: var(--text-display);
+  line-height: 1.5;
+  letter-spacing: 0.015em;
+  text-wrap: pretty;
+}
+
+.article-page__dateline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+/* ------------------------------------------------------------------ figure */
+
+.article-page__figure {
+  margin: var(--space-xl) 0 0;
+}
+
+.article-page__caption {
+  margin-top: var(--space-xs);
+  font-size: var(--text-micro);
+  letter-spacing: 0.08em;
+  color: var(--ink-mute);
+  text-align: right;
+}
+
+/* -------------------------------------------------------------------- body */
+
+.article-page__body {
+  margin-top: var(--space-xl);
+  max-width: var(--measure-body);
+}
+
+.article-page__body > p {
+  font-size: var(--text-body);
+  line-height: 2.15;
+  color: var(--ink-soft);
+}
+
+.article-page__body > p + p {
+  margin-top: var(--space-lg);
+}
+
+/* Lifts the opening paragraph out of the body colour. Selector is written to
+   out-specify `.article-page__body > p` on its own rather than with
+   !important, so later overrides stay possible. */
+.article-page__body > p.article-page__lede {
+  font-size: var(--text-card);
+  line-height: 2;
+  color: var(--ink);
+  padding-left: var(--space-md);
+  border-left: 3px solid var(--vermilion);
+}
+
+.article-page__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin: var(--space-xl) 0 0;
+  padding: var(--space-md) 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+/* ------------------------------------------------------------------ author */
+
+.article-page__author {
+  margin-top: var(--space-xl);
+}
+
+.article-page__author-body {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.article-page__author-bio {
+  font-size: var(--text-meta);
+  line-height: 1.95;
+  color: var(--ink-soft);
+}
+
+/* ------------------------------------------------------------------ series */
+
+.article-page__series,
+.article-page__related {
+  margin-top: var(--space-2xl);
+}
+
+.series-nav {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+
+.series-nav__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-xs);
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--text-meta);
+}
+
+.series-nav__item--current {
+  background-color: var(--vermilion-wash);
+}
+
+.series-nav__no {
+  flex: none;
+  font-size: var(--text-micro);
+  letter-spacing: 0.12em;
+  color: var(--ink-mute);
+  width: 4.5em;
+}
+
+.series-nav__title {
+  min-width: 0;
+  color: var(--ink);
+}
+
+.series-nav__now {
+  margin-left: var(--space-2xs);
+  font-size: var(--text-micro);
+  color: var(--vermilion-deep);
+}
+
+/* ----------------------------------------------------------------- related */
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+}
+
+.related-grid > * {
+  padding-inline: var(--space-sm);
+}
+
+.related-grid > *:first-child {
+  padding-inline-start: 0;
+}
+
+.related-grid > *:last-child {
+  padding-inline-end: 0;
+}
+
+.related-grid > * + * {
+  border-left: 1px solid var(--rule);
+}
+
+@media (max-width: 767px) {
+  .related-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-lg);
+  }
+
+  .related-grid > * {
+    padding-inline: 0;
+    padding-bottom: var(--space-lg);
+    border-left: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .related-grid > *:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+}
