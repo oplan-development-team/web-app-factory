@@ -1,0 +1,732 @@
+/* ==========================================================================
+   DEPARTURES — Deadline Departure Board
+   Style direction: Solari-style split-flap board revival (1970s–80s
+   airport / train departure signage). See README.md for the rationale
+   behind the palette, type, and layout decisions below.
+   ========================================================================== */
+
+:root {
+  /* -- Case & panel -- */
+  --case-bg: #0a0c0b;
+  --case-bg-edge: #050605;
+  --panel-bg: #15181700;
+  --bezel: #1f2321;
+  --bezel-highlight: #34382f;
+  --divider: #2a2d2b;
+
+  /* -- Flap surfaces -- */
+  --flap-face-top: #262a28;
+  --flap-face-bottom: #1a1d1c;
+  --flap-shadow: rgba(0, 0, 0, 0.6);
+  --flap-highlight: rgba(255, 255, 255, 0.05);
+  --flap-text: #f1ebda;
+  --flap-text-dim: #8c887c;
+  --flap-blank-bg: #1c1f1e;
+
+  /* -- Amber / status accents -- */
+  --amber: #f2a900;
+  --amber-bright: #ffc84a;
+  --amber-dim: #7a5900;
+  --status-scheduled: #d99b00;
+  --status-boarding: #ffc84a;
+  --status-final: #ff5a3c;
+  --status-departed: #6b6f6b;
+
+  /* -- Type -- */
+  --font-display: 'Oswald', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  /* Oswald/Arial Narrow have no Japanese glyphs; UI copy (form errors, empty
+     state hint, etc.) needs an explicit CJK-capable fallback so it doesn't
+     render as tofu boxes on systems without implicit font substitution. */
+  --font-body: 'Oswald', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic',
+    'Noto Sans JP', Meiryo, system-ui, 'Arial Narrow', Arial, sans-serif;
+
+  /* -- Flap sizing (fluid) -- */
+  --flap-w: clamp(15px, 1.9vw, 28px);
+  --flap-h: calc(var(--flap-w) * 1.34);
+  --flap-font: calc(var(--flap-w) * 0.62);
+  --flap-gap: 2px;
+  --cluster-gap: clamp(10px, 1.6vw, 20px);
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -10%, #14100a 0%, transparent 55%),
+    linear-gradient(180deg, var(--case-bg) 0%, var(--case-bg-edge) 100%);
+  color: var(--flap-text);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* -- Texture overlays: scanlines + grain, decorative only -- */
+.scanline-overlay,
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.scanline-overlay {
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.18) 0px,
+    rgba(0, 0, 0, 0.18) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.35;
+}
+
+.grain-overlay {
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ==========================================================================
+   Board case
+   ========================================================================== */
+
+.board-case {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(16px, 3vw, 40px) clamp(14px, 3vw, 36px) 48px;
+}
+
+/* ==========================================================================
+   Header: title placard + live clock
+   ========================================================================== */
+
+.board-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  margin-bottom: 22px;
+  border-bottom: 3px solid var(--divider);
+}
+
+.board-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.board-title__kicker {
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  color: var(--flap-text-dim);
+  font-weight: 500;
+}
+
+.board-title__main {
+  margin: 2px 0 0;
+  font-size: clamp(28px, 5.4vw, 46px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--flap-text);
+  text-shadow: 0 0 18px rgba(242, 169, 0, 0.12);
+}
+
+.board-title__sub {
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--amber);
+  font-weight: 500;
+}
+
+.board-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.board-clock__flaps {
+  display: flex;
+  gap: var(--flap-gap);
+}
+
+.board-clock__label {
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  color: var(--amber-dim);
+  font-weight: 500;
+}
+
+/* clock flaps render slightly larger than row flaps */
+.board-clock .flap {
+  --flap-w: clamp(20px, 3.4vw, 36px);
+}
+
+.clock-colon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  font-size: clamp(20px, 3vw, 32px);
+  color: var(--amber);
+  font-weight: 700;
+  animation: colon-pulse 2s steps(1) infinite;
+}
+
+@keyframes colon-pulse {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.25; }
+}
+
+/* ==========================================================================
+   Add form — styled like a printed instruction plate below the board
+   ========================================================================== */
+
+.add-form-section {
+  background: linear-gradient(180deg, #14110c, #100e0a);
+  border: 1px solid #2c2419;
+  border-radius: 4px;
+  padding: 16px 18px;
+  margin-bottom: 26px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.add-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field--title {
+  flex: 1 1 220px;
+}
+
+.field--date,
+.field--time {
+  flex: 0 1 150px;
+}
+
+.field label {
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  color: var(--amber);
+  font-weight: 600;
+}
+
+.field__optional {
+  color: var(--flap-text-dim);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+
+.field input {
+  font-family: var(--font-display);
+  background: #0d0f0e;
+  border: 1px solid #33372f;
+  border-radius: 2px;
+  color: var(--flap-text);
+  padding: 9px 10px;
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  color-scheme: dark;
+}
+
+.field input::placeholder {
+  color: #545850;
+  letter-spacing: 0.05em;
+}
+
+.field input:focus-visible {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px rgba(242, 169, 0, 0.18);
+}
+
+.btn-add {
+  font-family: var(--font-display);
+  background: linear-gradient(180deg, #2a2a26, #1a1a17);
+  border: 1px solid var(--amber-dim);
+  color: var(--amber-bright);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  font-size: 13px;
+  padding: 11px 22px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.btn-add:hover {
+  background: linear-gradient(180deg, #33322b, #201f1a);
+  box-shadow: 0 0 0 3px rgba(242, 169, 0, 0.12);
+}
+
+.btn-add:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.btn-add:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.form-error {
+  margin: 10px 2px 0;
+  min-height: 1em;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  color: var(--status-final);
+  font-weight: 500;
+  font-family: var(--font-body);
+}
+
+/* ==========================================================================
+   Column headers
+   ========================================================================== */
+
+.board-columns-header {
+  display: flex;
+  align-items: center;
+  gap: var(--cluster-gap);
+  padding: 0 10px 8px;
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  color: var(--flap-text-dim);
+  font-weight: 500;
+  border-bottom: 1px solid var(--divider);
+  margin-bottom: 4px;
+}
+
+.col--rank { width: 34px; flex-shrink: 0; }
+.col--title { flex: 1 1 auto; min-width: 140px; }
+.col--remain { width: calc(5 * (var(--flap-w) + var(--flap-gap)) + 40px); flex-shrink: 0; }
+.col--due { width: calc(9 * (var(--flap-w) + var(--flap-gap)) + 30px); flex-shrink: 0; }
+.col--status { width: calc(10 * (var(--flap-w) + var(--flap-gap)) + 20px); flex-shrink: 0; }
+.col--del { width: 34px; flex-shrink: 0; }
+
+@media (max-width: 900px) {
+  .board-columns-header { display: none; }
+}
+
+/* ==========================================================================
+   Rows
+   Each row is always exactly two lines: a full-width "head" line (rank +
+   title) and a "meta" line (remaining / due / status / delete) whose
+   contents wrap as whole blocks — never mid-cluster — when space is tight.
+   This keeps the flap tiles themselves from ever having to wrap, which is
+   what previously produced a broken vertical letter stack.
+   ========================================================================== */
+
+.board-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.board-row {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 10px 16px;
+  border-bottom: 1px solid var(--divider);
+  animation: row-enter 0.4s ease both;
+}
+
+.row-line {
+  display: flex;
+  align-items: center;
+  gap: var(--cluster-gap);
+}
+
+.row-line--meta {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+.board-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--status-color, var(--status-scheduled));
+  box-shadow: 0 0 8px 0 var(--status-color, var(--status-scheduled));
+  transition: background 0.3s ease;
+}
+
+@keyframes row-enter {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.board-row.is-departing {
+  animation: row-exit 0.5s ease forwards;
+}
+
+@keyframes row-exit {
+  to { opacity: 0; transform: translateY(4px) scale(0.98); }
+}
+
+.row-rank {
+  width: 34px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--amber-dim);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.row-rank::before {
+  content: "FL";
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--flap-text-dim);
+  display: block;
+}
+
+.flap-cluster {
+  display: flex;
+  gap: var(--flap-gap);
+  flex-shrink: 0;
+}
+
+.cluster-title { flex: 1 1 auto; min-width: 0; }
+
+.cluster-remain-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.cluster-static-label {
+  font-size: 10px;
+  color: var(--amber-dim);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  align-self: center;
+}
+
+.cluster-static-sep {
+  font-size: calc(var(--flap-font) * 0.9);
+  color: var(--flap-text-dim);
+  align-self: center;
+  padding: 0 1px;
+  font-weight: 600;
+}
+
+.cluster-due-group,
+.cluster-status-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-color, var(--status-scheduled));
+  box-shadow: 0 0 6px 1px var(--status-color, var(--status-scheduled));
+  flex-shrink: 0;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.row-delete {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  margin-left: auto;
+  border: 1px solid #3a3d38;
+  background: linear-gradient(180deg, #221f1a, #17150f);
+  color: #b3ab98;
+  border-radius: 2px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
+}
+
+.row-delete:hover {
+  color: var(--status-final);
+  border-color: var(--status-final);
+}
+
+.row-delete:active {
+  transform: translateY(1px);
+}
+
+.row-delete:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Flap tile — the core split-flap mechanism
+   ========================================================================== */
+
+.flap {
+  position: relative;
+  width: var(--flap-w);
+  height: var(--flap-h);
+  perspective: calc(var(--flap-h) * 6);
+  border-radius: 2px;
+  background: var(--flap-blank-bg);
+}
+
+.flap__half,
+.flap__leaf {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  background: linear-gradient(180deg, var(--flap-face-top), var(--flap-face-bottom));
+  backface-visibility: hidden;
+}
+
+.flap__half--top,
+.flap__leaf--front {
+  top: 0;
+  align-items: flex-start;
+  border-radius: 2px 2px 0 0;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 var(--flap-highlight);
+}
+
+.flap__half--bottom,
+.flap__leaf--back {
+  bottom: 0;
+  align-items: flex-start;
+  border-radius: 0 0 2px 2px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+.flap__char {
+  display: block;
+  height: var(--flap-h);
+  line-height: var(--flap-h);
+  font-size: var(--flap-font);
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--flap-text);
+  text-align: center;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+
+.flap__half--top .flap__char,
+.flap__leaf--front .flap__char {
+  margin-top: 0;
+}
+
+.flap__half--bottom .flap__char,
+.flap__leaf--back .flap__char {
+  margin-top: calc(var(--flap-h) * -0.5);
+}
+
+.flap__leaf {
+  transform-style: preserve-3d;
+  z-index: 2;
+  visibility: hidden;
+}
+
+.flap__leaf--front {
+  transform-origin: bottom center;
+  transform: rotateX(0deg);
+}
+
+.flap__leaf--back {
+  transform-origin: top center;
+  transform: rotateX(90deg);
+}
+
+.flap.is-flipping .flap__leaf--front {
+  visibility: visible;
+  animation: flap-front-fold 0.5s cubic-bezier(0.5, 0, 0.75, 0.3) forwards;
+}
+
+.flap.is-flipping .flap__leaf--back {
+  visibility: visible;
+  animation: flap-back-fold 0.5s cubic-bezier(0.25, 0.7, 0.5, 1) forwards;
+  animation-delay: 0.25s;
+}
+
+@keyframes flap-front-fold {
+  0% { transform: rotateX(0deg); box-shadow: none; }
+  100% { transform: rotateX(-90deg); box-shadow: 0 10px 10px -4px var(--flap-shadow); }
+}
+
+@keyframes flap-back-fold {
+  0% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0deg); }
+}
+
+/* Simple split line across every flap face, static top/bottom too */
+.flap::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Blank flap (used for empty-state / departed-out flaps) */
+.flap.is-blank .flap__char {
+  visibility: hidden;
+}
+
+/* Reduced motion: cut the flip to an instant swap */
+@media (prefers-reduced-motion: reduce) {
+  .flap.is-flipping .flap__leaf--front,
+  .flap.is-flipping .flap__leaf--back {
+    animation-duration: 0.001s;
+    animation-delay: 0s;
+  }
+  .board-row,
+  .board-row.is-departing {
+    animation: none !important;
+  }
+}
+
+/* ==========================================================================
+   Status text colour mapping (applied via inline custom property on row)
+   ========================================================================== */
+
+.status-scheduled { --status-color: var(--status-scheduled); }
+.status-boarding { --status-color: var(--status-boarding); }
+.status-final { --status-color: var(--status-final); }
+.status-departed { --status-color: var(--status-departed); }
+
+/* ==========================================================================
+   Empty state
+   ========================================================================== */
+
+.empty-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 10px 32px;
+  text-align: center;
+}
+
+.empty-state.is-visible {
+  display: flex;
+}
+
+.empty-state__flap-row {
+  display: flex;
+  gap: var(--flap-gap);
+}
+
+.empty-state__hint {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--flap-text-dim);
+  font-family: var(--font-body);
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+
+.board-footer {
+  margin-top: 34px;
+  padding-top: 14px;
+  border-top: 1px solid var(--divider);
+  text-align: center;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  color: #4a4d47;
+}
+
+/* ==========================================================================
+   Responsive: stack row content on narrow viewports
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  :root {
+    --flap-w: clamp(12px, 3.4vw, 20px);
+    --cluster-gap: 8px;
+  }
+
+  .board-row {
+    padding: 12px 8px 14px;
+  }
+
+  .cluster-status-group {
+    flex-basis: 100%;
+  }
+
+  .row-delete {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .board-header {
+    align-items: flex-start;
+  }
+
+  .board-clock {
+    align-items: flex-start;
+  }
+
+  .add-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .field--title,
+  .field--date,
+  .field--time {
+    flex: 0 0 auto;
+  }
+
+  .btn-add {
+    width: 100%;
+  }
+}
