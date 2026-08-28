@@ -1,0 +1,33 @@
+.search-page__form {
+  margin-top: var(--space-lg);
+  max-width: 26rem;
+}
+
+.search-box--page .search-box__input {
+  padding: 0.6rem 0.85rem;
+  font-size: var(--text-body);
+}
+
+.search-box--page .search-box__submit {
+  width: 2.7rem;
+}
+
+.search-page__prompt {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.search-page__suggestions {
+  display: grid;
+  gap: var(--space-xs);
+  justify-items: center;
+}
+
+.search-page__suggestions-label {
+  color: var(--ink-mute);
+}
+
+.search-page__tags {
+  justify-content: center;
+  padding: 0;
+}

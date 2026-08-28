@@ -128,6 +128,56 @@
   margin-bottom: var(--space-xs);
 }
 
+/* ================================================================== tags */
+
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.28rem 0.6rem;
+  border: 1px solid var(--rule-strong);
+  background-color: var(--paper-base);
+  font-size: var(--text-micro);
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  transition:
+    background-color var(--dur-fast) var(--ease-ink),
+    color var(--dur-fast) var(--ease-ink),
+    border-color var(--dur-fast) var(--ease-ink);
+}
+
+.tag-chip__hash {
+  color: var(--vermilion);
+}
+
+.tag-chip__count {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-faint);
+}
+
+.tag-chip:hover,
+.tag-chip:focus-visible {
+  background-color: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper-light);
+}
+
+.tag-chip:hover .tag-chip__hash,
+.tag-chip:focus-visible .tag-chip__hash,
+.tag-chip:hover .tag-chip__count,
+.tag-chip:focus-visible .tag-chip__count {
+  color: var(--paper-shade);
+}
+
 /* --------------------------------------------------------------- category glyph */
 
 .category-glyph {

@@ -12,9 +12,13 @@ interface ArticleListRowProps {
 }
 
 export function ArticleListRow({ article, rank }: ArticleListRowProps) {
+  // The rank cell is a real grid column; without a modifier the remaining
+  // children would slide into the wrong tracks on unranked listings.
+  const isRanked = rank !== undefined;
+
   return (
-    <article className="list-row">
-      {rank !== undefined ? (
+    <article className={isRanked ? 'list-row list-row--ranked' : 'list-row'}>
+      {isRanked ? (
         <p className={rank <= 3 ? 'list-row__rank list-row__rank--top' : 'list-row__rank'}>
           {rank}
         </p>

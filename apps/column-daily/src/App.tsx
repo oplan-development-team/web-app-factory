@@ -6,6 +6,7 @@ import { SiteHeader } from './components/layout/SiteHeader';
 import { ArticlePage } from './pages/ArticlePage';
 import { HomePage } from './pages/HomePage';
 import { CategoryPage, LatestPage, PopularPage, TagPage } from './pages/ListingPages';
+import { SearchPage } from './pages/SearchPage';
 import { SeriesPage } from './pages/SeriesPage';
 import './components/layout/layout.css';
 import './components/ui/ui.css';
@@ -26,6 +27,7 @@ function AppRoutes() {
           <Route path="/series" element={<SeriesPage />} />
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/tag/:tag" element={<TagPage />} />
+          <Route path="/search" element={<SearchPage />} />
         </Routes>
       </div>
     </main>
