@@ -1,0 +1,69 @@
+.article-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: var(--paper-shade);
+}
+
+/* A printed plate sits *in* the sheet: hard rule, thin inner margin, no float. */
+.image-plate {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--rule-strong);
+  background-color: var(--paper-shade);
+  padding: 4px;
+}
+
+.image-plate::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(44, 38, 30, 0.22);
+  pointer-events: none;
+}
+
+.image-plate--feature {
+  aspect-ratio: 4 / 3;
+  padding: 7px;
+  /* The one hard offset in the design: a plate pressed onto the page. */
+  box-shadow: 6px 6px 0 rgba(44, 38, 30, 0.13);
+}
+
+.image-plate--card {
+  aspect-ratio: 16 / 10;
+}
+
+.image-plate--row {
+  aspect-ratio: 4 / 3;
+}
+
+.image-plate--thumb {
+  aspect-ratio: 1 / 1;
+  padding: 2px;
+}
+
+.image-plate--thumb::after {
+  inset: 2px;
+}
+
+.image-plate--banner {
+  aspect-ratio: 21 / 9;
+  padding: 7px;
+}
+
+/* Ink deepens slightly when the surrounding link is hovered. */
+.image-plate .article-image {
+  transition: filter var(--dur-mid) var(--ease-ink);
+}
+
+a:hover .image-plate .article-image,
+a:focus-visible .image-plate .article-image {
+  filter: contrast(1.1) brightness(0.95);
+}
+
+@media (max-width: 640px) {
+  .image-plate--feature {
+    box-shadow: 4px 4px 0 rgba(44, 38, 30, 0.13);
+  }
+}
