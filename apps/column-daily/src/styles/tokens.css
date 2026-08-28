@@ -27,11 +27,21 @@
   --rule-strong: #a89d89;
   --band: #211f1c;
   --band-soft: #35312b;
+  --tag-bg: #cabfaf;
 
-  /* --- accent (semantic only: editorial emphasis, rank, current, error) --- */
-  --vermilion: #b8371f;
-  --vermilion-deep: #8f2818;
-  --vermilion-wash: rgba(184, 55, 31, 0.09);
+  /* --- desk frame: the paper "sheet" sits on this, like a mat around a
+     framed print. Sampled from a real vintage-newspaper composite. --- */
+  --frame-deep: #241e18;
+  --frame: #362d24;
+  --frame-light: #57493b;
+
+  /* --- accent (semantic only: editorial emphasis, error). Sampled from the
+     reference composite's "EDITOR'S PICK" ink — an oxblood/brick red, not a
+     bright vermilion. Reserved for this one emphasis role; navigation and
+     ranking use ink, not this accent. --- */
+  --vermilion: #6b1108;
+  --vermilion-deep: #470b05;
+  --vermilion-wash: rgba(107, 17, 8, 0.08);
 
   /* --- spacing: deliberately uneven rhythm, not a uniform 8px march --- */
   --space-3xs: 0.125rem;

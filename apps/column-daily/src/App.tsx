@@ -53,10 +53,12 @@ export default function App() {
       <a className="skip-link" href="#main">
         本文へスキップ
       </a>
-      <SiteHeader />
-      <NavBand />
-      <AppRoutes />
-      <SiteFooter />
+      <div className="site-shell">
+        <SiteHeader />
+        <NavBand />
+        <AppRoutes />
+        <SiteFooter />
+      </div>
     </HashRouter>
   );
 }

@@ -206,9 +206,8 @@
   align-items: stretch;
   justify-content: space-between;
   gap: 0;
-  background-color: var(--band);
-  background-image: linear-gradient(180deg, #2c2925 0%, #1d1b18 58%, #24211d 100%);
-  box-shadow: 0 3px 0 -1px rgba(33, 31, 28, 0.2);
+  background-color: var(--paper-light);
+  border-bottom: 1px solid var(--rule-strong);
 }
 
 .nav-band__list {
@@ -220,7 +219,7 @@
 }
 
 .nav-band__item + .nav-band__item {
-  border-left: 1px solid rgba(255, 250, 238, 0.17);
+  border-left: 1px solid var(--rule);
 }
 
 .nav-band__item--dropdown {
@@ -235,7 +234,7 @@
   padding: 0.8rem clamp(0.7rem, 1.5vw, 1.55rem);
   border: 0;
   background: transparent;
-  color: #f0e9da;
+  color: var(--ink);
   font-family: inherit;
   font-size: var(--text-card);
   letter-spacing: 0.12em;
@@ -248,19 +247,19 @@
 
 .nav-band__link:hover,
 .nav-band__link:focus-visible {
-  background-color: rgba(255, 250, 238, 0.12);
+  background-color: var(--paper-shade);
 }
 
-/* Current page inverts to paper — the strongest signal on the band. */
+/* Current page inverts to ink — the strongest signal on the band. */
 .nav-band__link--current {
-  background-color: var(--paper-light);
-  color: var(--ink);
+  background-color: var(--band);
+  color: var(--paper-light);
   font-weight: 700;
 }
 
 .nav-band__link--current:hover,
 .nav-band__link--current:focus-visible {
-  background-color: var(--paper-base);
+  background-color: var(--band-soft);
 }
 
 .nav-band__caret {
@@ -272,15 +271,15 @@
   transform: rotate(180deg);
 }
 
-/* Emphasised action: the only vermilion block on the band. */
+/* Emphasised action: the same ink block used for the current-page pill. */
 .nav-band__mypage {
   display: inline-flex;
   align-items: center;
   flex: none;
   align-self: stretch;
   padding: 0.8rem clamp(1rem, 2vw, 1.9rem);
-  background-color: var(--vermilion);
-  color: #fdf7ea;
+  background-color: var(--band);
+  color: var(--paper-light);
   font-size: var(--text-card);
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -290,12 +289,12 @@
 
 .nav-band__mypage:hover,
 .nav-band__mypage:focus-visible {
-  background-color: var(--vermilion-deep);
+  background-color: var(--band-soft);
 }
 
 .nav-band__mypage--current {
-  background-color: var(--paper-light);
-  color: var(--vermilion-deep);
+  background-color: var(--paper-shade);
+  color: var(--ink);
 }
 
 /* ------------------------------------------------------------- dropdown */

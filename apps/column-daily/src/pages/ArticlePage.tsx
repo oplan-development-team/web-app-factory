@@ -69,10 +69,10 @@ export function ArticlePage() {
 
         <figure className="article-page__figure">
           <span className="image-plate image-plate--banner">
-            <ArticleImage article={article} screenPitch={1.6} />
+            <ArticleImage article={article} />
           </span>
           <figcaption className="article-page__caption">
-            挿絵はカテゴリーごとの意匠を記事ごとに変えて描いています
+            写真はイメージです（Picsum Photos / Unsplashのフリー素材）
           </figcaption>
         </figure>
 

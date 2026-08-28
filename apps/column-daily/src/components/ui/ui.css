@@ -71,17 +71,17 @@
 
 .category-tag {
   display: inline-block;
-  padding: 0.16rem 0.55rem;
-  background-color: var(--paper-shade);
-  border: 1px solid var(--rule);
+  padding: 0.18rem 0.6rem;
+  background-color: var(--tag-bg);
+  border: 0;
+  border-radius: 2px;
   font-size: var(--text-micro);
-  letter-spacing: 0.1em;
-  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+  color: var(--ink);
   white-space: nowrap;
   transition:
     background-color var(--dur-fast) var(--ease-ink),
-    color var(--dur-fast) var(--ease-ink),
-    border-color var(--dur-fast) var(--ease-ink);
+    color var(--dur-fast) var(--ease-ink);
 }
 
 .category-tag--link:hover,

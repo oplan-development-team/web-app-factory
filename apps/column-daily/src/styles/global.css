@@ -50,8 +50,26 @@ textarea {
 
 /* ------------------------------------------------------- paper atmosphere */
 
+/* The page reads as a printed sheet resting on a desk: a dark mat fills the
+   viewport, and .site-shell is the paper itself — a rounded, shadowed card
+   that holds every surface. Nothing outside .site-shell renders the paper
+   texture, so the frame stays a flat, calm backdrop. */
 body {
   min-height: 100vh;
+  padding: clamp(0.65rem, 0.2rem + 1.8vw, 1.85rem);
+  color: var(--ink);
+  background-color: var(--frame);
+  background-image:
+    radial-gradient(ellipse 70% 60% at 50% 0%, rgba(255, 255, 255, 0.05), transparent 60%),
+    linear-gradient(165deg, var(--frame-light) 0%, var(--frame) 55%, var(--frame-deep) 100%);
+}
+
+.site-shell {
+  position: relative;
+  margin-inline: auto;
+  max-width: 1720px;
+  border-radius: clamp(12px, 1.4vw, 22px);
+  overflow: hidden;
   color: var(--ink);
   background-color: var(--paper-base);
   background-image:
@@ -59,28 +77,30 @@ body {
     radial-gradient(ellipse 58% 48% at 6% 28%, rgba(211, 195, 166, 0.4), transparent 64%),
     radial-gradient(ellipse 62% 52% at 97% 66%, rgba(203, 186, 156, 0.36), transparent 66%),
     linear-gradient(177deg, #f7f2e8 0%, #efe8da 46%, #e8e0d0 100%);
-  background-attachment: fixed;
+  box-shadow:
+    0 32px 60px -22px rgba(15, 12, 9, 0.55),
+    0 2px 0 0 rgba(255, 255, 255, 0.5) inset;
 }
 
-/* Grain + vignette ride above the whole page so every surface reads as the
-   same sheet of stock. Kept faint enough not to touch text contrast. */
-body::before,
-body::after {
+/* Grain + vignette ride above the whole sheet so every surface reads as the
+   same paper stock. Kept faint enough not to touch text contrast. */
+.site-shell::before,
+.site-shell::after {
   content: '';
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 200;
   pointer-events: none;
 }
 
-body::before {
+.site-shell::before {
   background-image: var(--grain);
   background-size: 220px 220px;
   opacity: 0.055;
   mix-blend-mode: multiply;
 }
 
-body::after {
+.site-shell::after {
   background: radial-gradient(
     ellipse 96% 88% at 50% 50%,
     transparent 58%,
