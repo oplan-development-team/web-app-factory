@@ -14,8 +14,13 @@
   /* --- ink --- */
   --ink: #1c1a17;
   --ink-soft: #453f37;
-  --ink-mute: #7a7167;
-  --ink-faint: #9c9284;
+  /* Metadata colour. Measured against the darkest surface it lands on
+     (--paper-shade) it reaches 4.92:1, so small text stays above 4.5:1
+     everywhere. Do not lighten without re-measuring. */
+  --ink-mute: #665d52;
+  /* Reserved for large (>=24px) or decorative marks: 3.45:1 on --paper-shade,
+     which clears the large-text floor but not the small-text one. */
+  --ink-faint: #7f7566;
 
   /* --- structure --- */
   --rule: #c9bfae;

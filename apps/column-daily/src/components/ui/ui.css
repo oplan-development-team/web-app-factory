@@ -159,9 +159,10 @@
   color: var(--vermilion);
 }
 
+/* Small text, so it takes the 4.5:1 token rather than the large-text one. */
 .tag-chip__count {
   font-variant-numeric: tabular-nums;
-  color: var(--ink-faint);
+  color: var(--ink-mute);
 }
 
 .tag-chip:hover,
