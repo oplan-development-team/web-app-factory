@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="手元の写真をSobelエッジ検出とクロスハッチングで銅版画風の線画に変換し、19世紀博物誌図版として書き出せるジェネレーター。画像は端末外に送信されません。"
+    />
+    <meta name="theme-color" content="#1c140c" />
+    <title>標本図鑑プレート・ジェネレーター</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="site-header">
+        <p class="eyebrow">Iconographia Naturalis &mdash; Plate Engine</p>
+        <h1 class="site-title">標本図鑑<br class="title-break" />プレート・ジェネレーター</h1>
+        <p class="site-sub">
+          手元の写真を、19世紀博物誌図版（natural history plate）風の銅版画エングレービングへ。
+        </p>
+      </header>
+
+      <main class="workspace">
+        <section class="preview-column" aria-label="図版プレビュー">
+          <div id="plate-stage" class="plate-stage">
+            <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="標本写真をドラッグ&ドロップ、またはクリックして選択">
+              <svg class="dropzone-icon" viewBox="0 0 48 48" aria-hidden="true">
+                <rect x="6" y="8" width="36" height="28" rx="1" fill="none" stroke="currentColor" stroke-width="1.4" />
+                <circle cx="16" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.4" />
+                <path d="M6 30l10-9 8 7 6-5 12 11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
+              </svg>
+              <p class="dropzone-text">標本写真をここへドロップ<br />または<span class="dropzone-link">クリックして選択</span></p>
+              <p class="dropzone-hint">JPEG / PNG / WebP・1枚のみ・端末内で処理</p>
+            </div>
+            <input id="file-input" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp" />
+
+            <canvas id="plate-canvas" class="plate-canvas" hidden></canvas>
+
+            <div id="processing-overlay" class="processing-overlay" hidden aria-hidden="true">
+              <div class="engrave-spinner" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+              </div>
+              <p class="processing-label">Engraving in progress&hellip;</p>
+            </div>
+          </div>
+
+          <p id="upload-error" class="upload-error" role="alert" hidden></p>
+
+          <div class="preview-toolbar">
+            <button id="change-photo-btn" type="button" class="btn btn-ghost" hidden>別の標本写真を選ぶ</button>
+          </div>
+        </section>
+
+        <aside class="control-column" aria-label="調整パネル">
+          <form id="control-panel" class="control-panel" novalidate>
+            <fieldset class="panel-group" disabled>
+              <legend>I. Incisio &mdash; エングレービング</legend>
+
+              <label class="field-row" for="threshold-slider">
+                <span class="field-label">エッジのしきい値</span>
+                <input id="threshold-slider" type="range" min="0" max="255" step="1" value="60" />
+                <output id="threshold-value" class="field-value" for="threshold-slider">60</output>
+              </label>
+
+              <label class="field-row" for="density-slider">
+                <span class="field-label">ハッチング密度</span>
+                <input id="density-slider" type="range" min="0" max="100" step="1" value="55" />
+                <output id="density-value" class="field-value" for="density-slider">55</output>
+              </label>
+
+              <label class="field-row" for="weight-slider">
+                <span class="field-label">線の濃さ</span>
+                <input id="weight-slider" type="range" min="0" max="100" step="1" value="60" />
+                <output id="weight-value" class="field-value" for="weight-slider">60</output>
+              </label>
+
+              <label class="field-row field-row-toggle" for="invert-toggle">
+                <span class="field-label">線画を反転</span>
+                <input id="invert-toggle" type="checkbox" class="toggle-checkbox" />
+                <span class="toggle-switch" aria-hidden="true"></span>
+              </label>
+            </fieldset>
+
+            <fieldset class="panel-group" disabled>
+              <legend>II. Charta &mdash; 経年紙</legend>
+              <label class="field-row" for="texture-slider">
+                <span class="field-label">紙の経年感</span>
+                <input id="texture-slider" type="range" min="0" max="70" step="1" value="35" />
+                <output id="texture-value" class="field-value" for="texture-slider">35</output>
+              </label>
+            </fieldset>
+
+            <fieldset class="panel-group" disabled>
+              <legend>III. Inscriptio &mdash; ラベル</legend>
+
+              <label class="field-row field-row-text" for="plate-number-input">
+                <span class="field-label">プレート番号</span>
+                <input id="plate-number-input" type="text" maxlength="12" value="I" placeholder="VII" />
+              </label>
+
+              <label class="field-row field-row-text" for="caption-input">
+                <span class="field-label">学名風キャプション</span>
+                <input
+                  id="caption-input"
+                  type="text"
+                  maxlength="60"
+                  placeholder="Papilio machaon, Linnaeus"
+                />
+              </label>
+            </fieldset>
+
+            <fieldset class="panel-group" disabled>
+              <legend>IV. Mensura &mdash; スケールバー</legend>
+
+              <div class="field-row field-row-inline">
+                <label for="scale-value-input">
+                  <span class="field-label">実寸の長さ</span>
+                  <input id="scale-value-input" type="number" min="0.1" max="1000" step="0.1" value="5" />
+                </label>
+                <label for="scale-unit-select">
+                  <span class="field-label">単位</span>
+                  <select id="scale-unit-select">
+                    <option value="cm">cm</option>
+                    <option value="mm">mm</option>
+                    <option value="in">in</option>
+                  </select>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="panel-group" disabled>
+              <legend>V. Editio &mdash; 書き出し</legend>
+              <div class="export-actions">
+                <button id="export-png-btn" type="button" class="btn btn-primary">PNGで書き出す</button>
+                <button id="export-svg-btn" type="button" class="btn btn-outline">SVGで書き出す</button>
+              </div>
+              <p id="export-status" class="export-status" role="status" aria-live="polite"></p>
+            </fieldset>
+          </form>
+        </aside>
+      </main>
+
+      <footer class="site-footer">
+        <p>アップロードした写真や生成した図版は端末の外へ一切送信されません。すべての処理はブラウザ内の Canvas で完結します。</p>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
