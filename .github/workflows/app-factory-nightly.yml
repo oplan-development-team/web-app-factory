@@ -11,6 +11,7 @@ jobs:
     timeout-minutes: 90
     permissions:
       contents: write
+      pull-requests: write
       id-token: write
     steps:
       - uses: actions/checkout@v4
@@ -27,6 +28,8 @@ jobs:
           git config user.email "app-factory-bot@users.noreply.github.com"
 
       - uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: true
@@ -62,8 +65,15 @@ jobs:
             4. 完了したら、新しいブランチ `app-factory/auto-<slug>`（<slug>は生成されたアプリのディレクトリ名に
                置き換える）を作成し、生成されたファイル一式とPROJECTS.mdの更新をコミットして、originにプッシュ
                してください。**mainには直接プッシュしないでください。**採否はユーザーが後で判断します。
-            5. 最後に、生成されたアイディアの内容・採用理由・QA/Verifyの結果・プッシュ先のブランチ名を
-               簡潔にまとめて報告してください。
+            5. ブランチをpushしたら、続けて `gh pr create` でmain宛てのPull Requestを作成してください
+               （例: `gh pr create --base main --head app-factory/auto-<slug> --title "<一言タイトル>" --body "<本文>"`）。
+               本文には次を含めてください: (a) コンセプトの一言概要とディレクトリパス（`apps/<slug>/`）、
+               (b) スタイル方向、(c) Design QA・Verify（npm build / Dockerビルド / コンソールエラー等）の結果、
+               (d) 既知の制約や気になる点があれば正直に。**PR自体はマージしないでください**
+               （マージ・却下の判断はユーザーが後で行います。あなたの役目はPRを開いて中身を分かりやすく
+               書くところまでです）。`gh` コマンドは認証済みです。
+            6. 最後に、生成されたアイディアの内容・採用理由・QA/Verifyの結果・プッシュ先のブランチ名・
+               作成したPRのURLを簡潔にまとめて報告してください。
 
             ## 制約
 
