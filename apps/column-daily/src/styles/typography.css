@@ -1,0 +1,59 @@
+/*
+ * Typography — two families only.
+ *   Shippori Mincho : everything readable (JP + Latin), 400 / 700
+ *   UnifrakturCook  : the masthead wordmark alone
+ *
+ * UnifrakturCook carries no CJK glyphs, so it is scoped to the Latin
+ * wordmark and never inherited by Japanese copy.
+ */
+
+:root {
+  --font-body: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho',
+    'Noto Serif JP', serif;
+  --font-black-letter: 'UnifrakturCook', 'Old English Text MT', 'Shippori Mincho',
+    serif;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.85;
+  font-feature-settings: 'palt' 1;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 700;
+  line-height: 1.32;
+  letter-spacing: 0.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+/* Latin editorial labels: TODAY'S PAPER, EDITOR'S PICK, section eyebrows. */
+.label-caps {
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.label-caps--accent {
+  color: var(--vermilion);
+}
+
+/* Metadata rows: byline, date, read time. Tight, quiet, never competing. */
+.meta {
+  font-size: var(--text-meta);
+  color: var(--ink-mute);
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+}
+
+.meta__date {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+}
