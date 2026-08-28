@@ -396,9 +396,16 @@ interface ArticleImageProps {
   readonly article: Article;
   /** Extra class for sizing/framing by the caller. */
   readonly className?: string;
+  /**
+   * Halftone pitch in viewBox units. The SVG scales to its container, so the
+   * screen scales too: left at one value, dots read as newsprint on a card and
+   * as polka dots on a full-width banner. Callers that render large pass a
+   * smaller pitch to keep the on-screen dot around 3–5px.
+   */
+  readonly screenPitch?: number;
 }
 
-export function ArticleImage({ article, className }: ArticleImageProps) {
+export function ArticleImage({ article, className, screenPitch = 5 }: ArticleImageProps) {
   const uid = useId().replace(/:/g, '');
   const screenId = `screen-${uid}`;
   const fadeId = `fade-${uid}`;
@@ -420,8 +427,18 @@ export function ArticleImage({ article, className }: ArticleImageProps) {
     >
       <defs>
         {/* Halftone screen: the dot grid that makes it read as newsprint. */}
-        <pattern id={screenId} width="5" height="5" patternUnits="userSpaceOnUse">
-          <circle cx="1.4" cy="1.4" r="1.25" fill={INK.t5} />
+        <pattern
+          id={screenId}
+          width={screenPitch}
+          height={screenPitch}
+          patternUnits="userSpaceOnUse"
+        >
+          <circle
+            cx={screenPitch * 0.28}
+            cy={screenPitch * 0.28}
+            r={screenPitch * 0.25}
+            fill={INK.t5}
+          />
         </pattern>
         <linearGradient id={fadeId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={INK.t5} stopOpacity="0" />

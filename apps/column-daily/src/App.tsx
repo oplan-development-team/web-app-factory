@@ -3,6 +3,7 @@ import { NavBand } from './components/layout/NavBand';
 import { ScrollToTop } from './components/layout/ScrollToTop';
 import { SiteFooter } from './components/layout/SiteFooter';
 import { SiteHeader } from './components/layout/SiteHeader';
+import { ArticlePage } from './pages/ArticlePage';
 import { HomePage } from './pages/HomePage';
 import './components/layout/layout.css';
 import './components/ui/ui.css';
@@ -17,6 +18,7 @@ function AppRoutes() {
       <div className="route-fade" key={location.pathname + location.search}>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/articles/:id" element={<ArticlePage />} />
         </Routes>
       </div>
     </main>
