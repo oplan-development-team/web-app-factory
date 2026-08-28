@@ -2,8 +2,11 @@
   padding-top: var(--space-xl);
 }
 
+/* Centred rather than flush-left: against a full-bleed masthead and nav band,
+   a left-aligned column leaves a void on the right that reads as a mistake. */
 .page-shell {
   max-width: 62rem;
+  margin-inline: auto;
 }
 
 .page-shell--wide {

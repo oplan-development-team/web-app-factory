@@ -5,6 +5,8 @@ import { SiteFooter } from './components/layout/SiteFooter';
 import { SiteHeader } from './components/layout/SiteHeader';
 import { ArticlePage } from './pages/ArticlePage';
 import { HomePage } from './pages/HomePage';
+import { CategoryPage, LatestPage, PopularPage, TagPage } from './pages/ListingPages';
+import { SeriesPage } from './pages/SeriesPage';
 import './components/layout/layout.css';
 import './components/ui/ui.css';
 import './app.css';
@@ -19,6 +21,11 @@ function AppRoutes() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/articles/:id" element={<ArticlePage />} />
+          <Route path="/latest" element={<LatestPage />} />
+          <Route path="/popular" element={<PopularPage />} />
+          <Route path="/series" element={<SeriesPage />} />
+          <Route path="/category/:slug" element={<CategoryPage />} />
+          <Route path="/tag/:tag" element={<TagPage />} />
         </Routes>
       </div>
     </main>
