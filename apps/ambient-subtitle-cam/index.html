@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>アンビエント映画字幕オーバーレイ — Ambient Subtitle Cam</title>
+  <meta name="description" content="ウェブカメラの映像に、音量スパイクと動き検出だけで駆動するフェイク映画字幕をリアルタイムで重ねるブラウザ完結のネタツール。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div class="house">
+    <header class="marquee">
+      <div class="marquee__title">
+        <span class="marquee__eyebrow">PROJECTION BOOTH No.7</span>
+        <h1>アンビエント映画字幕オーバーレイ</h1>
+      </div>
+      <p class="marquee__tagline">音量スパイクと動き検出だけで駆動する、物体認識ゼロのフェイク映画字幕ジェネレーター。</p>
+    </header>
+
+    <main class="theater">
+      <section class="stage" aria-label="映像プレビューとオーバーレイ">
+        <div class="screen-frame">
+          <canvas id="stage-canvas" width="1280" height="720"></canvas>
+          <video id="source-video" playsinline muted></video>
+
+          <div class="screen-standby" id="standby">
+            <div class="standby__reel" aria-hidden="true"></div>
+            <p class="standby__title">STANDBY</p>
+            <p class="standby__body">カメラとマイクへのアクセスを許可すると上映が始まります。</p>
+            <button class="btn btn--brass" id="start-button" type="button">
+              上映を開始する（カメラ・マイクを許可）
+            </button>
+            <p class="standby__privacy">映像・音声は一切サーバーへ送信されません。すべてこの端末のブラウザ内で処理されます。</p>
+            <p class="standby__error" id="start-error" role="alert" hidden></p>
+          </div>
+        </div>
+
+        <p class="stage__caption-live" id="caption-live" aria-live="polite"></p>
+      </section>
+
+      <aside class="console" aria-label="操作卓">
+        <div class="console__section">
+          <h2 class="console__heading">MOOD SELECT</h2>
+          <div class="mood-switch" role="radiogroup" aria-label="字幕のムード">
+            <button class="mood-switch__btn is-active" data-mood="suspense" role="radio" aria-checked="true" type="button">
+              サスペンス
+            </button>
+            <button class="mood-switch__btn" data-mood="melodrama" role="radio" aria-checked="false" type="button">
+              メロドラマ
+            </button>
+            <button class="mood-switch__btn" data-mood="comedy" role="radio" aria-checked="false" type="button">
+              日常コメディ
+            </button>
+          </div>
+        </div>
+
+        <div class="console__section">
+          <h2 class="console__heading">SENSITIVITY</h2>
+          <label class="dial">
+            <span class="dial__label">
+              <span>音量スパイク感度</span>
+              <span class="dial__value" id="sound-value">50</span>
+            </span>
+            <input type="range" id="sound-sensitivity" min="1" max="100" value="50" />
+          </label>
+          <label class="dial">
+            <span class="dial__label">
+              <span>動き検出感度</span>
+              <span class="dial__value" id="motion-value">50</span>
+            </span>
+            <input type="range" id="motion-sensitivity" min="1" max="100" value="50" />
+          </label>
+          <div class="meter-row" aria-hidden="true">
+            <div class="meter" title="現在の音量レベル">
+              <span class="meter__fill" id="sound-meter"></span>
+            </div>
+            <div class="meter" title="現在の動き量">
+              <span class="meter__fill" id="motion-meter"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="console__section">
+          <h2 class="console__heading">MANUAL CUE</h2>
+          <p class="console__hint">自動検出を待たず、狙ったタイミングで字幕を出す（キー: 1 / 2 / 3）。</p>
+          <div class="cue-row">
+            <button class="btn btn--cue" data-trigger="sound" type="button">
+              <span class="cue-key">1</span> 音
+            </button>
+            <button class="btn btn--cue" data-trigger="motion" type="button">
+              <span class="cue-key">2</span> 動き
+            </button>
+            <button class="btn btn--cue" data-trigger="silence" type="button">
+              <span class="cue-key">3</span> 静止
+            </button>
+          </div>
+        </div>
+
+        <div class="console__section">
+          <h2 class="console__heading">CAPTURE</h2>
+          <div class="capture-row">
+            <button class="btn btn--brass" id="snapshot-button" type="button" disabled>
+              スナップショット保存 (PNG)
+            </button>
+            <button class="btn btn--brass" id="clip-button" type="button" disabled>
+              3秒クリップを録画 (WebM)
+            </button>
+          </div>
+          <p class="console__status" id="capture-status" role="status"></p>
+        </div>
+
+        <div class="console__section console__section--footer">
+          <p class="console__privacy">
+            <strong>プライバシー: </strong>映像・音声はいずれもサーバーに送信・保存されません。カメラ映像の解析（音量・動きの数値判定のみ）と字幕合成はすべてこの端末のブラウザ内で完結します。物体認識・音声認識・文字起こしは一切行っていません。
+          </p>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
