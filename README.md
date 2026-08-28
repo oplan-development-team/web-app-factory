@@ -25,6 +25,11 @@
 | サイアノタイプ・ポスターメーカー | [Pages](https://oplan-development-team.github.io/web-app-factory/cyanotype-poster-maker/) | 完成 |
 | レシート詩集ポスター（Receipt Poetry Scroll） | [Pages](https://oplan-development-team.github.io/web-app-factory/receipt-poetry-scroll/) | プロトタイプ（採否待ち） |
 | アンビエント映画字幕オーバーレイ | [Pages](https://oplan-development-team.github.io/web-app-factory/ambient-subtitle-cam/) | プロトタイプ（採否待ち） |
+| 等高線ドローイング（Contour Draw） | [Pages](https://oplan-development-team.github.io/web-app-factory/contour-draw/) | プロトタイプ（採否待ち） |
+| 等高線ポートレート（Contour Portrait） | [Pages](https://oplan-development-team.github.io/web-app-factory/contour-portrait/) | プロトタイプ（採否待ち） |
+| 締切フライト案内板 | [Pages](https://oplan-development-team.github.io/web-app-factory/deadline-departure-board/) | プロトタイプ（採否待ち） |
+| 標本図鑑プレート・ジェネレーター | [Pages](https://oplan-development-team.github.io/web-app-factory/specimen-plate-generator/) | プロトタイプ（採否待ち） |
+| タブ庭園（Tab Guilt Garden） | [Pages](https://oplan-development-team.github.io/web-app-factory/tab-guilt-garden/) | プロトタイプ（採否待ち） |
 | タイピング心電図 | — （Pages未対応、下記参照） | 保留 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
