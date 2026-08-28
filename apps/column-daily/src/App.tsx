@@ -8,6 +8,7 @@ import { HomePage } from './pages/HomePage';
 import { CategoryPage, LatestPage, PopularPage, TagPage } from './pages/ListingPages';
 import { SearchPage } from './pages/SearchPage';
 import { SeriesPage } from './pages/SeriesPage';
+import { WritePage } from './pages/WritePage';
 import './components/layout/layout.css';
 import './components/ui/ui.css';
 import './app.css';
@@ -28,6 +29,7 @@ function AppRoutes() {
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/tag/:tag" element={<TagPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/write" element={<WritePage />} />
         </Routes>
       </div>
     </main>
