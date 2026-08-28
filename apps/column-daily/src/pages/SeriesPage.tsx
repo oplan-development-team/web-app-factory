@@ -7,10 +7,12 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { PageHeader } from '../components/ui/PageHeader';
 import { formatDotted } from '../lib/format';
 import { seriesGroups } from '../lib/selectors';
+import { usePageTitle } from '../lib/usePageTitle';
 import '../components/article/article.css';
 import './series-page.css';
 
 export function SeriesPage() {
+  usePageTitle('連載一覧');
   const groups = seriesGroups();
 
   return (

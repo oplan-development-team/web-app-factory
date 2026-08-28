@@ -3,11 +3,13 @@ import { FeatureArticle } from '../components/article/FeatureArticle';
 import { Sidebar } from '../components/sidebar/Sidebar';
 import { SectionHeading } from '../components/ui/SectionHeading';
 import { editorsPick, newestFirst, seriesGroups } from '../lib/selectors';
+import { usePageTitle } from '../lib/usePageTitle';
 import { Link } from 'react-router-dom';
 import '../components/article/article.css';
 import './home.css';
 
 export function HomePage() {
+  usePageTitle();
   const feature = editorsPick();
   const latest = newestFirst()
     .filter((article) => article.id !== feature.id)

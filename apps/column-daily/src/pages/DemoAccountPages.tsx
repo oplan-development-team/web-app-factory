@@ -6,6 +6,7 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { PageHeader } from '../components/ui/PageHeader';
 import { SectionHeading } from '../components/ui/SectionHeading';
 import { mostPopularFirst } from '../lib/selectors';
+import { usePageTitle } from '../lib/usePageTitle';
 import '../components/article/article.css';
 import './demo-account.css';
 
@@ -35,6 +36,8 @@ interface AccountShellProps {
 }
 
 function AccountShell({ eyebrow, title, lede, notice, children }: AccountShellProps) {
+  usePageTitle(title);
+
   return (
     <PageShell crumbs={[{ label: 'トップ', to: '/' }, { label: title }]}>
       <PageHeader eyebrow={eyebrow} title={title} lede={lede} />
@@ -141,6 +144,8 @@ export function MyPage() {
 }
 
 export function NotFoundPage() {
+  usePageTitle('ページが見つかりません');
+
   return (
     <PageShell>
       <EmptyState

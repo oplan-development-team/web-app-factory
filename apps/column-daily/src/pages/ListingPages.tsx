@@ -10,9 +10,11 @@ import {
   mostPopularFirst,
   newestFirst,
 } from '../lib/selectors';
+import { usePageTitle } from '../lib/usePageTitle';
 import '../components/article/article.css';
 
 export function LatestPage() {
+  usePageTitle('新着コラム');
   const articles = newestFirst();
 
   return (
@@ -33,6 +35,7 @@ export function LatestPage() {
 }
 
 export function PopularPage() {
+  usePageTitle('人気のコラム');
   const articles = mostPopularFirst();
 
   return (
@@ -56,6 +59,7 @@ export function PopularPage() {
 export function CategoryPage() {
   const { slug } = useParams();
   const category = findCategoryBySlug(slug);
+  usePageTitle(category ? `${category.name}のコラム` : 'カテゴリーが見つかりません');
 
   if (!category) {
     return (
@@ -96,6 +100,7 @@ export function TagPage() {
   const { tag } = useParams();
   const decoded = tag ? decodeURIComponent(tag) : '';
   const articles = decoded ? articlesWithTag(decoded) : [];
+  usePageTitle(decoded ? `#${decoded}` : 'タグ');
 
   return (
     <PageShell crumbs={[{ label: 'トップ', to: '/' }, { label: 'タグ' }, { label: decoded || 'タグ' }]}>

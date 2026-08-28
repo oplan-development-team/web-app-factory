@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { PageShell } from '../components/layout/PageShell';
 import { PageHeader } from '../components/ui/PageHeader';
 import { CATEGORY_NAMES } from '../data/types';
+import { usePageTitle } from '../lib/usePageTitle';
 import './write-page.css';
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -32,6 +33,7 @@ interface FormValues {
 const EMPTY_FORM: FormValues = { title: '', category: '', tags: '', body: '' };
 
 export function WritePage() {
+  usePageTitle('コラムを書く');
   const [values, setValues] = useState<FormValues>(EMPTY_FORM);
   const [missing, setMissing] = useState<readonly FieldName[]>([]);
   const [imageName, setImageName] = useState<string | null>(null);

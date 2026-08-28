@@ -6,6 +6,7 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { PageHeader } from '../components/ui/PageHeader';
 import { searchArticlesByTitle } from '../lib/search';
 import { topTags } from '../lib/selectors';
+import { usePageTitle } from '../lib/usePageTitle';
 import '../components/article/article.css';
 import './search-page.css';
 
@@ -14,6 +15,7 @@ export function SearchPage() {
   const query = (searchParams.get('q') ?? '').trim();
   const results = searchArticlesByTitle(query);
   const suggestions = topTags(6);
+  usePageTitle(query === '' ? 'コラムを検索' : `「${query}」の検索結果`);
 
   return (
     <PageShell crumbs={[{ label: 'トップ', to: '/' }, { label: '検索結果' }]}>

@@ -9,6 +9,7 @@ import { findArticleById } from '../data/articles';
 import { categorySlug } from '../data/categories';
 import { formatLongDate } from '../lib/format';
 import { relatedArticles, seriesGroups } from '../lib/selectors';
+import { usePageTitle } from '../lib/usePageTitle';
 import { ArticleCard } from '../components/article/ArticleCard';
 import '../components/article/article.css';
 import './article-page.css';
@@ -16,6 +17,7 @@ import './article-page.css';
 export function ArticlePage() {
   const { id } = useParams();
   const article = findArticleById(id);
+  usePageTitle(article ? article.title : 'コラムが見つかりません');
 
   if (!article) {
     return (
