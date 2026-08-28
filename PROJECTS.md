@@ -8,13 +8,15 @@
 
 ## プロトタイプ
 
-### 等高線ドローイング（Contour Draw）（`apps/contour-draw/`、未マージ・`app-factory/auto-contour-draw`ブランチ）
+### 等高線ドローイング（Contour Draw）（`apps/contour-draw/`）
 
 app-factoryパイプラインが自律生成したプロトタイプ。マウス/タッチで自由に線を描くと、ストローク経路に沿ったソフト円形カーネルで密度を高さ場（スカラー場）に加算堆積し、marching squaresを自前実装で等高線化。測量図・地形図風のポスターとしてPNG（高解像度）/SVG（ベクター）で書き出せるツール。線が重なる・往復する・円を描くほど地形が盛り上がる仕組みで、5本ごとの計曲線には架空の標高ラベルが付く。バックエンドなし、完全クライアントサイド完結。
 
 スタイル方向はダークラグジュアリー（測量原図のブループリント意匠）。深いインク紺〜チャコール背景に白金/真鍮色の等高線、彫刻プレート風の広い字間セリフ（Cormorant）とスタンプ風モノスペース（IBM Plex Mono）を対比させる。配色プリセット3種（藍図Blueprint／測量原図Survey Buff／モノクロームInk）、用紙比率3種（A4縦/A3縦/正方形）に対応。技術スタックはVite + TypeScript（フレームワークなし、marching squares・SVG組み立てとも外部ライブラリ非依存）。
 
 Design QA（2体・いずれも合格）: 階層・余白リズム・奥行き・タイポグラフィ対比・意味を持つ配色（3プリセットが実在の製図様式のメタファー）・作り込まれたhover/focus/active状態のいずれも満たしていると判定。Verify: `npm run build`成功、Playwrightでの実機操作（ループ描画→等高線生成、Undo、配色切替、PNG/SVG書き出し）・375/768/1440幅のレイアウト確認とも問題なし、コンソールエラー0件。**Dockerビルドも独立確認済み**（`docker build --no-cache`〜`docker run`〜HTTP 200応答、確認後にimage/containerとも削除）。
+
+夜間の無人パイプライン実行がブランチをpushしたままmainへの反映を伴わず、レビュー待ちのまま放置されていたのをメインセッションが発見。独立worktreeで`npm run build`・`docker build`+起動+HTTP 200・Anti-Template Policyを再確認し、いずれも合格したためmainにマージした（2026-08-28）。
 
 **採否待ち**: 機能・デザイン・Dockerビルドまで一通り動作確認済み。採用するかどうかはユーザー判断待ち。採用する場合は`.claude/CLAUDE.md`の「プロトタイプ採用後の引き継ぎ」に従ってsdd-managerに本実装を依頼する。
 
