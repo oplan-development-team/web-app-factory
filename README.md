@@ -23,6 +23,7 @@
 | 声の地層（Voice Strata Poster） | [Pages](https://oplan-development-team.github.io/web-app-factory/voice-strata-poster/) | プロトタイプ（採否待ち） |
 | レシート詩集ジェネレーター | [Pages](https://oplan-development-team.github.io/web-app-factory/receipt-poem-generator/) | プロトタイプ（採否待ち） |
 | サイアノタイプ・ポスターメーカー | [Pages](https://oplan-development-team.github.io/web-app-factory/cyanotype-poster-maker/) | 完成 |
+| The Column Daily（コラムメディアサイト） | [Pages](https://oplan-development-team.github.io/web-app-factory/column-daily/) | 完成 |
 | レシート詩集ポスター（Receipt Poetry Scroll） | [Pages](https://oplan-development-team.github.io/web-app-factory/receipt-poetry-scroll/) | プロトタイプ（採否待ち） |
 | アンビエント映画字幕オーバーレイ | [Pages](https://oplan-development-team.github.io/web-app-factory/ambient-subtitle-cam/) | プロトタイプ（採否待ち） |
 | 等高線ドローイング（Contour Draw） | [Pages](https://oplan-development-team.github.io/web-app-factory/contour-draw/) | プロトタイプ（採否待ち） |
