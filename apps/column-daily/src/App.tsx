@@ -3,6 +3,7 @@ import { NavBand } from './components/layout/NavBand';
 import { ScrollToTop } from './components/layout/ScrollToTop';
 import { SiteFooter } from './components/layout/SiteFooter';
 import { SiteHeader } from './components/layout/SiteHeader';
+import { HomePage } from './pages/HomePage';
 import './components/layout/layout.css';
 import './components/ui/ui.css';
 import './app.css';
@@ -15,7 +16,7 @@ function AppRoutes() {
       {/* Keyed on the location so each page re-runs the settle animation. */}
       <div className="route-fade" key={location.pathname + location.search}>
         <Routes>
-          <Route path="/" element={<p>準備中</p>} />
+          <Route path="/" element={<HomePage />} />
         </Routes>
       </div>
     </main>

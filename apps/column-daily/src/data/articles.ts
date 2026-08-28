@@ -56,7 +56,9 @@ const RAW_ARTICLES: readonly RawArticle[] = [
     daysAgo: 1,
     isEditorsPick: true,
     readMinutes: 7,
-    popularity: 92,
+    // Deliberately below the top five: the editor's pick already occupies the
+    // lead slot, and repeating it in the ranking beside it wastes the panel.
+    popularity: 78,
     author: AUTHORS.bookseller,
     tags: ['読書', '街の記録', '出会い'],
     series: { name: SERIES_TOWN, episode: 1 },

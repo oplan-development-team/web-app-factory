@@ -101,10 +101,7 @@
   gap: var(--space-sm);
   padding: var(--space-2xl) var(--space-lg);
   border: 1px solid var(--rule);
-  background-color: var(--paper-light);
-  background-image: var(--grain);
-  background-size: 200px 200px;
-  background-blend-mode: multiply;
+  background-color: #faf5ea;
 }
 
 .empty-state__mark {

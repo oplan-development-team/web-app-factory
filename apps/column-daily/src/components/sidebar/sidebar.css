@@ -1,0 +1,169 @@
+.sidebar {
+  display: grid;
+  gap: var(--space-lg);
+  align-content: start;
+}
+
+.sidebar-panel__more {
+  flex: none;
+  font-size: var(--text-micro);
+  letter-spacing: 0.08em;
+  color: var(--ink-mute);
+  white-space: nowrap;
+}
+
+/* ============================================================== ranking */
+
+.ranking-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ranking-item {
+  display: grid;
+  grid-template-columns: 2.2rem 62px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+}
+
+.ranking-item + .ranking-item {
+  border-top: 1px solid var(--rule);
+}
+
+/* The numeral is the ranking's visual anchor: big, tabular, quiet after 3rd. */
+.ranking-item__no {
+  font-size: 1.85rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--ink-faint);
+}
+
+.ranking-item__no--top {
+  color: var(--vermilion);
+  font-size: 2.15rem;
+}
+
+.ranking-item__media {
+  display: block;
+}
+
+.ranking-item__title {
+  font-size: var(--text-meta);
+  font-weight: 700;
+  line-height: 1.65;
+}
+
+.ranking-item__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  margin-top: var(--space-2xs);
+}
+
+/* ============================================================= categories */
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background-color: var(--rule);
+}
+
+.category-grid__entry {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  height: 100%;
+  padding: 0.6rem 0.7rem;
+  background-color: var(--paper-light);
+  font-size: var(--text-meta);
+  transition:
+    background-color var(--dur-fast) var(--ease-ink),
+    color var(--dur-fast) var(--ease-ink);
+}
+
+.category-grid__entry:hover,
+.category-grid__entry:focus-visible {
+  background-color: var(--ink);
+  color: var(--paper-light);
+}
+
+.category-grid__entry:hover .category-glyph,
+.category-grid__entry:focus-visible .category-glyph {
+  color: var(--paper-light);
+}
+
+.category-grid__name {
+  flex: 1;
+  min-width: 0;
+  letter-spacing: 0.04em;
+}
+
+.category-grid__count {
+  font-size: var(--text-micro);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-mute);
+}
+
+.category-grid__entry:hover .category-grid__count,
+.category-grid__entry:focus-visible .category-grid__count {
+  color: var(--paper-shade);
+}
+
+/* ================================================================== tags */
+
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: var(--space-md);
+  list-style: none;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.28rem 0.6rem;
+  border: 1px solid var(--rule-strong);
+  background-color: var(--paper-base);
+  font-size: var(--text-micro);
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  transition:
+    background-color var(--dur-fast) var(--ease-ink),
+    color var(--dur-fast) var(--ease-ink),
+    border-color var(--dur-fast) var(--ease-ink);
+}
+
+.tag-chip__hash {
+  color: var(--vermilion);
+}
+
+.tag-chip__count {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-faint);
+}
+
+.tag-chip:hover,
+.tag-chip:focus-visible {
+  background-color: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper-light);
+}
+
+.tag-chip:hover .tag-chip__hash,
+.tag-chip:focus-visible .tag-chip__hash,
+.tag-chip:hover .tag-chip__count,
+.tag-chip:focus-visible .tag-chip__count {
+  color: var(--paper-shade);
+}

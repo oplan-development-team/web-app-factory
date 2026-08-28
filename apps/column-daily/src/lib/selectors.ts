@@ -20,8 +20,10 @@ function compareNewest(a: Article, b: Article): number {
   if (a.publishedAt !== b.publishedAt) {
     return a.publishedAt < b.publishedAt ? 1 : -1;
   }
-  // Same day: fall back to popularity so ordering stays stable across renders.
-  return b.popularity - a.popularity;
+  // Same day: keep the corpus order. `Array.prototype.sort` is stable, so
+  // articles published together stay in editorial sequence rather than being
+  // re-ranked by popularity, which is what a print edition would do.
+  return 0;
 }
 
 export function newestFirst(articles: readonly Article[] = ARTICLES): Article[] {

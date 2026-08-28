@@ -166,12 +166,11 @@ a {
 
 /* --------------------------------------------------------------- surfaces */
 
-/* Panels are printed blocks: hairline rules, zero radius, no float shadow. */
+/* Panels are printed blocks: hairline rules, zero radius, no float shadow.
+   Texture comes from the page-wide overlay only — a second local grain pass
+   stacks two multiplies and turns warm paper grey. */
 .paper-panel {
-  background-color: var(--paper-light);
-  background-image: var(--grain);
-  background-size: 200px 200px;
-  background-blend-mode: multiply;
+  background-color: #faf5ea;
   border: 1px solid var(--rule);
 }
 

@@ -307,10 +307,7 @@
   z-index: 40;
   width: min(30rem, 88vw);
   padding: var(--space-md);
-  background-color: var(--paper-light);
-  background-image: var(--grain);
-  background-size: 200px 200px;
-  background-blend-mode: multiply;
+  background-color: #faf5ea;
   border: 1px solid var(--band);
   border-top: 0;
   box-shadow: 0 10px 0 -6px rgba(33, 31, 28, 0.18);

@@ -1,0 +1,285 @@
+/* ================================================================ feature */
+
+/* No local grain here: the page-wide overlay already textures this surface,
+   and layering a second multiply pass turned the panel grey. */
+.feature {
+  position: relative;
+  padding: var(--space-lg) var(--space-lg) var(--space-xl);
+  border: 1px solid var(--rule);
+  background-color: #f8f3e8;
+}
+
+.feature__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  gap: clamp(var(--space-lg), 2.6vw, var(--space-xl));
+  align-items: start;
+}
+
+/* Sized so the lead headline sets on two lines at desktop width, as it does
+   in a print front page — the display scale alone overshoots the column. */
+.feature__title {
+  font-size: clamp(1.5rem, 0.95rem + 1.7vw, 2.2rem);
+  line-height: 1.46;
+  letter-spacing: 0.01em;
+  text-wrap: pretty;
+}
+
+.feature__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+.feature__excerpt {
+  margin-top: var(--space-lg);
+  max-width: 26rem;
+  font-size: var(--text-body);
+  line-height: 2.05;
+  color: var(--ink-soft);
+}
+
+.feature__byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+  margin-top: var(--space-xl);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--rule);
+}
+
+.feature__readtime {
+  letter-spacing: 0.08em;
+}
+
+.feature__media {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-xs);
+}
+
+.feature__pick {
+  color: var(--vermilion);
+}
+
+.feature__media-link {
+  display: block;
+  width: 100%;
+}
+
+/* =========================================================== article card */
+
+.article-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.article-card__media {
+  display: block;
+}
+
+.article-card__tagline {
+  margin-top: var(--space-2xs);
+}
+
+.article-card__title {
+  font-size: var(--text-card);
+  line-height: 1.62;
+  text-wrap: pretty;
+}
+
+.article-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  margin-top: auto;
+  padding-top: var(--space-xs);
+}
+
+/* Newspaper columns: cards are divided by rules, not floated as cards. */
+.column-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+}
+
+.column-grid > * {
+  padding-inline: var(--space-sm);
+}
+
+.column-grid > *:first-child {
+  padding-inline-start: 0;
+}
+
+.column-grid > *:last-child {
+  padding-inline-end: 0;
+}
+
+.column-grid > * + * {
+  border-left: 1px solid var(--rule);
+}
+
+/* ============================================================== list row */
+
+.list-row {
+  display: grid;
+  grid-template-columns: auto 168px minmax(0, 1fr);
+  gap: var(--space-lg);
+  align-items: start;
+  padding: var(--space-lg) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.list-row:first-child {
+  padding-top: 0;
+}
+
+.list-row__rank {
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-faint);
+  width: 2ch;
+  text-align: right;
+}
+
+.list-row__rank--top {
+  color: var(--vermilion);
+}
+
+.list-row__media {
+  display: block;
+}
+
+.list-row__tagline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xs);
+}
+
+.list-row__series {
+  font-size: var(--text-micro);
+  letter-spacing: 0.1em;
+  color: var(--vermilion-deep);
+}
+
+.list-row__title {
+  font-size: var(--text-title);
+  line-height: 1.55;
+}
+
+.list-row__excerpt {
+  margin-top: var(--space-xs);
+  font-size: var(--text-meta);
+  line-height: 1.95;
+  color: var(--ink-soft);
+  max-width: var(--measure-body);
+}
+
+.list-row__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
+}
+
+/* ============================================================ responsive */
+
+@media (max-width: 1023px) {
+  .feature__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .feature__media {
+    order: -1;
+    align-items: stretch;
+  }
+
+  .feature__pick {
+    align-self: flex-end;
+  }
+
+  .feature__excerpt {
+    max-width: none;
+  }
+
+  .column-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-lg) 0;
+  }
+
+  .column-grid > * {
+    padding-inline: var(--space-md);
+  }
+
+  .column-grid > *:nth-child(odd) {
+    padding-inline-start: 0;
+  }
+
+  .column-grid > *:nth-child(even) {
+    padding-inline-end: 0;
+  }
+
+  .column-grid > * + * {
+    border-left: 0;
+  }
+
+  .column-grid > *:nth-child(even) {
+    border-left: 1px solid var(--rule);
+  }
+}
+
+@media (max-width: 767px) {
+  .feature {
+    padding: var(--space-md) var(--space-md) var(--space-lg);
+  }
+
+  .list-row {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-sm) var(--space-md);
+  }
+
+  .list-row__media {
+    grid-column: 1 / -1;
+    order: 2;
+    max-width: 220px;
+  }
+
+  .list-row__body {
+    order: 1;
+  }
+
+  .list-row__rank {
+    order: 0;
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 479px) {
+  .column-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-lg);
+  }
+
+  .column-grid > * {
+    padding-inline: 0;
+    border-left: 0 !important;
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .column-grid > *:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+}

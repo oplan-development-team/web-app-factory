@@ -1,0 +1,94 @@
+.home {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 336px;
+  gap: clamp(var(--space-lg), 2.6vw, var(--space-2xl));
+  align-items: start;
+}
+
+.home__main {
+  display: grid;
+  gap: var(--space-2xl);
+}
+
+.home__section {
+  min-width: 0;
+}
+
+/* --------------------------------------------------------- series strip */
+
+/* Deliberately breaks the four-column rhythm above it: three wide slugs,
+   type-only, so the eye gets a different texture before the footer. */
+.series-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.series-strip__item {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 3px double var(--rule-strong);
+}
+
+.series-strip__item:first-child {
+  padding-inline-start: 0;
+}
+
+.series-strip__item:last-child {
+  padding-inline-end: 0;
+}
+
+.series-strip__item + .series-strip__item {
+  border-left: 1px solid var(--rule);
+}
+
+.series-strip__label {
+  color: var(--vermilion);
+  margin-bottom: var(--space-xs);
+}
+
+.series-strip__name {
+  font-size: var(--text-card);
+  line-height: 1.5;
+}
+
+.series-strip__lead {
+  margin-top: var(--space-xs);
+  font-size: var(--text-meta);
+  line-height: 1.9;
+  color: var(--ink-soft);
+}
+
+.series-strip__count {
+  margin-top: var(--space-xs);
+  letter-spacing: 0.08em;
+}
+
+/* ============================================================ responsive */
+
+@media (max-width: 1199px) {
+  .home {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .home {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .series-strip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .series-strip__item {
+    padding-inline: 0;
+  }
+
+  .series-strip__item + .series-strip__item {
+    border-left: 0;
+    border-top: 1px solid var(--rule);
+  }
+}
