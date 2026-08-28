@@ -4,6 +4,12 @@ import { ScrollToTop } from './components/layout/ScrollToTop';
 import { SiteFooter } from './components/layout/SiteFooter';
 import { SiteHeader } from './components/layout/SiteHeader';
 import { ArticlePage } from './pages/ArticlePage';
+import {
+  LoginPage,
+  MyPage,
+  NotFoundPage,
+  RegisterPage,
+} from './pages/DemoAccountPages';
 import { HomePage } from './pages/HomePage';
 import { CategoryPage, LatestPage, PopularPage, TagPage } from './pages/ListingPages';
 import { SearchPage } from './pages/SearchPage';
@@ -30,6 +36,10 @@ function AppRoutes() {
           <Route path="/tag/:tag" element={<TagPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/write" element={<WritePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/mypage" element={<MyPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
     </main>
