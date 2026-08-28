@@ -6,6 +6,11 @@ interface EmptyStateProps {
   readonly actionLabel?: string;
   readonly actionTo?: string;
   readonly tone?: 'quiet' | 'alert';
+  /**
+   * `1` when this empty state *is* the page (a 404). Those screens have no
+   * PageHeader, so without this the document would have no h1 at all.
+   */
+  readonly headingLevel?: 1 | 2;
 }
 
 /**
@@ -18,7 +23,10 @@ export function EmptyState({
   actionLabel = 'トップへ戻る',
   actionTo = '/',
   tone = 'quiet',
+  headingLevel = 2,
 }: EmptyStateProps) {
+  const Heading = headingLevel === 1 ? 'h1' : 'h2';
+
   return (
     <div className={`empty-state empty-state--${tone}`} role={tone === 'alert' ? 'alert' : undefined}>
       <svg
@@ -38,7 +46,7 @@ export function EmptyState({
         />
         <path d="M48 28l14 14M62 28l-14 14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
-      <p className="empty-state__title">{title}</p>
+      <Heading className="empty-state__title">{title}</Heading>
       <p className="empty-state__description">{description}</p>
       <Link className="press-button press-button--ghost" to={actionTo}>
         {actionLabel}

@@ -478,7 +478,12 @@
     margin-left: 0;
     margin-top: var(--space-2xs);
   }
+}
 
+/* The seven band items stop fitting on one line well before the phone
+   breakpoint. Left to wrap on the desktop layout they leave a dead dark gap
+   beside the マイページ block, so switch to the even-width stacked band here. */
+@media (max-width: 960px) {
   .nav-band__inner {
     flex-wrap: wrap;
     gap: 0;

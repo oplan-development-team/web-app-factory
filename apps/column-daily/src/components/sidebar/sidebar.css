@@ -57,12 +57,31 @@
   line-height: 1.65;
 }
 
+/* Wraps rather than overflows: the category tag is nowrap, so at narrow
+   widths the tag + date pair cannot shrink to fit the text column. */
 .ranking-item__meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-xs);
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-xs);
   margin-top: var(--space-2xs);
+}
+
+@media (max-width: 479px) {
+  .ranking-item {
+    grid-template-columns: 1.8rem 50px minmax(0, 1fr);
+    gap: var(--space-xs);
+    padding-inline: var(--space-sm);
+  }
+
+  .ranking-item__no {
+    font-size: 1.5rem;
+  }
+
+  .ranking-item__no--top {
+    font-size: 1.7rem;
+  }
 }
 
 /* ============================================================= categories */

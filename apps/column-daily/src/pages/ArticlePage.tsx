@@ -24,6 +24,7 @@ export function ArticlePage() {
       <PageShell>
         <EmptyState
           tone="alert"
+          headingLevel={1}
           title="コラムが見つかりませんでした"
           description="お探しのコラムは削除されたか、URLが正しくない可能性があります。新着コラムの一覧からお探しください。"
           actionLabel="新着コラムを見る"

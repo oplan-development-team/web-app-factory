@@ -150,6 +150,7 @@ export function NotFoundPage() {
     <PageShell>
       <EmptyState
         tone="alert"
+        headingLevel={1}
         title="ページが見つかりませんでした"
         description="お探しのページは存在しないか、移動した可能性があります。ナビゲーションから目的のページをお選びください。"
         actionLabel="トップへ戻る"

@@ -66,6 +66,7 @@ export function CategoryPage() {
       <PageShell>
         <EmptyState
           tone="alert"
+          headingLevel={1}
           title="カテゴリーが見つかりませんでした"
           description="指定されたカテゴリーは存在しません。ナビゲーションの「カテゴリー」から選び直してください。"
           actionLabel="新着コラムを見る"
