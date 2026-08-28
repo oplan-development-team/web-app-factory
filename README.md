@@ -31,6 +31,7 @@
 | 締切フライト案内板 | [Pages](https://oplan-development-team.github.io/web-app-factory/deadline-departure-board/) | プロトタイプ（採否待ち） |
 | 標本図鑑プレート・ジェネレーター | [Pages](https://oplan-development-team.github.io/web-app-factory/specimen-plate-generator/) | プロトタイプ（採否待ち） |
 | タブ庭園（Tab Guilt Garden） | [Pages](https://oplan-development-team.github.io/web-app-factory/tab-guilt-garden/) | プロトタイプ（採否待ち） |
+| 校正記号diffビューア（Proofmark Diff） | [Pages](https://oplan-development-team.github.io/web-app-factory/proofmark-diff/) | プロトタイプ（採否待ち、PRレビュー待ち） |
 | タイピング心電図 | — （Pages未対応、下記参照） | 保留 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
