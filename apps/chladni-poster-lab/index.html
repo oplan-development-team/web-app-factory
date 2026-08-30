@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CHLADNI LAB — Cymatics Poster Generator</title>
+    <meta name="description" content="モード番号n・mを指定して振動板の節線パターンを可視化し、実験記録ポスターとして書き出すレトロフューチャー実験機材風ツール。" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Archivo:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <div class="scanlines" aria-hidden="true"></div>
+
+      <header class="topbar">
+        <div class="topbar__brand">
+          <span class="bolt bolt--brand" aria-hidden="true"></span>
+          <div>
+            <h1>CHLADNI&nbsp;LAB</h1>
+            <p class="topbar__subtitle">CYMATICS POSTER GENERATOR — UNIT&nbsp;CL‑9</p>
+          </div>
+        </div>
+        <div class="topbar__status" id="statusReadout">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">STANDBY</span>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="panel" aria-label="コントロールパネル">
+          <span class="bolt bolt--tl" aria-hidden="true"></span>
+          <span class="bolt bolt--tr" aria-hidden="true"></span>
+          <span class="bolt bolt--bl" aria-hidden="true"></span>
+          <span class="bolt bolt--br" aria-hidden="true"></span>
+
+          <div class="panel__section">
+            <h2>MODE SELECT</h2>
+            <div class="fader-row">
+              <div class="fader">
+                <div class="fader__head">
+                  <label for="nSlider">n</label>
+                  <span class="led" id="nValue">3</span>
+                </div>
+                <input type="range" id="nSlider" min="1" max="9" step="1" value="3" aria-label="モード数n" />
+                <div class="fader__ticks">
+                  <span>1</span><span>3</span><span>5</span><span>7</span><span>9</span>
+                </div>
+              </div>
+              <div class="fader">
+                <div class="fader__head">
+                  <label for="mSlider">m</label>
+                  <span class="led" id="mValue">5</span>
+                </div>
+                <input type="range" id="mSlider" min="1" max="9" step="1" value="5" aria-label="モード数m" />
+                <div class="fader__ticks">
+                  <span>1</span><span>3</span><span>5</span><span>7</span><span>9</span>
+                </div>
+              </div>
+            </div>
+            <button type="button" id="retryBtn" class="btn btn--retry">
+              <span class="btn__icon">⟳</span> RANDOM RETRY
+            </button>
+          </div>
+
+          <div class="panel__section">
+            <h2>PLATE GEOMETRY</h2>
+            <div class="toggle-group" role="group" aria-label="プレート形状">
+              <button type="button" class="toggle-btn is-active" id="shapeSquareBtn" data-shape="square">■ SQUARE</button>
+              <button type="button" class="toggle-btn" id="shapeCircleBtn" data-shape="circle">● CIRCLE</button>
+            </div>
+            <div class="fader fader--wide">
+              <div class="fader__head">
+                <label for="sizeSlider" id="sizeLabel">SIDE LENGTH</label>
+                <span class="led led--wide" id="sizeValue">220 mm</span>
+              </div>
+              <input type="range" id="sizeSlider" min="100" max="400" step="5" value="220" aria-label="プレート寸法(mm)" />
+            </div>
+          </div>
+
+          <div class="panel__section">
+            <h2>DRIVE</h2>
+            <div class="fader-row">
+              <div class="fader">
+                <div class="fader__head">
+                  <label for="amplitudeSlider">AMPL</label>
+                  <span class="led" id="amplitudeValue">60</span>
+                </div>
+                <input type="range" id="amplitudeSlider" min="10" max="100" step="1" value="60" aria-label="振幅" />
+              </div>
+              <div class="fader">
+                <div class="fader__head">
+                  <label for="driveSlider">FORCE</label>
+                  <span class="led" id="driveValue">55</span>
+                </div>
+                <input type="range" id="driveSlider" min="10" max="100" step="1" value="55" aria-label="駆動強度" />
+              </div>
+            </div>
+            <div class="density-group">
+              <span class="density-group__label">SAND DENSITY</span>
+              <div class="toggle-group" role="group" aria-label="砂粒子密度">
+                <button type="button" class="toggle-btn" data-density="coarse">粗い</button>
+                <button type="button" class="toggle-btn is-active" data-density="standard">標準</button>
+                <button type="button" class="toggle-btn" data-density="dense">密</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel__section readout-section">
+            <h2>READOUT</h2>
+            <div class="readout">
+              <span class="readout__label">FREQUENCY (approx.)</span>
+              <span class="led led--big" id="freqValue">000.0 Hz</span>
+            </div>
+          </div>
+
+          <div class="panel__section actions">
+            <h2>EXPORT</h2>
+            <div class="actions__row">
+              <button type="button" id="exportPngBtn" class="btn">PNG POSTER</button>
+              <button type="button" id="exportSvgBtn" class="btn">SVG VECTOR</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="stage" aria-label="シミュレーション表示">
+          <div class="stage__frame">
+            <canvas id="simCanvas"></canvas>
+            <div class="stage__hud">
+              <span id="hudMode">n=3 m=5</span>
+              <span id="hudShape">SQUARE · 220mm</span>
+            </div>
+            <div class="stage__loading" id="loadingOverlay">
+              <span>INITIALIZING FIELD…</span>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
