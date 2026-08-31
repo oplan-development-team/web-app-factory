@@ -1,0 +1,346 @@
+/* The garden itself: plant cards, stage palette, tombstones. */
+
+/* ---------- garden grid ---------- */
+
+.garden-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-4);
+}
+
+.plant-card {
+  position: relative;
+  border: var(--bw-md) solid var(--ink);
+  background: var(--paper-2);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  transition: background 400ms ease, border-color 400ms ease;
+}
+
+.plant-card:nth-child(3n + 1) {
+  transform: rotate(-0.8deg);
+}
+.plant-card:nth-child(3n + 2) {
+  transform: rotate(0.6deg);
+}
+.plant-card:nth-child(3n) {
+  transform: rotate(-0.3deg);
+}
+
+.you-badge {
+  position: absolute;
+  top: -14px;
+  right: -10px;
+  background: var(--red);
+  color: var(--cream);
+  border: var(--bw-sm) solid var(--ink);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  padding: 0.2em 0.6em;
+  transform: rotate(8deg);
+  box-shadow: 3px 3px 0 var(--ink);
+  z-index: 2;
+}
+
+.plant-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.plant-species-icon {
+  width: 64px;
+  height: 64px;
+  transition: transform 600ms ease;
+  transform-origin: 50% 90%;
+}
+
+.plant-species-icon svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* stage-driven recoloring (pure CSS, no per-item JS color logic) */
+.stage-tint[data-stage='sprout'] .plant-body,
+.stage-tint[data-stage='leaf'] .plant-body {
+  fill: var(--green);
+}
+.stage-tint[data-stage='bloom'] .plant-body {
+  fill: var(--green-deep);
+}
+.stage-tint[data-stage='wilt'] .plant-body {
+  fill: var(--mustard-deep);
+}
+.stage-tint[data-stage='dead'] .plant-body {
+  fill: var(--gray-dead);
+}
+
+.stage-tint .plant-stem {
+  fill: var(--ink);
+}
+
+.stage-tint[data-stage='sprout'] .plant-accent,
+.stage-tint[data-stage='leaf'] .plant-accent,
+.stage-tint[data-stage='bloom'] .plant-accent {
+  fill: var(--mustard);
+}
+.stage-tint[data-stage='wilt'] .plant-accent {
+  fill: var(--red);
+}
+.stage-tint[data-stage='dead'] .plant-accent {
+  fill: var(--ink);
+}
+
+.plant-card[data-stage='dead'] {
+  background: var(--paper-3);
+  border-color: var(--gray-dead);
+}
+
+/* --- late decay: the idle payoff for walking away for a long time --- */
+
+.stage-tint[data-stage='husk'] .plant-body {
+  fill: var(--gray-husk);
+}
+.stage-tint[data-stage='husk'] .plant-accent {
+  fill: var(--gray-dead);
+}
+.stage-tint[data-stage='husk'] .plant-stem {
+  fill: var(--gray-husk);
+}
+.plant-card[data-stage='husk'] {
+  background: var(--paper-3);
+  border-color: var(--gray-husk);
+}
+.plant-card[data-stage='husk'] .stage-badge {
+  background: var(--gray-husk);
+  color: var(--cream);
+}
+
+/* Fossil reads as stone pressed into the paper: hatched border, no accent. */
+.stage-tint[data-stage='fossil'] .plant-body {
+  fill: var(--stone-fossil);
+}
+.stage-tint[data-stage='fossil'] .plant-accent {
+  fill: var(--stone-fossil);
+}
+.stage-tint[data-stage='fossil'] .plant-stem {
+  fill: var(--stone-fossil);
+}
+.plant-card[data-stage='fossil'] {
+  /* Bleached rather than sharing the dead/husk paper: a mid-grey silhouette is
+     nearly invisible on --paper-3 (2.08:1), and the paler card both fixes that
+     (3.45:1) and separates fossil from the two stages before it. */
+  background: var(--cream);
+  border-style: double;
+  border-width: var(--bw-lg);
+  border-color: var(--stone-fossil);
+  box-shadow: var(--shadow-sm);
+}
+.plant-card[data-stage='fossil'] .stage-badge {
+  background: var(--stone-fossil);
+  color: var(--ink);
+}
+.plant-card[data-stage='fossil'] .plant-taunt,
+.plant-card[data-stage='husk'] .plant-taunt {
+  opacity: 0.95;
+}
+
+.stage-badge {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  border: var(--bw-sm) solid var(--ink);
+  padding: 0.15em 0.5em;
+  background: var(--cream);
+  white-space: nowrap;
+}
+
+.plant-card[data-stage='wilt'] .stage-badge {
+  background: var(--mustard);
+}
+.plant-card[data-stage='dead'] .stage-badge {
+  background: var(--gray-dead);
+  color: var(--cream);
+}
+
+.plant-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.plant-name,
+.plant-name-input {
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.plant-note,
+.plant-note-input {
+  font-size: 0.82rem;
+  opacity: 0.85;
+  margin: 0;
+  font-style: italic;
+}
+
+.plant-name-input,
+.plant-note-input {
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  padding: 0.1em 0;
+  width: 100%;
+}
+
+.plant-name-input:hover,
+.plant-note-input:hover {
+  border-bottom-color: var(--ink);
+}
+
+.plant-name-input:focus-visible,
+.plant-note-input:focus-visible {
+  outline: none;
+  border-bottom-color: var(--red);
+}
+
+.plant-taunt {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.4;
+  opacity: 0.72;
+}
+
+.storage-notice {
+  border: var(--bw-md) solid var(--ink);
+  background: var(--red);
+  color: var(--cream);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.storage-notice[hidden] {
+  display: none;
+}
+
+.plant-card-foot {
+  margin-top: auto;
+  padding-top: var(--space-2);
+  border-top: 2px solid var(--ink);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.neglect-label {
+  opacity: 0.65;
+}
+
+.neglect-value {
+  font-weight: 700;
+}
+
+/* ---------- graveyard ---------- */
+
+.graveyard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-4);
+}
+
+.tombstone {
+  background: var(--ink);
+  color: var(--cream);
+  border: var(--bw-md) solid var(--ink);
+  box-shadow: var(--shadow-md);
+  /* The roof is cut at 14% of the height, so the top padding has to clear that
+     band or the icon's corners get sliced off by the clip-path. */
+  padding: 2.75rem var(--space-3) var(--space-3);
+  clip-path: polygon(0 14%, 50% 0%, 100% 14%, 100% 100%, 0% 100%);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.tombstone:hover {
+  transform: translateY(-4px);
+  box-shadow: 10px 12px 0 var(--gray-dead);
+}
+
+.tombstone[data-cause='ghost'] {
+  background: var(--red-deep);
+}
+
+.tombstone-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--space-2);
+  opacity: 0.85;
+}
+
+.tombstone-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.tombstone-icon .plant-body {
+  fill: var(--paper-2);
+}
+.tombstone-icon .plant-stem,
+.tombstone-icon .plant-accent {
+  fill: var(--cream);
+}
+
+.tombstone-name {
+  text-align: center;
+  font-weight: 700;
+  margin: 0 0 var(--space-1);
+}
+
+.tombstone-epitaph {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  opacity: 0.85;
+  margin: 0 0 var(--space-3);
+  min-height: 1.4em;
+}
+
+.tombstone-stats {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  border-top: 2px solid var(--cream);
+  padding-top: var(--space-2);
+}
+
+.tombstone-stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.tombstone-stat-row dt {
+  opacity: 0.65;
+}
+
+.tombstone-stat-row dd {
+  margin: 0;
+  font-weight: 700;
+}

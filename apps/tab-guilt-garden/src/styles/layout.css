@@ -1,0 +1,111 @@
+/* Page shell: header, section rhythm, footer. */
+
+/* ---------- header ---------- */
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  background: var(--mustard);
+  border: var(--bw-lg) solid var(--ink);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-5) var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.header-inner {
+  max-width: 640px;
+  /* Flex items default to min-width:auto, which refuses to shrink below the
+     widest unbreakable child and forces the page to scroll horizontally. */
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.75;
+}
+
+.site-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  line-height: 0.98;
+  margin: 0 0 var(--space-3);
+  letter-spacing: -0.01em;
+  text-shadow: 3px 3px 0 var(--cream);
+}
+
+.site-tagline {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 1rem;
+  background: var(--ink);
+  color: var(--cream);
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+}
+
+.header-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: stretch;
+  min-width: 0;
+}
+
+/* ---------- layout ---------- */
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+
+.section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  border-bottom: var(--bw-sm) solid var(--ink);
+  padding-bottom: var(--space-2);
+}
+
+.section-heading h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  margin: 0;
+}
+
+.section-note {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.empty-state {
+  border: var(--bw-md) dashed var(--ink);
+  padding: var(--space-5);
+  text-align: center;
+  color: var(--ink);
+  opacity: 0.75;
+  background: var(--paper-2);
+}
+
+/* ---------- footer ---------- */
+
+.site-footer {
+  margin-top: var(--space-7);
+  padding-top: var(--space-4);
+  border-top: var(--bw-sm) solid var(--ink);
+  font-size: 0.78rem;
+  opacity: 0.65;
+  max-width: 640px;
+}

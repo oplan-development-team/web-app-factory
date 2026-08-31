@@ -22,6 +22,10 @@
         <div class="header-inner">
           <p class="eyebrow mono">同一ブラウザ・タブ限定 / サーバーなし・保存はこの端末だけ</p>
           <h1 class="site-title">あなたの罪の庭</h1>
+          <p class="site-lede">
+            このページを開いたタブ1本が、庭の苗1本になります。<br />
+            放置した実時間ぶんだけ、その苗はしおれていきます。
+          </p>
           <p class="site-tagline" id="tab-count-line">読み込み中...</p>
         </div>
         <div class="header-actions">
@@ -29,10 +33,23 @@
             + 新しい罪を開く
           </a>
           <button id="reset-btn" class="btn btn-outline" type="button">庭を焼き払う</button>
+          <button id="help-btn" class="btn btn-outline" type="button">これは何？</button>
         </div>
       </header>
 
+      <p class="storage-notice" id="storage-notice" role="status" hidden>
+        このブラウザではローカル保存が使えないため、庭はこのタブを閉じるまでの一時的なものになります。
+        他のタブとの同期と、通算記録の保存は行われません。
+      </p>
+
+      <section class="intro-panel" id="intro-panel" aria-label="このアプリの説明" hidden></section>
+
       <section class="stats-strip" id="stats-strip" aria-label="罪のスコア"></section>
+
+      <section class="progress-strip" aria-label="階級と実績">
+        <div class="rank-panel" id="rank-panel"></div>
+        <div class="achievements-panel" id="achievements-panel"></div>
+      </section>
 
       <main class="layout">
         <section class="garden-section" aria-labelledby="garden-heading">
@@ -41,7 +58,9 @@
             <p class="section-note mono">フォーカスを外すとしおれる。戻れば助かる。</p>
           </div>
           <p class="empty-state" id="garden-empty" hidden>
-            庭はまだ空っぽ。「+ 新しい罪を開く」でタブを増やし、罪を重ねよう。
+            <strong>庭はまだ空っぽ。</strong><br />
+            「+ 新しい罪を開く」を押すと、同じページが新しいタブで開き、そのぶん苗が増える。
+            開いたまま別のタブを見ていると、この苗はしおれていく。
           </p>
           <div class="garden-grid" id="garden-grid"></div>
         </section>
@@ -52,7 +71,8 @@
             <p class="section-note mono">閉じたタブがここに眠る。安らかに、とは言っていない。</p>
           </div>
           <p class="empty-state" id="graveyard-empty" hidden>
-            まだ何も葬っていない。あなたはまだ誠実なタブ管理者だ(今のところは)。
+            <strong>まだ何も葬っていない。</strong><br />
+            タブを1つ閉じると、その苗がここに墓標として残る。あなたはまだ誠実なタブ管理者だ(今のところは)。
           </p>
           <div class="graveyard-grid" id="graveyard-grid"></div>
         </section>
@@ -60,10 +80,11 @@
 
       <footer class="site-footer">
         <p>
-          タブごとに苗が育ち、フォーカスを外した実時間ぶんしおれ、閉じれば墓標が残る。同期はこのブラウザ内のタブ同士のみ、他ブラウザ・他端末とは共有されない。
+          タブごとに苗が育ち、フォーカスを外した実時間ぶんしおれ、閉じれば墓標が残る。同期はこのブラウザ内のタブ同士のみで、他ブラウザ・他端末とは共有されない。通算記録と実績は「庭を焼き払う」でも消えない。
         </p>
       </footer>
     </div>
+    <div class="toast-host" id="toast-host" aria-live="polite"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
