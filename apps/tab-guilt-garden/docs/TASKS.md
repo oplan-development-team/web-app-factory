@@ -18,7 +18,7 @@
       `npm run test` / `npm run test:coverage` を追加。カバレッジ閾値80%を設定。
       → 検証: 空のスモークテストが通る
 
-- [ ] **T2** `domain/` へ移設し `husk` / `fossil` 段階を追加 (FR-103)
+- [x] **T2** `domain/` へ移設し `husk` / `fossil` 段階を追加 (FR-103)
       `types.ts` `constants.ts` `health.ts` `format.ts` `species.ts` を `src/domain/` へ移動。
       `Stage` に `husk` `fossil` を追加、`computeStage` を放置実時間ベースで拡張。
       → 検証: health/format/species の単体テスト（境界値・時刻巻き戻り E-10 含む）

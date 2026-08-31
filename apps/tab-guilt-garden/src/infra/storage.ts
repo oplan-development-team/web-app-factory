@@ -1,5 +1,5 @@
-import { STORAGE_KEY_GRAVEYARD, STORAGE_KEY_PLANTS } from './constants';
-import type { GraveyardEntry, PlantRecord } from './types';
+import { STORAGE_KEY_GRAVEYARD, STORAGE_KEY_PLANTS } from '../domain/constants';
+import type { GraveyardEntry, PlantRecord } from '../domain/types';
 
 function safeParse<T>(raw: string | null, fallback: T): T {
   if (!raw) return fallback;

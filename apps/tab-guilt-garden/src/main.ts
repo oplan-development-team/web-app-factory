@@ -1,15 +1,15 @@
 import './style.css';
-import { GardenChannel } from './channel';
+import { GardenChannel } from './infra/channel';
 import {
   GHOST_TIMEOUT_MS,
   HEARTBEAT_BROADCAST_MS,
   TICK_MS,
-} from './constants';
-import { confirmModal } from './modal';
+} from './domain/constants';
+import { confirmModal } from './ui/modal';
 import { computeSinRank, GardenRenderer, renderGraveyard, renderStats } from './render';
-import { pickRandomSpecies } from './species';
-import { clearAll, loadGraveyard, loadPlants, saveGraveyard, savePlants } from './storage';
-import type { GraveyardEntry, PlantRecord } from './types';
+import { pickRandomSpecies } from './domain/species';
+import { clearAll, loadGraveyard, loadPlants, saveGraveyard, savePlants } from './infra/storage';
+import type { GraveyardEntry, PlantRecord } from './domain/types';
 
 const selfId = crypto.randomUUID();
 let closed = false;
@@ -84,7 +84,7 @@ function tick(): void {
 
   // ghost sweep: anyone else whose heartbeat has gone silent too long is presumed crashed.
   const survivors: PlantRecord[] = [];
-  let ghostsBuried = false;
+  const ghostIds: string[] = [];
   for (const p of plants) {
     if (p.id === selfId) {
       survivors.push(p);
@@ -92,16 +92,17 @@ function tick(): void {
     }
     if (now - p.lastHeartbeatAt > GHOST_TIMEOUT_MS) {
       graveyard.push(toGraveyardEntry(p, now, 'ghost'));
-      ghostsBuried = true;
+      ghostIds.push(p.id);
     } else {
       survivors.push(p);
     }
   }
 
   savePlants(survivors);
-  if (ghostsBuried) {
+  if (ghostIds.length > 0) {
     saveGraveyard(graveyard);
-    channel.post({ type: 'closed', id: selfId });
+    // The message must carry the id of the plant that was buried, not our own.
+    for (const ghostId of ghostIds) channel.post({ type: 'buried', id: ghostId });
   }
 
   if (now - lastHeartbeatBroadcast > HEARTBEAT_BROADCAST_MS) {
@@ -178,7 +179,7 @@ function handleOwnClose(): void {
     graveyard.push(toGraveyardEntry(self, now, 'closed'));
     saveGraveyard(graveyard);
   }
-  channel.post({ type: 'closed', id: selfId });
+  channel.post({ type: 'buried', id: selfId });
 }
 
 async function handleReset(): Promise<void> {

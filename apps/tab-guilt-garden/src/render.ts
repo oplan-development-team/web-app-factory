@@ -1,15 +1,16 @@
-import { EXCUSE_PLACEHOLDER, NAME_PLACEHOLDER } from './constants';
-import { formatNeglect } from './format';
+import { EXCUSE_PLACEHOLDER, NAME_PLACEHOLDER } from './domain/constants';
+import { formatNeglect } from './domain/format';
 import {
   computeDroopDeg,
   computeMaturity,
+  computeNeglectMs,
   computeScale,
   computeStage,
   computeVitality,
   STAGE_LABEL,
-} from './health';
-import { speciesSvg } from './species';
-import type { GraveyardEntry, PlantRecord } from './types';
+} from './domain/health';
+import { speciesSvg } from './domain/species';
+import type { GraveyardEntry, PlantRecord } from './domain/types';
 
 export interface GardenHandlers {
   onNameChange(id: string, value: string): void;
@@ -144,7 +145,8 @@ export class GardenRenderer {
   private patchCard(refs: CardRefs, plant: PlantRecord, now: number): void {
     const maturity = computeMaturity(plant, now);
     const vitality = computeVitality(plant, now);
-    const stage = computeStage(maturity, vitality);
+    const neglectMs = computeNeglectMs(plant, now);
+    const stage = computeStage(maturity, vitality, neglectMs);
     const droop = computeDroopDeg(vitality);
     const scale = computeScale(vitality, maturity);
 
@@ -152,7 +154,6 @@ export class GardenRenderer {
     refs.icon.style.transform = `rotate(${droop}deg) scale(${scale.toFixed(3)})`;
     refs.stageBadge.textContent = STAGE_LABEL[stage];
 
-    const neglectMs = Math.max(0, now - plant.lastFocusAt);
     refs.neglectValue.textContent = neglectMs < 1000 ? 'いまここ' : formatNeglect(neglectMs);
 
     if (refs.nameEl instanceof HTMLInputElement) {

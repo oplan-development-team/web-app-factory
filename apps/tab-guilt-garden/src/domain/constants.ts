@@ -25,13 +25,28 @@ export const WILT_AT = 50;
 export const DEAD_AT = 4;
 
 /**
+ * Death is not the end of the idle curve. A plant left unfocused well past the
+ * point of death keeps visibly degrading, so a player who walks away for a long
+ * time still finds that *something happened* while they were gone. Both are
+ * measured in real (unscaled) neglect time.
+ */
+export const HUSK_AT_MS = 6 * 60 * 1000; // 6 minutes -> 立ち枯れ
+export const FOSSIL_AT_MS = 12 * 60 * 1000; // 12 minutes -> 化石化
+
+/**
  * Multiplies real elapsed ms into the "story time" shown to the user, so a
- * 3-minute real decay reads as "3時間放置" instead of "3分放置". Purely cosmetic.
+ * 3-minute real decay reads as "3時間放置" instead of "3分放置". Purely cosmetic:
+ * nothing in the simulation reads this value.
  */
 export const DISPLAY_TIME_SCALE = 60;
 
+/** Hard cap on stored tombstones, to keep localStorage from growing without bound. */
+export const MAX_GRAVEYARD = 200;
+
 export const STORAGE_KEY_PLANTS = 'tgg:plants:v1';
 export const STORAGE_KEY_GRAVEYARD = 'tgg:graveyard:v1';
+export const STORAGE_KEY_LEDGER = 'tgg:ledger:v1';
+export const STORAGE_KEY_INTRO_SEEN = 'tgg:intro-seen:v1';
 export const CHANNEL_NAME = 'tab-guilt-garden:v1';
 
 export const EXCUSE_PLACEHOLDER = '言い訳を入力...';
