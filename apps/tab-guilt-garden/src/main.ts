@@ -7,6 +7,7 @@ import { confirmModal } from './ui/modal';
 import { GardenRenderer } from './ui/garden-view';
 import { renderGraveyard } from './ui/graveyard';
 import { renderAchievements, renderRank, renderStats } from './ui/scoreboard';
+import { hideIntro, isIntroVisible, renderIntro } from './ui/intro';
 
 /**
  * Wiring only. Every decision lives in GardenEngine (simulation) or the ui/
@@ -30,6 +31,8 @@ const addTabLinkEl = requireEl('add-tab-link') as HTMLAnchorElement;
 const resetBtnEl = requireEl('reset-btn') as HTMLButtonElement;
 const rankPanelEl = requireEl('rank-panel');
 const achievementsPanelEl = requireEl('achievements-panel');
+const introPanelEl = requireEl('intro-panel');
+const helpBtnEl = requireEl('help-btn') as HTMLButtonElement;
 
 addTabLinkEl.href = window.location.href;
 
@@ -81,6 +84,22 @@ async function handleReset(): Promise<void> {
   engine.reset(toggled);
   tick();
 }
+
+function showIntro(): void {
+  renderIntro(introPanelEl, { onDismiss: () => store.markIntroSeen() });
+}
+
+// Shown unprompted only on the very first visit; afterwards it is on demand.
+if (!store.hasSeenIntro()) showIntro();
+
+helpBtnEl.addEventListener('click', () => {
+  if (isIntroVisible(introPanelEl)) {
+    hideIntro(introPanelEl);
+    return;
+  }
+  showIntro();
+  introPanelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
 
 resetBtnEl.addEventListener('click', () => {
   void handleReset();

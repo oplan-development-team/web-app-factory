@@ -800,3 +800,138 @@ input {
   padding: 0.25em 0.4em;
   transform: rotate(9deg);
 }
+
+/* ---------- intro / first-run explainer ---------- */
+/*
+  Sits above the garden as a taped-on broadsheet rather than a blocking modal:
+  the garden itself is the real explanation, so it must stay visible behind this.
+*/
+
+.site-lede {
+  margin: 0 0 var(--space-3);
+  font-size: clamp(0.95rem, 1.6vw, 1.08rem);
+  line-height: 1.5;
+  font-weight: 500;
+  max-width: 34em;
+}
+
+.intro-panel {
+  border: var(--bw-lg) solid var(--ink);
+  box-shadow: var(--shadow-md);
+  background: var(--cream);
+  padding: var(--space-5) var(--space-4);
+  margin-bottom: var(--space-5);
+  transform: rotate(-0.35deg);
+}
+
+.intro-panel[hidden] {
+  display: none;
+}
+
+.intro-head {
+  border-bottom: var(--bw-sm) solid var(--ink);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.intro-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3.2vw, 2.1rem);
+  line-height: 1.05;
+  margin: 0 0 var(--space-2);
+}
+
+.intro-lede {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  max-width: 46em;
+}
+
+.intro-steps {
+  list-style: none;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: var(--space-4);
+}
+
+.intro-step {
+  position: relative;
+  border: var(--bw-md) solid var(--ink);
+  background: var(--paper-2);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4) var(--space-3) var(--space-3);
+}
+
+.intro-step-ordinal {
+  position: absolute;
+  top: -13px;
+  left: -8px;
+  background: var(--ink);
+  color: var(--mustard);
+  border: var(--bw-sm) solid var(--ink);
+  font-weight: 800;
+  font-size: 0.7rem;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  padding: 0.35em 0.55em;
+  transform: rotate(-6deg);
+}
+
+.intro-step-art {
+  width: 60px;
+  height: 60px;
+  margin: 0 0 var(--space-3);
+  border: none;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  display: block;
+  transform: none;
+}
+
+.intro-step-art svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.intro-step-title {
+  margin: 0 0 var(--space-1);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.intro-step-body {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  opacity: 0.85;
+}
+
+.intro-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-top: 2px solid var(--ink);
+  padding-top: var(--space-3);
+}
+
+.intro-note {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  opacity: 0.75;
+  max-width: 42em;
+}
+
+.empty-state strong {
+  display: inline-block;
+  margin-bottom: var(--space-1);
+  font-weight: 700;
+}
