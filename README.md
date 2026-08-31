@@ -30,7 +30,7 @@
 | 等高線ポートレート（Contour Portrait） | アップロードした写真の明暗を標高に見立て、等高線だけで描く測量図風ポートレート・ジェネレーター | [Pages](https://oplan-development-team.github.io/web-app-factory/contour-portrait/) | プロトタイプ（採否待ち） |
 | 締切フライト案内板 | 複数の締切・予定日を登録すると、空港の発着案内板のようなパタパタ表示で残り日数を見せるボード | [Pages](https://oplan-development-team.github.io/web-app-factory/deadline-departure-board/) | プロトタイプ（採否待ち） |
 | 標本図鑑プレート・ジェネレーター | 手元の植物・貝殻などの写真を、銅版画エングレービング風の19世紀博物誌図版に変換する | [Pages](https://oplan-development-team.github.io/web-app-factory/specimen-plate-generator/) | プロトタイプ（採否待ち） |
-| タブ庭園（Tab Guilt Garden） | このアプリを開いた各タブに苗が生え、放置するとしおれ、閉じると墓標が残る「タブを溜め込みがちな自分」への自虐ジョークツール | [Pages](https://oplan-development-team.github.io/web-app-factory/tab-guilt-garden/) | プロトタイプ（採否待ち） |
+| タブ庭園（Tab Guilt Garden） | このアプリを開いた各タブに苗が生え、放置するとしおれ、閉じると墓標が残る「タブを溜め込みがちな自分」への自虐ジョークツール。放置ゲームとしての階級・実績もあり | [Pages](https://oplan-development-team.github.io/web-app-factory/tab-guilt-garden/) | 完成 |
 | 液だまり（Puddle Tilt） | 端末を傾けると画面の中の水たまりが実際に流れ・波打ち、油膜のように虹色に光る感覚トイ | [Pages](https://oplan-development-team.github.io/web-app-factory/puddle-tilt/) | プロトタイプ（採否待ち） |
 | タイピング心電図 | 打鍵のkeydown間隔だけを計測し、病院の心電図モニター風UIでリアルタイムに波形と診断結果を描くネタツール | — （Pages未対応、下記参照） | 保留 |
 
