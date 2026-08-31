@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+    <title>オーロラ・テルミン | Aurora Theremin</title>
+    <meta
+      name="description"
+      content="ポインタの位置と速度で奏でるテルミン風シンセ楽器。音に呼応してオーロラが揺らめく、宇宙船コンソール風の音のおもちゃ。"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0e14'/%3E%3Ccircle cx='16' cy='16' r='8' fill='%234dd8e0'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23ffb454'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Oswald:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="aurora-canvas" aria-label="ポインタの操作に反応して揺らめくオーロラのビジュアル"></canvas>
+
+      <div id="hint-overlay" class="hint-overlay" role="dialog" aria-label="操作方法">
+        <div class="hint-card">
+          <p class="hint-eyebrow">FIRST CONTACT // 起動シーケンス</p>
+          <h1 class="hint-title">オーロラ・テルミン</h1>
+          <ul class="hint-list">
+            <li><span class="hint-key">ドラッグ</span>で演奏する</li>
+            <li><span class="hint-key">X 位置</span>が音の高さ、<span class="hint-key">Y 位置</span>が音量になる</li>
+            <li><span class="hint-key">押しっぱなし</span>で発音、離すと止まる</li>
+            <li>パネルの <span class="hint-key">REC</span> で演奏を録音し、重ね録りできる</li>
+          </ul>
+          <p class="hint-dismiss">画面に触れて演奏を始めてください</p>
+        </div>
+      </div>
+
+      <div class="console-frame">
+        <div class="console-panel">
+          <div class="panel-section brand-plate">
+            <span class="brand-plate__model">MODEL T-1</span>
+            <span class="brand-plate__name">AURORA THEREMIN</span>
+          </div>
+
+          <div class="panel-section rec-module">
+            <button id="rec-toggle" class="rec-switch" type="button" aria-pressed="false" title="録音の開始/停止">
+              <span class="rec-switch__ring"></span>
+              <span class="rec-switch__dot"></span>
+              <span class="rec-switch__label">REC</span>
+            </button>
+          </div>
+
+          <div class="panel-section layers-module" aria-label="ループレイヤー">
+            <div class="layer-unit" data-layer-index="0">
+              <span class="layer-unit__index">L1</span>
+              <button class="led-btn" data-role="mute" type="button" aria-label="レイヤー1をミュート/再生切替">
+                <span class="led"></span>
+              </button>
+              <button class="clear-btn" data-role="clear" type="button" aria-label="レイヤー1をクリア">×</button>
+            </div>
+            <div class="layer-unit" data-layer-index="1">
+              <span class="layer-unit__index">L2</span>
+              <button class="led-btn" data-role="mute" type="button" aria-label="レイヤー2をミュート/再生切替">
+                <span class="led"></span>
+              </button>
+              <button class="clear-btn" data-role="clear" type="button" aria-label="レイヤー2をクリア">×</button>
+            </div>
+            <div class="layer-unit" data-layer-index="2">
+              <span class="layer-unit__index">L3</span>
+              <button class="led-btn" data-role="mute" type="button" aria-label="レイヤー3をミュート/再生切替">
+                <span class="led"></span>
+              </button>
+              <button class="clear-btn" data-role="clear" type="button" aria-label="レイヤー3をクリア">×</button>
+            </div>
+          </div>
+
+          <div class="panel-section readout-module">
+            <div class="readout">
+              <div class="readout__row">
+                <span class="readout__label">PITCH</span>
+                <span class="readout__value" id="readout-hz">----.- Hz</span>
+              </div>
+              <div class="readout__row">
+                <span class="readout__label">GAIN</span>
+                <span class="readout__value" id="readout-db">-inf dB</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-section reset-module">
+            <button id="reset-all" class="reset-switch" type="button" title="全レイヤーをリセット">
+              <span class="reset-switch__label">RESET</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
