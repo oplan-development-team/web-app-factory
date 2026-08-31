@@ -935,3 +935,87 @@ input {
   margin-bottom: var(--space-1);
   font-weight: 700;
 }
+
+/* ---------- achievement toasts ---------- */
+
+.toast-host {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.toast {
+  border: var(--bw-md) solid var(--ink);
+  box-shadow: var(--shadow-md);
+  background: var(--mustard);
+  padding: var(--space-3) var(--space-4);
+  max-width: 300px;
+  transform: rotate(-1.1deg);
+  animation: toast-stamp 260ms var(--ease-stamp) both;
+}
+
+.toast[data-leaving='true'] {
+  animation: toast-leave 380ms ease forwards;
+}
+
+.toast-eyebrow {
+  margin: 0 0 2px;
+  font-size: 0.62rem;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.toast-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  line-height: 1.15;
+}
+
+.toast-body {
+  margin: 4px 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1.4;
+  opacity: 0.8;
+}
+
+/* Stamped down rather than faded in -- matches the button press language. */
+@keyframes toast-stamp {
+  from {
+    opacity: 0;
+    transform: rotate(-1.1deg) translateY(14px) scale(1.1);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-1.1deg) translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-leave {
+  to {
+    opacity: 0;
+    transform: rotate(-1.1deg) translateX(24px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toast[data-leaving='true'] {
+    animation: none;
+  }
+  .rank-bar-fill {
+    transition: none;
+  }
+  .plant-species-icon {
+    transition: none;
+  }
+}

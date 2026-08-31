@@ -8,6 +8,7 @@ import { GardenRenderer } from './ui/garden-view';
 import { renderGraveyard } from './ui/graveyard';
 import { renderAchievements, renderRank, renderStats } from './ui/scoreboard';
 import { hideIntro, isIntroVisible, renderIntro } from './ui/intro';
+import { ToastHost } from './ui/toast';
 
 /**
  * Wiring only. Every decision lives in GardenEngine (simulation) or the ui/
@@ -33,6 +34,7 @@ const rankPanelEl = requireEl('rank-panel');
 const achievementsPanelEl = requireEl('achievements-panel');
 const introPanelEl = requireEl('intro-panel');
 const helpBtnEl = requireEl('help-btn') as HTMLButtonElement;
+const toastHostEl = requireEl('toast-host');
 
 addTabLinkEl.href = window.location.href;
 
@@ -47,6 +49,7 @@ const engine = new GardenEngine({
 });
 
 const gardenRenderer = new GardenRenderer(gardenGridEl, gardenEmptyEl);
+const toasts = new ToastHost(toastHostEl);
 
 function tick(): void {
   const snapshot = engine.tick();
@@ -68,6 +71,8 @@ function tick(): void {
   });
 
   renderGraveyard(graveyardGridEl, graveyardEmptyEl, snapshot.graveyard, snapshot.now);
+
+  toasts.announce(snapshot.newlyUnlocked);
 }
 
 async function handleReset(): Promise<void> {
