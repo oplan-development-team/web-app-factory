@@ -10,7 +10,7 @@ import {
   STAGE_LABEL,
 } from './domain/health';
 import { speciesSvg } from './domain/species';
-import type { GraveyardEntry, PlantRecord } from './domain/types';
+import type { GraveyardEntry, LifetimeLedger, PlantRecord } from './domain/types';
 
 export interface GardenHandlers {
   onNameChange(id: string, value: string): void;
@@ -175,6 +175,7 @@ export function renderGraveyard(
   el: HTMLElement,
   emptyEl: HTMLElement,
   entries: GraveyardEntry[],
+  now: number,
 ): void {
   emptyEl.hidden = entries.length > 0;
   el.innerHTML = '';
@@ -204,6 +205,7 @@ export function renderGraveyard(
       statRow('死因', CAUSE_LABEL[entry.cause]),
       statRow('生存期間', formatNeglect(entry.lifespanMs)),
       statRow('末期の放置', formatNeglect(entry.neglectMsAtDeath)),
+      statRow('埋葬から', formatNeglect(Math.max(0, now - entry.diedAt))),
     );
 
     stone.append(icon, name, epitaph, stats);
@@ -222,37 +224,27 @@ function statRow(label: string, value: string): HTMLDivElement {
   return row;
 }
 
-export interface SinScoreInput {
-  totalPlanted: number;
-  aliveCount: number;
-  graveyardCount: number;
-  longestNeglectMs: number | null;
-}
-
-export function computeSinRank(graveyardCount: number): string {
-  if (graveyardCount === 0) return '無垢';
-  if (graveyardCount <= 2) return '軽犯罪';
-  if (graveyardCount <= 5) return '常習犯';
-  if (graveyardCount <= 10) return '重罪人';
-  return '庭の破壊神';
-}
-
-export function renderStats(el: HTMLElement, data: SinScoreInput): void {
+export function renderStats(
+  el: HTMLElement,
+  ledger: LifetimeLedger,
+  aliveCount: number,
+  graveyardCount: number,
+): void {
   el.innerHTML = '';
 
   const blocks: Array<{ cls: string; label: string; value: string; sub?: string }> = [
     {
       cls: 'stat-total',
-      label: '総植栽数',
-      value: String(data.totalPlanted),
+      label: '通算植栽数',
+      value: String(ledger.totalPlanted),
       sub: 'これまで芽吹いた罪',
     },
-    { cls: 'stat-alive', label: '現在生存', value: String(data.aliveCount) },
-    { cls: 'stat-grave', label: '墓標', value: String(data.graveyardCount) },
+    { cls: 'stat-alive', label: '現在生存', value: String(aliveCount) },
+    { cls: 'stat-grave', label: '墓標', value: String(graveyardCount) },
     {
       cls: 'stat-record',
       label: '最長放置記録',
-      value: data.longestNeglectMs != null ? formatNeglect(data.longestNeglectMs) : '-',
+      value: ledger.longestNeglectMs > 0 ? formatNeglect(ledger.longestNeglectMs) : '-',
     },
   ];
 
