@@ -1,9 +1,14 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import type { Stage } from '../domain/types';
 
-const css = readFileSync(join(__dirname, '..', 'style.css'), 'utf8');
+// The stylesheet is split by concern, so read the whole set rather than one file.
+const stylesDir = join(__dirname, '..', 'styles');
+const css = readdirSync(stylesDir)
+  .filter((f) => f.endsWith('.css'))
+  .map((f) => readFileSync(join(stylesDir, f), 'utf8'))
+  .join('\n');
 
 function token(name: string): string {
   const m = css.match(new RegExp(`--${name}:\\s*(#[0-9a-fA-F]{6})`));
@@ -78,5 +83,20 @@ describe('stage palette contrast (FR-601 / AC-600b)', () => {
 describe('motion preferences (FR-602)', () => {
   test('honours prefers-reduced-motion', () => {
     expect(css).toContain('prefers-reduced-motion');
+  });
+});
+
+describe('stylesheet organisation', () => {
+  test('no partial grows past the project file-size limit', () => {
+    for (const f of readdirSync(stylesDir).filter((x) => x.endsWith('.css'))) {
+      const lines = readFileSync(join(stylesDir, f), 'utf8').split('\n').length;
+      expect(lines, `${f} is ${lines} lines`).toBeLessThan(800);
+    }
+  });
+
+  test('web fonts are not double-loaded via CSS @import', () => {
+    // index.html already <link>s the Google Fonts stylesheet; importing it here
+    // as well would add a second, later-starting render-blocking request.
+    expect(css).not.toContain('@import url(');
   });
 });
