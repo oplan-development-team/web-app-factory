@@ -35,6 +35,7 @@ const achievementsPanelEl = requireEl('achievements-panel');
 const introPanelEl = requireEl('intro-panel');
 const helpBtnEl = requireEl('help-btn') as HTMLButtonElement;
 const toastHostEl = requireEl('toast-host');
+const storageNoticeEl = requireEl('storage-notice');
 
 addTabLinkEl.href = window.location.href;
 
@@ -53,6 +54,9 @@ const toasts = new ToastHost(toastHostEl);
 
 function tick(): void {
   const snapshot = engine.tick();
+
+  // Surfaced rather than swallowed: the app still works, but nothing persists.
+  storageNoticeEl.hidden = !snapshot.ephemeral;
 
   tabCountLineEl.textContent = `放置タブ${snapshot.aliveCount}本、墓標${snapshot.graveyard.length}基`;
 

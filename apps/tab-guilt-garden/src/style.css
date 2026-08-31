@@ -22,12 +22,18 @@
   --cream: #fbf6ea;
 
   --mustard: #e8a93a;
-  --mustard-deep: #c9852a;
+  /* Darkened from #c9852a so the wilting silhouette actually reads against
+     the card (measured 2.25:1 before, 3.17:1 now). Only used for that fill. */
+  --mustard-deep: #a86d1c;
   --red: #d64545;
   --red-deep: #a52f2f;
   --green: #3f7d4e;
   --green-deep: #2b5a38;
   --gray-dead: #746c5d;
+  /* Late-decay tones: progressively drained and cooler than --gray-dead, so
+     枯死 / 立ち枯れ / 化石化 stay distinguishable at a glance. */
+  --gray-husk: #57534a;
+  --stone-fossil: #84857f;
 
   --font-display: 'Archivo Black', 'Hiragino Sans', system-ui, sans-serif;
   --font-body: 'Space Grotesk', 'Hiragino Sans', system-ui, sans-serif;
@@ -421,6 +427,55 @@ input {
   border-color: var(--gray-dead);
 }
 
+/* --- late decay: the idle payoff for walking away for a long time --- */
+
+.plant-card[data-stage='husk'] .plant-body {
+  fill: var(--gray-husk);
+}
+.plant-card[data-stage='husk'] .plant-accent {
+  fill: var(--gray-dead);
+}
+.plant-card[data-stage='husk'] .plant-stem {
+  fill: var(--gray-husk);
+}
+.plant-card[data-stage='husk'] {
+  background: var(--paper-3);
+  border-color: var(--gray-husk);
+}
+.plant-card[data-stage='husk'] .stage-badge {
+  background: var(--gray-husk);
+  color: var(--cream);
+}
+
+/* Fossil reads as stone pressed into the paper: hatched border, no accent. */
+.plant-card[data-stage='fossil'] .plant-body {
+  fill: var(--stone-fossil);
+}
+.plant-card[data-stage='fossil'] .plant-accent {
+  fill: var(--stone-fossil);
+}
+.plant-card[data-stage='fossil'] .plant-stem {
+  fill: var(--stone-fossil);
+}
+.plant-card[data-stage='fossil'] {
+  /* Bleached rather than sharing the dead/husk paper: a mid-grey silhouette is
+     nearly invisible on --paper-3 (2.08:1), and the paler card both fixes that
+     (3.45:1) and separates fossil from the two stages before it. */
+  background: var(--cream);
+  border-style: double;
+  border-width: var(--bw-lg);
+  border-color: var(--stone-fossil);
+  box-shadow: var(--shadow-sm);
+}
+.plant-card[data-stage='fossil'] .stage-badge {
+  background: var(--stone-fossil);
+  color: var(--ink);
+}
+.plant-card[data-stage='fossil'] .plant-taunt,
+.plant-card[data-stage='husk'] .plant-taunt {
+  opacity: 0.95;
+}
+
 .stage-badge {
   font-family: var(--font-mono);
   font-weight: 700;
@@ -478,6 +533,30 @@ input {
 .plant-note-input:focus-visible {
   outline: none;
   border-bottom-color: var(--red);
+}
+
+.plant-taunt {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.4;
+  opacity: 0.72;
+}
+
+.storage-notice {
+  border: var(--bw-md) solid var(--ink);
+  background: var(--red);
+  color: var(--cream);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.storage-notice[hidden] {
+  display: none;
 }
 
 .plant-card-foot {
