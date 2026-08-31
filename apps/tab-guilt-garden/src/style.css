@@ -48,6 +48,8 @@
   --space-5: 2rem;
   --space-6: 3.5rem;
   --space-7: 5.5rem;
+
+  --ease-stamp: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * {
@@ -646,4 +648,155 @@ input {
   .header-actions .btn {
     flex: 1;
   }
+}
+
+/* ---------- progress: rank + achievements ---------- */
+/*
+  Deliberately asymmetric (rank reads as a wide stamped placard, achievements as
+  a dense ticket stub) so this does not become another row of equal cards. Both
+  are built only from the tokens already established above.
+*/
+
+.progress-strip {
+  display: grid;
+  grid-template-columns: 1.1fr 1.9fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+@media (max-width: 860px) {
+  .progress-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rank-panel {
+  border: var(--bw-lg) solid var(--ink);
+  box-shadow: var(--shadow-md);
+  background: var(--ink);
+  color: var(--cream);
+  padding: var(--space-4);
+  transform: rotate(-0.7deg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.rank-eyebrow {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mustard);
+}
+
+.rank-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3.4vw, 2.3rem);
+  line-height: 1;
+  margin: 0;
+  color: var(--cream);
+}
+
+.rank-bar {
+  height: 18px;
+  border: var(--bw-sm) solid var(--cream);
+  background: var(--gray-dead);
+  padding: 2px;
+}
+
+.rank-bar-fill {
+  height: 100%;
+  background: var(--mustard);
+  transition: width 400ms var(--ease-stamp);
+  min-width: 0;
+}
+
+.rank-bar[data-max='true'] .rank-bar-fill {
+  background: var(--red);
+}
+
+.rank-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--paper-3);
+}
+
+.achievements-panel {
+  border: var(--bw-md) solid var(--ink);
+  box-shadow: var(--shadow-sm);
+  background: var(--cream);
+  padding: var(--space-4);
+  transform: rotate(0.4deg);
+}
+
+.achievements-heading {
+  margin: 0 0 var(--space-3);
+  font-size: 0.8rem;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: var(--space-2);
+}
+
+.achievement-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-2);
+}
+
+.achievement {
+  position: relative;
+  border: var(--bw-sm) solid var(--ink);
+  background: var(--paper-2);
+  padding: var(--space-2) var(--space-3);
+  transition: background 200ms ease, transform 200ms ease;
+}
+
+.achievement[data-unlocked='false'] {
+  background: transparent;
+  border-style: dashed;
+  opacity: 0.62;
+}
+
+.achievement[data-unlocked='true'] {
+  background: var(--green);
+  color: var(--cream);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.achievement-label {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1.25;
+}
+
+.achievement-req {
+  margin: 2px 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.35;
+  opacity: 0.85;
+}
+
+.achievement-mark {
+  position: absolute;
+  top: -9px;
+  right: -7px;
+  background: var(--red);
+  color: var(--cream);
+  border: 2px solid var(--ink);
+  font-weight: 800;
+  font-size: 0.62rem;
+  line-height: 1;
+  padding: 0.25em 0.4em;
+  transform: rotate(9deg);
 }

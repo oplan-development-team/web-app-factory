@@ -6,7 +6,7 @@ import { GardenStore } from './infra/storage';
 import { confirmModal } from './ui/modal';
 import { GardenRenderer } from './ui/garden-view';
 import { renderGraveyard } from './ui/graveyard';
-import { renderStats } from './ui/scoreboard';
+import { renderAchievements, renderRank, renderStats } from './ui/scoreboard';
 
 /**
  * Wiring only. Every decision lives in GardenEngine (simulation) or the ui/
@@ -28,6 +28,8 @@ const graveyardEmptyEl = requireEl('graveyard-empty');
 const tabCountLineEl = requireEl('tab-count-line');
 const addTabLinkEl = requireEl('add-tab-link') as HTMLAnchorElement;
 const resetBtnEl = requireEl('reset-btn') as HTMLButtonElement;
+const rankPanelEl = requireEl('rank-panel');
+const achievementsPanelEl = requireEl('achievements-panel');
 
 addTabLinkEl.href = window.location.href;
 
@@ -53,6 +55,9 @@ function tick(): void {
     aliveCount: snapshot.aliveCount,
     graveyardCount: snapshot.graveyard.length,
   });
+
+  renderRank(rankPanelEl, snapshot.ledger);
+  renderAchievements(achievementsPanelEl, snapshot.ledger);
 
   gardenRenderer.update(snapshot.plants, snapshot.now, snapshot.selfId, {
     onNameChange: (id, value) => engine.patchOwn(id, { name: value }),
