@@ -191,7 +191,7 @@ a {
    stacks two multiplies and turns warm paper grey. */
 .paper-panel {
   background-color: #faf5ea;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--rule-strong);
 }
 
 .paper-panel__head {
