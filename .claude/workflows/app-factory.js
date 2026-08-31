@@ -96,11 +96,12 @@ const VERIFY_SCHEMA = {
     buildOk: { type: 'boolean' },
     devServerOk: { type: 'boolean' },
     dockerBuildOk: { type: 'boolean' },
+    deployJsonOk: { type: 'boolean' },
     consoleErrors: { type: 'array', items: { type: 'string' } },
     functionalNotes: { type: 'string' },
     overallOk: { type: 'boolean' },
   },
-  required: ['buildOk', 'devServerOk', 'dockerBuildOk', 'overallOk'],
+  required: ['buildOk', 'devServerOk', 'dockerBuildOk', 'deployJsonOk', 'overallOk'],
 }
 
 const LENSES = [
@@ -232,6 +233,8 @@ const VERIFY_PROMPT =
   `リポジトリルートの apps/${concept.slug}/ を実際にビルド・起動し、主要機能を操作して動作確認してください。` +
   `コンソールエラーの有無、375/768/1440幅での見た目の破綻の有無を確認してください。` +
   `また、apps/${concept.slug}/Dockerfile を使って実際に \`docker build\` が成功するかを独立に確認し、結果をdockerBuildOkとして報告してください。` +
+  `apps/${concept.slug}/deploy.json が存在するか、pages:trueの場合はVite設定のbaseが相対パス('./')になっているかも確認し、結果をdeployJsonOkとして報告してください` +
+  `（deploy.jsonが無いとGitHub Pagesワークフローがこのアプリを黙ってビルド対象から除外し、後からリンクが404になる不具合が過去に発生しています）。` +
   `確認後は起動したプロセス・作成したDockerイメージ/コンテナを必ず終了・削除してください。` + runIdNote
 
 let qaRounds = []
@@ -259,6 +262,7 @@ for (let round = 1; round <= MAX_REVIEW_ROUNDS; round++) {
     verifyIssues: verify
       ? [
           verify.dockerBuildOk === false ? 'Dockerビルドが失敗しています。Dockerfileを見直してください。' : null,
+          verify.deployJsonOk === false ? 'deploy.jsonが無い、またはpages:trueなのにVite設定のbaseが相対パス(\'./\')になっていません。apps/<slug>/deploy.jsonを追加/修正してください。' : null,
           verify.functionalNotes,
           ...(verify.consoleErrors || []),
         ].filter(Boolean)

@@ -1,0 +1,92 @@
+/*
+  Visual system: neo-brutalism, paper-craft self-mockery.
+  - Palette: 3 solid hues (mustard / warning red / garden green) over warm
+    unbleached paper, plus near-black ink for structure. No gradients,
+    no pastels, no rounded corners anywhere.
+  - Type: Archivo Black for shouting headlines, Space Grotesk for body/UI
+    (a geometric grotesk with enough character to not read as a default
+    system font), JetBrains Mono for anything that is "data" (stats,
+    timers, epitaphs) -- the ticket/receipt register of guilt.
+  - Depth comes from hard offset drop-shadows (never blurred) and from
+    literal overlap: badges stamped across corners, stat blocks rotated
+    slightly off-grid as if glued on by hand.
+*/
+
+:root {
+  --ink: #14120f;
+  --paper: #f2e9d8;
+  --paper-2: #e9dcbd;
+  --paper-3: #ddcca0;
+  --cream: #fbf6ea;
+
+  --mustard: #e8a93a;
+  /* Darkened from #c9852a so the wilting silhouette actually reads against
+     the card (measured 2.25:1 before, 3.17:1 now). Only used for that fill. */
+  --mustard-deep: #a86d1c;
+  --red: #d64545;
+  --red-deep: #a52f2f;
+  --green: #3f7d4e;
+  --green-deep: #2b5a38;
+  --gray-dead: #746c5d;
+  /* Late-decay tones: progressively drained and cooler than --gray-dead, so
+     枯死 / 立ち枯れ / 化石化 stay distinguishable at a glance. */
+  --gray-husk: #57534a;
+  --stone-fossil: #84857f;
+
+  --font-display: 'Archivo Black', 'Hiragino Sans', system-ui, sans-serif;
+  --font-body: 'Space Grotesk', 'Hiragino Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', ui-monospace, monospace;
+
+  --bw-sm: 3px;
+  --bw-md: 4px;
+  --bw-lg: 6px;
+
+  --shadow-sm: 5px 5px 0 var(--ink);
+  --shadow-md: 8px 8px 0 var(--ink);
+  --shadow-lg: 12px 12px 0 var(--ink);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1.25rem;
+  --space-5: 2rem;
+  --space-6: 3.5rem;
+  --space-7: 5.5rem;
+
+  --ease-stamp: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+button,
+input {
+  font-family: inherit;
+  color: inherit;
+}
+
+#app {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-7);
+}
