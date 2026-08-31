@@ -40,7 +40,7 @@
       階級ラダーと次段階までの進捗、実績10種の解除判定（純粋関数）。
       → 検証: 各階級の境界値、実績の解除条件と不可逆性
 
-- [ ] **T7** `engine.ts` — GardenEngine（依存注入）
+- [x] **T7** `engine.ts` — GardenEngine（依存注入）
       `now` / `selfId` / `store` / `channel` / `isFocused` を注入。
       tick・埋葬・焼き払い・実績解除通知を統括。
       → 検証: 注入時計を進めての枯死・ゴースト埋葬・焼き払い挙動
