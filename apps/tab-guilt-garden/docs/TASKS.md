@@ -8,12 +8,12 @@
 
 ## フェーズ0: 準備
 
-- [ ] **T0** `frontend-design` と `visual-qa` スキルを呼び出し、UI着手前に指針を取り込む
+- [x] **T0** `frontend-design` と `visual-qa` スキルを呼び出し、UI着手前に指針を取り込む
       （実装コミットなし。設計方針を docs に反映する場合のみコミット）
 
 ## フェーズ1: 基盤とドメイン
 
-- [ ] **T1** テスト基盤の導入
+- [x] **T1** テスト基盤の導入
       Vitest + jsdom + v8カバレッジ。Node 25 の localStorage を無効化する setup を用意。
       `npm run test` / `npm run test:coverage` を追加。カバレッジ閾値80%を設定。
       → 検証: 空のスモークテストが通る
