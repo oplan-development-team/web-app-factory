@@ -1,5 +1,5 @@
-import { CHANNEL_NAME } from './constants';
-import type { ChannelMessage } from './types';
+import { CHANNEL_NAME } from '../domain/constants';
+import type { ChannelMessage } from '../domain/types';
 
 type Listener = (msg: ChannelMessage) => void;
 

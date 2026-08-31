@@ -14,9 +14,10 @@ tools: [Read, Write, Edit, Bash, Grep, Glob, Skill]
 1. 実装前に、**必ず `frontend-design` スキルを呼び出す**。指定されたスタイル方向を、具体的な配色・タイポグラフィ・レイアウトの判断にまで落とし込んでから着手する。デザインが肝ではない題材でも、テンプレっぽい見た目にしないための最低限の判断はここで行う。
 2. `apps/<slug>/` はそのアプリだけで完結させる。他の `apps/` 配下のディレクトリとコード・依存を共有しない。
 3. `npm run build`（またはそれに相当するコマンド）が実際に通り、開発サーバーを起動して操作できる状態まで仕上げる。
-4. README.md を置き、使い方と「app-factoryパイプラインによる自律生成プロトタイプであること」を一言書く。
-5. `Dockerfile`（と`.dockerignore`）を用意する。プロトタイプであってもコンテナ化は省略しない（`.claude/CLAUDE.md`の「デプロイの方針」参照）。バックエンド不要な静的サイトであれば、マルチステージ構成（build stageでビルド→runtime stageで`nginx:alpine`が`dist/`を配信、`EXPOSE 80`）で十分。実際に`docker build`が通ることを確認してから返す（`docker run`での起動確認まではプロトタイプでは必須としないが、ビルドは必ず通すこと）。README.mdにも起動コマンドを書き添える。
-6. `apps/<slug>/deploy.json` を置く（GitHub PagesプレビューをCIが機械的に判定するための設定。`PROJECTS.md`は人間向けプローズなのでCIから解析しない方針）。
+4. **実装が一通り終わったら、StructuredOutputを返す前に必ず `visual-qa` スキルを呼び出して検証する。** このパイプラインは人間のレビューを挟まずそのまま完成扱いになるため、「コードは正しく見えるが実際には意図通り視認できていない」（paddingの書き忘れで中身が枠に詰まって見える、境界線が地色に埋もれて見えない、ボタン・ナビ等がbody由来のline-height継承で間延びする等）を自分で裏取りする以外に品質を担保する手段がない。見つかった問題はこの場で直してから次に進む。
+5. README.md を置き、使い方と「app-factoryパイプラインによる自律生成プロトタイプであること」を一言書く。
+6. `Dockerfile`（と`.dockerignore`）を用意する。プロトタイプであってもコンテナ化は省略しない（`.claude/CLAUDE.md`の「デプロイの方針」参照）。バックエンド不要な静的サイトであれば、マルチステージ構成（build stageでビルド→runtime stageで`nginx:alpine`が`dist/`を配信、`EXPOSE 80`）で十分。実際に`docker build`が通ることを確認してから返す（`docker run`での起動確認まではプロトタイプでは必須としないが、ビルドは必ず通すこと）。README.mdにも起動コマンドを書き添える。
+7. `apps/<slug>/deploy.json` を置く（GitHub PagesプレビューをCIが機械的に判定するための設定。`PROJECTS.md`は人間向けプローズなのでCIから解析しない方針）。
    - バックエンド不要・完全クライアントサイドで、`npm run build`が`dist/`ディレクトリに静的サイト一式を出力するなら `{"pages": true}`
    - サーバープロセスが必要、または`npm run build`が`dist/`を生成しない構成なら `{"pages": false, "reason": "<理由>"}`
    - Vite使用時は`vite.config.ts`に`base: './'`を設定すること（GitHub Pagesのプロジェクトサイトはサブパス配信になるため、絶対パス`/`のままだとアセット読み込みが壊れる）

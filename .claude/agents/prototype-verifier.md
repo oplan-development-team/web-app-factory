@@ -17,6 +17,10 @@ prototype-builderが作ったものが、報告通りに実際に動くかを機
 4. **画面表示**: 375 / 768 / 1440幅程度で、明らかなレイアウト崩れ（要素の重なり、はみ出し）がないか
 5. **主要機能**: コンセプトで定義された中心的な操作が、実際に一通り動くか
 6. **Dockerビルド**: `apps/<slug>/Dockerfile`が存在し、`docker build`が実際に成功するか。prototype-builderの自己申告を信用せず、独立して確認する（`npm run build`が通ってもDockerfileのCOPYパスの誤り等で失敗することがある）。結果を`dockerBuildOk`として報告する
+7. **Pagesデプロイ設定**: `apps/<slug>/deploy.json`が存在するか。存在しない場合はビルド失敗と同格の不合格として扱う（prototype-builderの実装手順にある必須ステップが抜けている状態であり、`.github/workflows/pages-deploy.yml`はこのファイルが無いアプリを黙ってビルド対象から外すため、気づかれないまま「リンクだけあってアクセスすると404」のアプリを生む）。
+   - `{"pages": true}`の場合: `npm run build`の成果物が実際に`dist/`に出力されることに加え、Vite使用時は`vite.config.*`で`base: './'`（相対パス）が設定されているか確認する。未設定だと`npm run build`自体は成功するがビルド後のHTML/CSSが`/assets/...`のような絶対パス参照になり、GitHub Pagesのサブパス配信（`/web-app-factory/<slug>/`）で読み込みが壊れる（ビルド成功はするので他のチェックでは検出できない）。ローカルで`dist/`を`/<slug>/`のようなサブディレクトリ配下に置いて簡易サーバーで配信し、アセットが実際に読み込めることまで確認するのが確実。
+   - `{"pages": false, "reason": "..."}`の場合: `reason`が空でないことだけ確認すれば十分
+   - 結果を`deployJsonOk`として報告する
 
 ## 手順の注意
 

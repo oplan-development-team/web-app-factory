@@ -4,7 +4,7 @@
   "private": true,
   "description": "Solari-style split-flap countdown board for personal deadlines. Static HTML/CSS/JS, no build tool, no dependencies.",
   "scripts": {
-    "build": "node -e \"console.log('Static site — nothing to compile. index.html / css / js are served as-is.')\"",
+    "build": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true});fs.mkdirSync('dist');fs.copyFileSync('index.html','dist/index.html');fs.cpSync('css','dist/css',{recursive:true});fs.cpSync('js','dist/js',{recursive:true});console.log('Static site copied to dist/ — nothing to compile.')\"",
     "start": "python3 -m http.server 8080",
     "serve": "python3 -m http.server 8080"
   }
