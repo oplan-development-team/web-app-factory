@@ -51,7 +51,7 @@
 
 ## フェーズ2: UI
 
-- [ ] **T9** `ui/` へ分割
+- [x] **T9** `ui/` へ分割
       `render.ts` を `garden-view.ts` / `graveyard.ts` / `scoreboard.ts` に分割。
       墓標に埋葬からの経過時間を追加 (FR-403)。
       → 検証: jsdom での描画テスト

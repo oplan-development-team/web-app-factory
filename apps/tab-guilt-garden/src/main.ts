@@ -4,7 +4,9 @@ import { GardenEngine } from './engine';
 import { GardenChannel } from './infra/channel';
 import { GardenStore } from './infra/storage';
 import { confirmModal } from './ui/modal';
-import { GardenRenderer, renderGraveyard, renderStats } from './render';
+import { GardenRenderer } from './ui/garden-view';
+import { renderGraveyard } from './ui/graveyard';
+import { renderStats } from './ui/scoreboard';
 
 /**
  * Wiring only. Every decision lives in GardenEngine (simulation) or the ui/
@@ -46,7 +48,11 @@ function tick(): void {
 
   tabCountLineEl.textContent = `放置タブ${snapshot.aliveCount}本、墓標${snapshot.graveyard.length}基`;
 
-  renderStats(statsEl, snapshot.ledger, snapshot.aliveCount, snapshot.graveyard.length);
+  renderStats(statsEl, {
+    ledger: snapshot.ledger,
+    aliveCount: snapshot.aliveCount,
+    graveyardCount: snapshot.graveyard.length,
+  });
 
   gardenRenderer.update(snapshot.plants, snapshot.now, snapshot.selfId, {
     onNameChange: (id, value) => engine.patchOwn(id, { name: value }),
