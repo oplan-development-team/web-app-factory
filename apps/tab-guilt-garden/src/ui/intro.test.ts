@@ -38,6 +38,17 @@ describe('renderIntro (FR-500)', () => {
     expect(stages).toEqual(['leaf', 'wilt', 'dead']);
   });
 
+  test('artwork is tinted without joining the .plant-card namespace', () => {
+    // Reusing .plant-card here made every `.plant-card` query in the app (and in
+    // verification scripts) count the three legend illustrations as real plants.
+    renderIntro(el, { onDismiss: vi.fn() });
+    for (const art of el.querySelectorAll('.intro-step-art')) {
+      expect(art.classList.contains('stage-tint')).toBe(true);
+      expect(art.classList.contains('plant-card')).toBe(false);
+    }
+    expect(el.querySelectorAll('.plant-card')).toHaveLength(0);
+  });
+
   test('states that nothing leaves this browser', () => {
     renderIntro(el, { onDismiss: vi.fn() });
     expect(el.querySelector('.intro-note')?.textContent).toContain('このブラウザ');

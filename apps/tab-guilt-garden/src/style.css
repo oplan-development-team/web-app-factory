@@ -110,6 +110,9 @@ input {
 
 .header-inner {
   max-width: 640px;
+  /* Flex items default to min-width:auto, which refuses to shrink below the
+     widest unbreakable child and forces the page to scroll horizontally. */
+  min-width: 0;
 }
 
 .eyebrow {
@@ -147,6 +150,7 @@ input {
   flex-direction: column;
   gap: var(--space-3);
   align-items: stretch;
+  min-width: 0;
 }
 
 /* ---------- buttons ---------- */
@@ -167,7 +171,9 @@ input {
   color: var(--ink);
   box-shadow: var(--shadow-sm);
   transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
-  white-space: nowrap;
+  /* Explicit: the 1.5 body line-height makes single-line buttons tall and
+     leaves padding changes looking like they did nothing. */
+  line-height: 1.1;
 }
 
 .btn:hover {
@@ -274,6 +280,7 @@ input {
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 0.85rem;
+  line-height: 1.2;
   margin: var(--space-2) 0 0;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -365,6 +372,7 @@ input {
   font-weight: 800;
   font-size: 0.7rem;
   letter-spacing: 0.05em;
+  line-height: 1;
   padding: 0.2em 0.6em;
   transform: rotate(8deg);
   box-shadow: 3px 3px 0 var(--ink);
@@ -392,33 +400,33 @@ input {
 }
 
 /* stage-driven recoloring (pure CSS, no per-item JS color logic) */
-.plant-card[data-stage='sprout'] .plant-body,
-.plant-card[data-stage='leaf'] .plant-body {
+.stage-tint[data-stage='sprout'] .plant-body,
+.stage-tint[data-stage='leaf'] .plant-body {
   fill: var(--green);
 }
-.plant-card[data-stage='bloom'] .plant-body {
+.stage-tint[data-stage='bloom'] .plant-body {
   fill: var(--green-deep);
 }
-.plant-card[data-stage='wilt'] .plant-body {
+.stage-tint[data-stage='wilt'] .plant-body {
   fill: var(--mustard-deep);
 }
-.plant-card[data-stage='dead'] .plant-body {
+.stage-tint[data-stage='dead'] .plant-body {
   fill: var(--gray-dead);
 }
 
-.plant-card .plant-stem {
+.stage-tint .plant-stem {
   fill: var(--ink);
 }
 
-.plant-card[data-stage='sprout'] .plant-accent,
-.plant-card[data-stage='leaf'] .plant-accent,
-.plant-card[data-stage='bloom'] .plant-accent {
+.stage-tint[data-stage='sprout'] .plant-accent,
+.stage-tint[data-stage='leaf'] .plant-accent,
+.stage-tint[data-stage='bloom'] .plant-accent {
   fill: var(--mustard);
 }
-.plant-card[data-stage='wilt'] .plant-accent {
+.stage-tint[data-stage='wilt'] .plant-accent {
   fill: var(--red);
 }
-.plant-card[data-stage='dead'] .plant-accent {
+.stage-tint[data-stage='dead'] .plant-accent {
   fill: var(--ink);
 }
 
@@ -429,13 +437,13 @@ input {
 
 /* --- late decay: the idle payoff for walking away for a long time --- */
 
-.plant-card[data-stage='husk'] .plant-body {
+.stage-tint[data-stage='husk'] .plant-body {
   fill: var(--gray-husk);
 }
-.plant-card[data-stage='husk'] .plant-accent {
+.stage-tint[data-stage='husk'] .plant-accent {
   fill: var(--gray-dead);
 }
-.plant-card[data-stage='husk'] .plant-stem {
+.stage-tint[data-stage='husk'] .plant-stem {
   fill: var(--gray-husk);
 }
 .plant-card[data-stage='husk'] {
@@ -448,13 +456,13 @@ input {
 }
 
 /* Fossil reads as stone pressed into the paper: hatched border, no accent. */
-.plant-card[data-stage='fossil'] .plant-body {
+.stage-tint[data-stage='fossil'] .plant-body {
   fill: var(--stone-fossil);
 }
-.plant-card[data-stage='fossil'] .plant-accent {
+.stage-tint[data-stage='fossil'] .plant-accent {
   fill: var(--stone-fossil);
 }
-.plant-card[data-stage='fossil'] .plant-stem {
+.stage-tint[data-stage='fossil'] .plant-stem {
   fill: var(--stone-fossil);
 }
 .plant-card[data-stage='fossil'] {
@@ -480,6 +488,7 @@ input {
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 0.75rem;
+  line-height: 1.2;
   border: var(--bw-sm) solid var(--ink);
   padding: 0.15em 0.5em;
   background: var(--cream);
@@ -591,7 +600,9 @@ input {
   color: var(--cream);
   border: var(--bw-md) solid var(--ink);
   box-shadow: var(--shadow-md);
-  padding: var(--space-4) var(--space-3) var(--space-3);
+  /* The roof is cut at 14% of the height, so the top padding has to clear that
+     band or the icon's corners get sliced off by the clip-path. */
+  padding: 2.75rem var(--space-3) var(--space-3);
   clip-path: polygon(0 14%, 50% 0%, 100% 14%, 100% 100%, 0% 100%);
   transition: transform 150ms ease, box-shadow 150ms ease;
 }
@@ -723,9 +734,11 @@ input {
   }
   .header-actions {
     flex-direction: row;
+    /* Three nowrap buttons side by side overflow a 320px viewport. */
+    flex-wrap: wrap;
   }
   .header-actions .btn {
-    flex: 1;
+    flex: 1 1 auto;
   }
 }
 
@@ -801,6 +814,36 @@ input {
   font-size: 0.75rem;
   line-height: 1.35;
   color: var(--paper-3);
+}
+
+.rank-ledger {
+  margin: auto 0 0;
+  padding-top: var(--space-3);
+  border-top: 2px solid var(--gray-dead);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.rank-ledger-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
+.rank-ledger-row dt {
+  color: var(--paper-3);
+  opacity: 0.8;
+}
+
+.rank-ledger-row dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--mustard);
 }
 
 .achievements-panel {
@@ -963,12 +1006,7 @@ input {
   width: 60px;
   height: 60px;
   margin: 0 0 var(--space-3);
-  border: none;
-  background: none;
-  box-shadow: none;
-  padding: 0;
   display: block;
-  transform: none;
 }
 
 .intro-step-art svg {

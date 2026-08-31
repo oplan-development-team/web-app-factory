@@ -109,7 +109,39 @@ export function renderRank(el: HTMLElement, ledger: LifetimeLedger): void {
     note.textContent = `次の「${progress.next?.label}」まであと${progress.remaining}基`;
   }
 
-  el.append(heading, name, bar, note);
+  el.append(heading, name, bar, note, buildLifetimeList(ledger));
+}
+
+/**
+ * Lifetime figures that have no home in the four stat blocks. They exist in the
+ * ledger regardless; surfacing them gives the idle loop more to accumulate than
+ * a single rank label.
+ */
+function buildLifetimeList(ledger: LifetimeLedger): HTMLElement {
+  const list = document.createElement('dl');
+  list.className = 'rank-ledger';
+
+  const rows: Array<[string, string]> = [
+    ['最長生存', ledger.longestLifespanMs > 0 ? formatNeglect(ledger.longestLifespanMs) : '—'],
+    ['同時最大', ledger.peakAlive > 0 ? `${ledger.peakAlive}本` : '—'],
+    ['焼き払い', `${ledger.burnCount}回`],
+  ];
+
+  for (const [label, value] of rows) {
+    const row = document.createElement('div');
+    row.className = 'rank-ledger-row';
+
+    const dt = document.createElement('dt');
+    dt.textContent = label;
+
+    const dd = document.createElement('dd');
+    dd.textContent = value;
+
+    row.append(dt, dd);
+    list.appendChild(row);
+  }
+
+  return list;
 }
 
 /**

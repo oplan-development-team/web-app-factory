@@ -99,7 +99,9 @@ function buildStep(s: Step): HTMLElement {
   ordinal.textContent = s.ordinal;
 
   const art = document.createElement('div');
-  art.className = 'intro-step-art plant-card';
+  // stage-tint (not plant-card) so the artwork picks up the stage palette
+  // without joining every .plant-card selector and query in the app.
+  art.className = 'intro-step-art stage-tint';
   art.dataset.stage = s.stage;
   art.innerHTML = speciesSvg(s.species);
 

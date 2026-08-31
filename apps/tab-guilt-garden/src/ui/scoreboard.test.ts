@@ -103,10 +103,30 @@ describe('renderRank (FR-401)', () => {
     expect(el.querySelector('.rank-note')?.textContent).not.toContain('あと');
   });
 
+  test('surfaces lifetime figures that have no stat block of their own', () => {
+    renderRank(el, ledger({ longestLifespanMs: 60_000, peakAlive: 4, burnCount: 2 }));
+    const rows = [...el.querySelectorAll('.rank-ledger-row')].map((r) => [
+      r.querySelector('dt')?.textContent,
+      r.querySelector('dd')?.textContent,
+    ]);
+    expect(rows).toEqual([
+      ['最長生存', '1時間0分'],
+      ['同時最大', '4本'],
+      ['焼き払い', '2回'],
+    ]);
+  });
+
+  test('shows placeholders before those records exist', () => {
+    renderRank(el, ledger());
+    const rows = [...el.querySelectorAll('.rank-ledger-row dd')].map((d) => d.textContent);
+    expect(rows).toEqual(['—', '—', '0回']);
+  });
+
   test('re-rendering does not stack duplicate bars', () => {
     renderRank(el, ledger({ totalBuried: 1 }));
     renderRank(el, ledger({ totalBuried: 2 }));
     expect(el.querySelectorAll('.rank-bar')).toHaveLength(1);
+    expect(el.querySelectorAll('.rank-ledger')).toHaveLength(1);
   });
 });
 

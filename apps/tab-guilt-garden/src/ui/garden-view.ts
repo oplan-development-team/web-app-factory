@@ -65,7 +65,7 @@ export class GardenRenderer {
 
   private buildCard(plant: PlantRecord, isSelf: boolean, handlers: GardenHandlers): CardRefs {
     const root = document.createElement('article');
-    root.className = 'plant-card';
+    root.className = 'plant-card stage-tint';
     root.dataset.species = plant.species;
 
     if (isSelf) {
