@@ -8,6 +8,20 @@
 
 ## プロトタイプ
 
+### 年輪ポスター（Life Rings）（`apps/life-rings-poster/`）
+
+app-factoryパイプラインが自律生成したプロトタイプ（週次バッチ無人実行）。生まれた年と人生の出来事（年+短いラベル、通常/大のmagnitude）を数件登録すると、木の年輪の断面図として可視化するツール。出来事の無い年は淡く均一な幅の輪、大きな出来事のある年は色濃く節（コブ状の膨らみ）・放射状の割れ目・局所的な色濃淡を持つ輪として描かれる。生年をシードにした自作の値ノイズで輪の境界を有機的に歪ませ、ピスからバークへ貫通する主要な放射割れ、粗い不規則なバーク帯、木目調のノイズテクスチャ（SVGフィルタ）まで再現し、一枚の「自分だけの年輪」ポスターとしてSVG/PNG（画面用・印刷用高解像度の2段階）で書き出せる。データ入力起点で既存アプリのどれとも重ならない新規カテゴリ。バックエンドなし、完全クライアントサイド完結、localStorage自動保存。技術スタックはVite + TypeScript（フレームワーク非依存）、描画はCanvasを使わずSVG一本化（プレビューと書き出しの構造的ズレ防止）。
+
+スタイル方向はダークラグジュアリー。漆黒に近いチャコール（#14120f系）のUIクロームにブラス/ゴールドの細線アクセント、Fraunces（見出し）+ Manrope（本文）+ IBM Plex Mono（年号・数値ラベル）の3書体構成。プレビュー中央にギャラリー版画風の柔らかい影付きでポスターを配置し、周囲の暗いUIとのコントラストでポスター本体（オーク/ウォルナット/アッシュの暖色木目、3プリセット切替可）を主役として際立たせる。
+
+実装中にprototype-builderが自己発見・修正した実バグが2件ある: (1) 出来事追加時のrequestAnimationFrameによるフォーカス移動が高速入力とレースし、年フィールドの値がstoreに反映されないことがあった、(2) 長い日本語ラベルが3時/9時位置でSVG viewBox外にはみ出しclipされることがあった。いずれも修正済み。visual-qaスキルでもline-height継承漏れ3箇所・罫線コントラスト不足・number inputのネイティブspinnerによる年表示の桁欠け・アイコンボタンのタップ領域の小ささを発見し修正済み。
+
+Design QA（2体・いずれもラウンド1で合格）: 階層・余白リズム・奥行き（feTurbulenceノイズオーバーレイ+mix-blend-mode:overlay、poster-frameの二重drop-shadow、posterFloatの浮遊アニメーション）・タイポグラフィ対比・意味を持った配色（brass=主要操作／rust=削除・エラー／olive=成功）・作り込まれたhover/focus/active/disabled/loading状態のいずれも満たしていると判定。Verify（prototype-verifier実施）: `npm run build`成功、dev server起動・機能確認（Playwright、生年/終了年/タイトル入力→プレビュー即時更新、出来事追加・トグル・木トーン切替・SVG書き出し）、375/768/1440幅でレイアウト崩れ・横スクロールなし、コンソールエラー0件。deploy.json（`{"pages": true}`）とVite `base: './'`設定を確認済み、GitHub Pagesサブパス配信のローカルシミュレーションでもアセットが200で取得できることを確認済み。**Dockerビルドのみ未検証**: このセッションのegressポリシーがDocker Hub CDN（production.cloudfront.docker.com）への接続を403 Forbiddenで拒否するため、`docker pull alpine:latest`単体でも同一エラーとなることを確認済みで、Dockerfile自体（node:22-alpine→nginx:alpine多段構成、既存アプリと同一パターン）の欠陥ではなく環境起因と判断。image/containerは一切作成されておらず、クリーンアップ対象なし。
+
+このエントリは`.github/workflows/`とは別の週次バッチトリガー（対話セッション相当のRoutine、週次登録7件目・最終）による無人実行が生成したもので、`app-factory/auto-life-rings-poster`ブランチにpushしmainへは直接反映していない（採否をユーザー判断待ちとするため）。
+
+**採否待ち**: 機能・デザインは動作確認済みだが、Dockerビルドのみ環境要因（このセッションのegress制約）で未検証。採用するかどうかはユーザー判断待ち。採用する場合は`.claude/CLAUDE.md`の「プロトタイプ採用後の引き継ぎ」に従ってsdd-managerに本実装を依頼する（本実装移行時にDockerビルドも改めて確認すること）。
+
 ### 液だまり（Puddle Tilt）（`apps/puddle-tilt/`）
 
 app-factoryパイプラインが自律生成したプロトタイプ。端末を傾けると画面の中の水たまりが実際に流れ・波打ち、油膜のように虹色に光る、触って眺めるためだけの感覚トイ。Canvas 2D上でFloat32Arrayの高さ場（浅水シミュレーション、隣接4近傍平均×2−前フレーム値＋減衰係数）を自前実装し、DeviceOrientationEvent（beta/gamma）から導出した重力ベクトルを毎フレーム高さ場に加算して傾きに応じた水の移流を表現する。iOS 13+の`requestPermission()`に対応した明示的なオンボーディングを持ち、傾きセンサー非対応環境ではポインタドラッグへ自動フォールバックする（"POINTER ONLY"表示）。任意の瞬間をPNG書き出し可能。バックエンドなし、完全クライアントサイド完結。技術スタックはVite + TypeScript（フレームワーク非依存）。

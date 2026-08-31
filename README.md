@@ -36,5 +36,6 @@
 | オーロラ・テルミン（Aurora Theremin） | マウス/指の位置と速度でWeb Audioのテルミン風シンセを演奏し、録音・ループ・重ね録りもできる楽器トイ | [Pages](https://oplan-development-team.github.io/web-app-factory/aurora-theremin/) | プロトタイプ（採否待ち） |
 | クラドニ図形ポスタージェネレーター（Chladni Cymatics Poster Lab） | 振動モードを指定すると、砂粒子がChladni図形の節線に収束する物理シミュレーションを描画し、実験記録ポスターとして書き出す | [Pages](https://oplan-development-team.github.io/web-app-factory/chladni-poster-lab/) | プロトタイプ（採否待ち） |
 | タイピング心電図 | 打鍵のkeydown間隔だけを計測し、病院の心電図モニター風UIでリアルタイムに波形と診断結果を描くネタツール | — （Pages未対応、下記参照） | 保留 |
+| 年輪ポスター（Life Rings） | 生まれた年と人生の出来事を入力すると、有機的に歪んだ年輪・節・放射割れ・木目テクスチャを持つ「自分だけの年輪ポスター」を書き出せるツール | [Pages](https://oplan-development-team.github.io/web-app-factory/life-rings-poster/) | プロトタイプ（採否待ち） |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
