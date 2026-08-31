@@ -8,9 +8,10 @@ import {
 import { confirmModal } from './ui/modal';
 import { computeSinRank, GardenRenderer, renderGraveyard, renderStats } from './render';
 import { pickRandomSpecies } from './domain/species';
-import { clearAll, loadGraveyard, loadPlants, saveGraveyard, savePlants } from './infra/storage';
+import { GardenStore } from './infra/storage';
 import type { GraveyardEntry, PlantRecord } from './domain/types';
 
+const store = new GardenStore();
 const selfId = crypto.randomUUID();
 let closed = false;
 let lastHeartbeatBroadcast = 0;
@@ -56,8 +57,8 @@ const channel = new GardenChannel();
 // --- initial plant ------------------------------------------------------
 {
   const now = Date.now();
-  const initialPlants = upsertSelf(loadPlants(), createFreshRecord(now));
-  savePlants(initialPlants);
+  const initialPlants = upsertSelf(store.loadPlants(), createFreshRecord(now));
+  store.savePlants(initialPlants);
   channel.post({ type: 'planted', id: selfId });
 }
 
@@ -67,8 +68,8 @@ function isFocusedNow(): boolean {
 
 function tick(): void {
   const now = Date.now();
-  let plants = loadPlants();
-  const graveyard = loadGraveyard();
+  let plants = store.loadPlants();
+  const graveyard = store.loadGraveyard();
   // Cross-tab writes are last-write-wins on localStorage: a slow tick in one
   // tab can race a close/removal in another and briefly resurrect a record.
   // Self-heal by never showing a plant whose id already has a grave.
@@ -98,9 +99,9 @@ function tick(): void {
     }
   }
 
-  savePlants(survivors);
+  store.savePlants(survivors);
   if (ghostIds.length > 0) {
-    saveGraveyard(graveyard);
+    store.saveGraveyard(graveyard);
     // The message must carry the id of the plant that was buried, not our own.
     for (const ghostId of ghostIds) channel.post({ type: 'buried', id: ghostId });
   }
@@ -132,7 +133,7 @@ function toGraveyardEntry(
 }
 
 function render(plants: PlantRecord[], now: number): void {
-  const graveyard = loadGraveyard();
+  const graveyard = store.loadGraveyard();
 
   tabCountLineEl.textContent = `放置タブ${plants.length}本、墓標${graveyard.length}基 -- ${computeSinRank(
     graveyard.length,
@@ -160,24 +161,24 @@ function render(plants: PlantRecord[], now: number): void {
 
 function patchSelfField(id: string, patch: Partial<Pick<PlantRecord, 'name' | 'note'>>): void {
   if (id !== selfId) return;
-  const plants = loadPlants();
+  const plants = store.loadPlants();
   const self = plants.find((p) => p.id === selfId);
   if (!self) return;
-  savePlants(upsertSelf(plants, { ...self, ...patch }));
+  store.savePlants(upsertSelf(plants, { ...self, ...patch }));
 }
 
 function handleOwnClose(): void {
   if (closed) return;
   closed = true;
   const now = Date.now();
-  const plants = loadPlants();
+  const plants = store.loadPlants();
   const self = plants.find((p) => p.id === selfId);
   const remaining = plants.filter((p) => p.id !== selfId);
-  savePlants(remaining);
+  store.savePlants(remaining);
   if (self) {
-    const graveyard = loadGraveyard();
+    const graveyard = store.loadGraveyard();
     graveyard.push(toGraveyardEntry(self, now, 'closed'));
-    saveGraveyard(graveyard);
+    store.saveGraveyard(graveyard);
   }
   channel.post({ type: 'buried', id: selfId });
 }
@@ -191,11 +192,11 @@ async function handleReset(): Promise<void> {
   });
   if (!confirmed) return;
 
-  clearAll();
+  store.clearGarden();
   const now = Date.now();
   const fresh = createFreshRecord(now);
-  savePlants([fresh]);
-  saveGraveyard([]);
+  store.savePlants([fresh]);
+  store.saveGraveyard([]);
   channel.post({ type: 'reset' });
   tick();
 }
@@ -217,7 +218,7 @@ channel.onMessage((msg) => {
     // another tab reset the garden; replant ourselves fresh into the (now-empty) storage.
     const now = Date.now();
     const fresh = createFreshRecord(now);
-    savePlants(upsertSelf(loadPlants(), fresh));
+    store.savePlants(upsertSelf(store.loadPlants(), fresh));
   }
   tick();
 });
