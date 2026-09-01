@@ -1,0 +1,116 @@
+.stage-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* [hidden]属性のUAデフォルト(display:none)は、同じ詳細度の`.stage-empty{display:flex}`に
+   負けて無効化されるため、明示的に上書きして確実に非表示にする。 */
+.stage-empty[hidden] {
+  display: none;
+}
+
+.stage-empty-glyph {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  color: var(--paper-dim);
+  text-shadow: 3px 3px 0 var(--ink);
+}
+
+.stage-empty-text {
+  font-size: var(--text-sm);
+  max-width: 32ch;
+}
+
+.splice-frame {
+  position: relative;
+  border: var(--border-w) solid var(--ink);
+  background: var(--ink);
+  /* width / height は JS が実画像サイズに合わせて inline style で設定する */
+}
+
+.splice-layer {
+  position: absolute;
+  left: 0;
+  overflow: hidden;
+  /* top / height は JS が実画像サイズ・カット量・重なりから inline style で設定する */
+}
+
+.splice-layer img {
+  display: block;
+  max-width: none;
+  user-select: none;
+  pointer-events: none;
+  /* width / transform(translateY) は JS が inline style で設定する */
+}
+
+#layer-top-wrap {
+  top: 0;
+  z-index: 1;
+}
+
+#layer-bottom-wrap {
+  z-index: 2;
+}
+
+.splice-frame.front-top #layer-top-wrap {
+  z-index: 2;
+}
+.splice-frame.front-top #layer-bottom-wrap {
+  z-index: 1;
+}
+
+/* mix-blend-mode は「前面(z-indexが上)にあるレイヤー」に付けないと、
+   背面側で差分計算されても不透明な前面レイヤーにそのまま覆い隠されて見えなくなる。
+   前面トグルでz-indexが入れ替わるのに合わせて、blend対象も切り替える。 */
+.splice-frame.diff-mode:not(.front-top) #layer-bottom-wrap {
+  mix-blend-mode: difference;
+}
+.splice-frame.diff-mode.front-top #layer-top-wrap {
+  mix-blend-mode: difference;
+}
+
+.seam-handle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  height: 18px;
+  margin-top: -9px;
+  cursor: row-resize;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--orange),
+    var(--orange) 6px,
+    var(--ink) 6px,
+    var(--ink) 12px
+  );
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+}
+
+.seam-handle:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.seam-handle-grip {
+  width: 46px;
+  height: 8px;
+  background: var(--paper-raised);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+}
+
+.seam-handle.is-dragging {
+  filter: brightness(1.08);
+}
