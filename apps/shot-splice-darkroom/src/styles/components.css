@@ -1,0 +1,547 @@
+/* --- Safelight indicator -------------------------------------------------- */
+
+.safelight-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-safelight);
+  box-shadow: 0 0 8px 2px var(--color-safelight-glow);
+  animation: safelight-pulse 3.6s ease-in-out infinite;
+}
+
+@keyframes safelight-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 8px 2px var(--color-safelight-glow);
+  }
+  50% {
+    opacity: 0.62;
+    box-shadow: 0 0 4px 1px var(--color-safelight-glow-soft);
+  }
+}
+
+/* --- Film sprocket texture -------------------------------------------------- */
+
+.lighttable__sprockets {
+  background-image: radial-gradient(circle, var(--color-void) 2.5px, transparent 2.6px);
+  background-size: 14px 22px;
+  background-position: center;
+  opacity: 0.7;
+}
+
+/* --- Tray (image loader) ---------------------------------------------------- */
+
+.tray {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.tray__label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+}
+
+.tray__index {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-safelight);
+  letter-spacing: 0.1em;
+}
+
+.tray__name {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-paper);
+}
+
+.tray__dropzone {
+  position: relative;
+  border: 1.5px dashed var(--color-tray-border);
+  border-radius: var(--radius-md);
+  background: var(--color-tray);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-normal) var(--ease-out-expo),
+    box-shadow var(--duration-normal) var(--ease-out-expo),
+    transform var(--duration-fast) var(--ease-out-expo);
+}
+
+.tray__dropzone:hover {
+  border-color: var(--color-safelight-dim);
+}
+
+.tray__dropzone:focus-visible {
+  outline: none;
+  border-color: var(--color-safelight);
+  box-shadow: 0 0 0 3px var(--color-safelight-glow-soft);
+}
+
+.tray__dropzone.is-dragover {
+  border-color: var(--color-safelight);
+  box-shadow: 0 0 22px var(--color-safelight-glow-soft);
+  transform: scale(1.01);
+}
+
+.tray__dropzone.has-image {
+  border-style: solid;
+  border-color: var(--color-tray-border);
+}
+
+.tray__dropzone-inner {
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm);
+}
+
+.tray__hint {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-paper-dim);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.tray__preview {
+  max-width: 100%;
+  max-height: 160px;
+  display: block;
+  border-radius: var(--radius-sm);
+  filter: sepia(0.15) contrast(1.02);
+}
+
+/* `display: block` above and the UA `[hidden]{display:none}` rule share
+   specificity (0,0,1,0); without this override the later-loaded author
+   rule wins the cascade and the placeholder <img> stays visible (as a
+   broken-image icon) even while hidden. */
+.tray__preview[hidden] {
+  display: none;
+}
+
+.tray__meta {
+  font-size: var(--text-xs);
+  color: var(--color-paper-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Buttons ---------------------------------------------------------------- */
+
+.rail-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  line-height: 1;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.7em 1em;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-tray-border);
+  background: var(--color-tray-raised);
+  color: var(--color-paper);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out-expo),
+    border-color var(--duration-fast) var(--ease-out-expo),
+    box-shadow var(--duration-fast) var(--ease-out-expo),
+    transform var(--duration-fast) var(--ease-out-expo);
+}
+
+.rail-btn__icon {
+  font-size: 1.05em;
+  line-height: 1;
+}
+
+.rail-btn:hover:not(:disabled) {
+  border-color: var(--color-safelight-dim);
+  background: #3a2019;
+}
+
+.rail-btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.99);
+}
+
+.rail-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-safelight-glow-soft);
+}
+
+.rail-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.rail-btn--primary {
+  background: var(--color-safelight-dim);
+  border-color: var(--color-safelight);
+  color: var(--color-grease-white);
+}
+
+.rail-btn--primary:hover:not(:disabled) {
+  background: var(--color-safelight);
+  box-shadow: 0 0 18px var(--color-safelight-glow);
+}
+
+.rail-btn--danger:hover:not(:disabled) {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.rail-btn--download {
+  background: var(--color-amber);
+  border-color: var(--color-amber);
+  color: var(--color-void-deep);
+  font-weight: 600;
+}
+
+.rail-btn--download:hover:not(:disabled) {
+  box-shadow: 0 0 18px var(--color-amber-glow);
+}
+
+/* --- Mode toggle -------------------------------------------------------------- */
+
+.mode-toggle {
+  display: inline-flex;
+  border: 1px solid var(--color-tray-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.mode-toggle__btn {
+  line-height: 1;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  padding: 0.6em 0.9em;
+  border: none;
+  background: var(--color-tray-raised);
+  color: var(--color-paper-dim);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out-expo), color var(--duration-fast) var(--ease-out-expo);
+}
+
+.mode-toggle__btn + .mode-toggle__btn {
+  border-left: 1px solid var(--color-tray-border);
+}
+
+.mode-toggle__btn:hover {
+  color: var(--color-paper);
+}
+
+.mode-toggle__btn:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--color-safelight-glow-soft);
+}
+
+.mode-toggle__btn.is-active {
+  background: var(--color-safelight-dim);
+  color: var(--color-grease-white);
+}
+
+/* --- Numeric controls --------------------------------------------------------- */
+
+.control-group__legend {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  color: var(--color-paper-dim);
+  padding: 0 var(--space-2xs);
+}
+
+.stepper-btn {
+  line-height: 1;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: 0.55em 0.6em;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-tray-border);
+  background: var(--color-tray-raised);
+  color: var(--color-paper);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out-expo);
+}
+
+.stepper-btn:hover:not(:disabled) {
+  border-color: var(--color-safelight-dim);
+}
+
+.stepper-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-safelight-glow-soft);
+}
+
+.stepper-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.numeric-input {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.2;
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  text-align: center;
+  padding: 0.5em 0.4em;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-tray-border);
+  background: var(--color-void-deep);
+  color: var(--color-grease-white);
+}
+
+.numeric-input:focus-visible {
+  outline: none;
+  border-color: var(--color-safelight);
+  box-shadow: 0 0 0 3px var(--color-safelight-glow-soft);
+}
+
+.numeric-input:disabled {
+  opacity: 0.4;
+}
+
+/* Hide native spinner so the darkroom stepper buttons are the only affordance */
+.numeric-input::-webkit-outer-spin-button,
+.numeric-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.numeric-input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.range-input {
+  width: 100%;
+  margin-top: var(--space-xs);
+  accent-color: var(--color-safelight);
+}
+
+.range-input:disabled {
+  opacity: 0.4;
+}
+
+/* --- Gauge readouts ------------------------------------------------------------ */
+
+.gauge__label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-paper-dim);
+}
+
+.gauge__value {
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-grease-white);
+}
+
+.gauge__value[data-state='good'] {
+  color: var(--color-amber);
+}
+
+.gauge__value[data-state='warn'] {
+  color: var(--color-danger);
+}
+
+/* --- Light table stage ---------------------------------------------------------- */
+
+.lighttable__canvas {
+  display: block;
+  max-width: 100%;
+  border: 1px solid var(--color-tray-border);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+
+.lighttable__canvas[hidden] {
+  display: none;
+}
+
+.lighttable__empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  text-align: center;
+}
+
+.lighttable__empty p {
+  margin: 0;
+  max-width: 26ch;
+  font-family: var(--font-hand);
+  font-size: 1.3rem;
+  color: var(--color-paper-dim);
+}
+
+/* Same [hidden]-vs-class-display specificity tie as .tray__preview above:
+   without this, the empty-state copy stays layered over the canvas once
+   both negatives are loaded. */
+.lighttable__empty[hidden] {
+  display: none;
+}
+
+.lighttable__seam-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-grease-red);
+  box-shadow: 0 0 6px var(--color-safelight-glow);
+  cursor: ns-resize;
+  pointer-events: auto;
+}
+
+.lighttable__seam-line::before {
+  content: '';
+  position: absolute;
+  inset: -8px 0;
+}
+
+.lighttable__seam-line.is-sweeping::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-grease-white);
+  animation: seam-sweep var(--duration-slow) var(--ease-out-expo);
+}
+
+@keyframes seam-sweep {
+  0% {
+    opacity: 1;
+    transform: scaleX(0.02);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+.lighttable__status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(12, 4, 3, 0.82);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-paper);
+}
+
+.lighttable__status::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  margin-right: var(--space-xs);
+  border-radius: 50%;
+  background: var(--color-safelight);
+  animation: safelight-pulse 0.9s ease-in-out infinite;
+}
+
+/* Same [hidden]-vs-class-display specificity tie as .tray__preview above. */
+.lighttable__status[hidden] {
+  display: none;
+}
+
+/* --- Loupe (magnifier) ------------------------------------------------------------- */
+
+.loupe {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 3px solid var(--color-grease-white);
+  box-shadow:
+    0 0 0 2px var(--color-void-deep),
+    0 8px 24px rgba(0, 0, 0, 0.6),
+    inset 0 0 20px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  overflow: hidden;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+}
+
+.loupe__canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.loupe__crosshair {
+  position: absolute;
+  inset: 0;
+}
+
+.loupe__crosshair::before,
+.loupe__crosshair::after {
+  content: '';
+  position: absolute;
+  background: var(--color-grease-red);
+  opacity: 0.85;
+}
+
+.loupe__crosshair::before {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.loupe__crosshair::after {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+/* --- Toast (grease-pencil stamp) ------------------------------------------------------ */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-lg);
+  z-index: 20;
+  transform: translateX(-50%) rotate(-2deg);
+  font-family: var(--font-hand);
+  font-size: 1.3rem;
+  padding: 0.5em 1.2em;
+  border: 2px solid var(--color-grease-red);
+  border-radius: var(--radius-sm);
+  background: var(--color-paper);
+  color: var(--color-void-deep);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.toast[data-tone='error'] {
+  border-color: var(--color-danger);
+}
+
+.toast.is-visible {
+  animation: toast-stamp var(--duration-normal) var(--ease-out-expo);
+}
+
+@keyframes toast-stamp {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) rotate(-2deg) scale(1.4);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(-50%) rotate(-2deg) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) rotate(-2deg) scale(1);
+  }
+}

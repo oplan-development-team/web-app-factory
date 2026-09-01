@@ -1,0 +1,23 @@
+@media (prefers-reduced-motion: reduce) {
+  .safelight-dot,
+  .lighttable__status::before {
+    animation: none;
+  }
+
+  .lighttable__seam-line.is-sweeping::after {
+    animation: none;
+    display: none;
+  }
+
+  .toast.is-visible {
+    animation: none;
+  }
+
+  .tray__dropzone,
+  .rail-btn,
+  .mode-toggle__btn,
+  .stepper-btn,
+  .numeric-input {
+    transition: none;
+  }
+}

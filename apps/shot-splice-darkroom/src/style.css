@@ -1,0 +1,12 @@
+@import '@fontsource/oswald/400.css';
+@import '@fontsource/oswald/600.css';
+@import '@fontsource/space-mono/400.css';
+@import '@fontsource/space-mono/700.css';
+@import '@fontsource/caveat/500.css';
+@import '@fontsource/caveat/600.css';
+
+@import './styles/tokens.css';
+@import './styles/base.css';
+@import './styles/layout.css';
+@import './styles/components.css';
+@import './styles/motion.css';

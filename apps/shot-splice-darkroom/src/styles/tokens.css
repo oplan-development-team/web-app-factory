@@ -1,0 +1,57 @@
+:root {
+  /* Surfaces — warm, red-cast darkroom air, never neutral gray-black */
+  --color-void: #170807;
+  --color-void-deep: #0c0403;
+  --color-tray: #271511;
+  --color-tray-raised: #33201a;
+  --color-tray-border: #4a2c22;
+
+  /* Safelight red — the darkroom's only true light source */
+  --color-safelight: #ff3d1f;
+  --color-safelight-dim: #9c2e18;
+  --color-safelight-glow: rgba(255, 61, 31, 0.38);
+  --color-safelight-glow-soft: rgba(255, 61, 31, 0.16);
+
+  /* Chemistry amber — secondary accent, reserved for confirmation/success */
+  --color-amber: #e0983f;
+  --color-amber-glow: rgba(224, 152, 63, 0.35);
+
+  /* Photo paper / contact sheet cream */
+  --color-paper: #ece1c6;
+  --color-paper-dim: #b8a983;
+  --color-paper-faint: rgba(236, 225, 198, 0.5);
+
+  /* Grease pencil marks */
+  --color-grease-white: #f6f1e4;
+  --color-grease-red: #d8432c;
+
+  --color-danger: #ff5a3d;
+
+  /* Typography */
+  --font-display: 'Oswald', 'Hiragino Sans', sans-serif;
+  --font-mono: 'Space Mono', 'SF Mono', monospace;
+  --font-hand: 'Caveat', cursive;
+
+  --text-xs: 0.72rem;
+  --text-sm: 0.82rem;
+  --text-base: 0.95rem;
+  --text-md: 1.1rem;
+  --text-lg: 1.5rem;
+  --text-xl: clamp(1.6rem, 1.2rem + 1.6vw, 2.4rem);
+
+  /* Spacing rhythm — intentionally uneven, not a single uniform unit */
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.85rem;
+  --space-md: 1.4rem;
+  --space-lg: 2.25rem;
+  --space-xl: 3.5rem;
+
+  --radius-sm: 3px;
+  --radius-md: 6px;
+
+  --duration-fast: 140ms;
+  --duration-normal: 280ms;
+  --duration-slow: 900ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
