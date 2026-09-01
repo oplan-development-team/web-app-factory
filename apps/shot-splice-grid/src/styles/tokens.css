@@ -1,0 +1,45 @@
+:root {
+  /* -- Palette: warm paper + ink + a single signal accent ------------ */
+  --paper: #f3f0e8;
+  --paper-raised: #fbfaf5;
+  --ink: #15140f;
+  --ink-soft: rgba(21, 20, 15, 0.64);
+  --ink-faint: rgba(21, 20, 15, 0.4);
+  --line: rgba(21, 20, 15, 0.18);
+  --line-strong: rgba(21, 20, 15, 0.55);
+  --accent: #ff3d1a;
+  --accent-ink: #fff8f2;
+  --accent-soft: rgba(255, 61, 26, 0.12);
+  --accent-line: rgba(255, 61, 26, 0.55);
+  --focus-ring: rgba(255, 61, 26, 0.6);
+  --error: #c81e0f;
+
+  /* -- Type ------------------------------------------------------------ */
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --text-hero: clamp(2.6rem, 1.7rem + 4vw, 5.4rem);
+  --text-xl: clamp(1.35rem, 1.1rem + 1vw, 1.9rem);
+  --text-lg: 1.05rem;
+  --text-base: 0.94rem;
+  --text-sm: 0.8rem;
+  --text-xs: 0.68rem;
+  --text-readout: clamp(2.2rem, 1.6rem + 2.6vw, 3.4rem);
+
+  /* -- Spacing rhythm (intentionally uneven, not a uniform scale) ----- */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1.1rem;
+  --space-md: 1.75rem;
+  --space-lg: 2.75rem;
+  --space-xl: 4.5rem;
+
+  /* -- Motion ----------------------------------------------------------- */
+  --duration-fast: 140ms;
+  --duration-normal: 260ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* -- Shape ------------------------------------------------------------ */
+  --shadow-offset: 4px;
+}
