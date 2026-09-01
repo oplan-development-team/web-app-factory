@@ -58,7 +58,26 @@
   gap: var(--gap-tight);
   margin: 0 calc(var(--pad-edge) * -1);
   padding: var(--gap-tight) var(--pad-edge) var(--gap);
-  background: linear-gradient(to bottom, var(--bg) 76%, transparent);
+}
+
+/*
+ * The stage's backdrop lives on a pseudo-element rather than on .stage itself.
+ * Masking the element directly also fades its children, which quietly turned
+ * the output-size readout half-transparent.
+ *
+ * It is opaque so content scrolling underneath does not show through, and it
+ * repaints the same fixed atmosphere as the body so its top edge does not read
+ * as a band across the page.
+ */
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-color: var(--bg);
+  background-image: var(--atmosphere);
+  background-attachment: fixed, fixed;
+  mask-image: linear-gradient(to bottom, #000 82%, transparent);
 }
 
 .stage__wash {
@@ -246,6 +265,10 @@
     margin: 0;
     padding: 0;
     background: none;
+  }
+
+  .stage::before {
+    display: none;
   }
 
   .stage__frame {

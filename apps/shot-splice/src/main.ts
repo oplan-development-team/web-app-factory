@@ -5,11 +5,19 @@ import './styles/components.css';
 import './styles/sheet.css';
 import './styles/motion.css';
 
+import { MATCH_COST_THRESHOLD } from './core/alignment';
 import { computeLayout } from './core/layout';
 import type { FrontLayer, Layout } from './core/types';
 import { composeCanvas, seamView, type ShotSource } from './imaging/compose';
 import { type CanvasLike, context2d, createCanvas } from './imaging/surface';
-import { createAnalyzer, detectBands, detectSeam, workingGrays } from './ui/analysis';
+import {
+  createAnalyzer,
+  cutsEqual,
+  detectBands,
+  detectSeam,
+  scoreOverlap,
+  workingGrays,
+} from './ui/analysis';
 import { createAppShell } from './ui/app-shell';
 import { createBandCard } from './ui/band-card';
 import { el, frameThrottle } from './ui/dom';
@@ -38,13 +46,18 @@ import {
   updateBands,
   updateSeam,
   type AppState,
+  type SeamState,
 } from './ui/store';
 import { createToolbar } from './ui/toolbar';
 
 /** Cap on canvas pixels along one axis; some browsers refuse taller surfaces. */
 const MAX_CANVAS_DIM = 8192;
-/** How many image rows the seam crop shows at once. */
+/** How many image rows either side of the band the seam crop may reach for. */
 const LOUPE_WINDOW_PX = 300;
+/** Physical height of the seam crop, in CSS pixels. */
+const LOUPE_HEIGHT_CSS = 170;
+/** Never magnify past this, or the crop stops showing enough context. */
+const MAX_LOUPE_ZOOM = 3;
 
 const store = createStore();
 const analyzer = createAnalyzer();
@@ -63,6 +76,35 @@ function currentLayout(state: AppState): Layout | null {
     seamList(state).map((seam) => seam.overlapPx),
     effectiveCuts(state.bands),
   );
+}
+
+let grayCache: { key: string; cuts: ReturnType<typeof effectiveCuts>; grays: ReturnType<typeof workingGrays> } | null =
+  null;
+
+function cutGrays(state: AppState, layout: Layout) {
+  const key = state.shots.map((shot) => shot.id).join(',');
+  const cuts = effectiveCuts(state.bands);
+  if (grayCache && grayCache.key === key && cutsEqual(grayCache.cuts, cuts)) return grayCache.grays;
+  const grays = workingGrays(analyzer, state.shots, baseWidth(state), layout);
+  grayCache = { key, cuts, grays };
+  return grays;
+}
+
+/**
+ * Re-measures a seam at the overlap the user just chose.
+ *
+ * Without this the seam keeps advertising the cost of the *detected* overlap,
+ * so dragging a perfectly matched seam apart leaves it still labelled "一致".
+ */
+function rescore(state: AppState, index: number, overlapPx: number): Partial<SeamState> {
+  const layout = currentLayout(state);
+  if (!layout) return { overlapPx };
+  const grays = cutGrays(state, layout);
+  const upper = grays[index];
+  const lower = grays[index + 1];
+  if (!upper || !lower) return { overlapPx };
+  const cost = scoreOverlap(upper, lower, overlapPx);
+  return { overlapPx, cost, matched: cost !== null && cost <= MATCH_COST_THRESHOLD };
 }
 
 function sourcesOf(state: AppState): ShotSource[] {
@@ -105,12 +147,15 @@ function paintStage(canvas: HTMLCanvasElement, width: number, height: number): v
 }
 
 /**
- * Draws one seam at 1:1 device pixels and returns the CSS-pixels-per-image-pixel
- * ratio so the drag handler can move the image exactly as far as the finger.
+ * Draws one seam at no less than 1:1 device pixels and returns how many CSS
+ * pixels one image pixel occupies, so the drag handler can move the image
+ * exactly as far as the finger.
  *
- * 1:1 matters here: at fit-width a phone screenshot is squeezed by 3x or more,
+ * Never below 1:1: at fit-width a phone screenshot is squeezed by 3x or more,
  * and a one-pixel misalignment — the thing this view exists to expose — would
- * be averaged out of existence.
+ * be averaged out of existence. Sources narrower than the sheet are magnified
+ * instead of being left floating in dead space, and magnification is drawn
+ * with smoothing off so single-pixel errors stay hard-edged.
  */
 function paintLoupe(canvas: HTMLCanvasElement, index: number, diff: boolean): number {
   const state = store.getState();
@@ -129,29 +174,35 @@ function paintLoupe(canvas: HTMLCanvasElement, index: number, diff: boolean): nu
   const frame = canvas.parentElement;
   const cssWidth = Math.max(1, frame?.clientWidth ?? 320);
   const deviceWidth = Math.round(cssWidth * ratio);
-  const windowPx = Math.min(view.canvas.height, LOUPE_WINDOW_PX);
+  const zoom = Math.max(1, Math.min(MAX_LOUPE_ZOOM, deviceWidth / view.canvas.width));
+
+  // Keep the crop a consistent physical height whatever the zoom.
+  const windowPx = Math.max(
+    1,
+    Math.min(view.canvas.height, Math.round((LOUPE_HEIGHT_CSS * ratio) / zoom)),
+  );
   const focus = view.bandY + Math.min(view.bandHeight, windowPx) / 2;
   const sy = Math.max(0, Math.min(view.canvas.height - windowPx, Math.round(focus - windowPx / 2)));
-  const sx = Math.max(0, Math.round((view.canvas.width - deviceWidth) / 2));
-  const sw = Math.min(deviceWidth, view.canvas.width);
+  const sw = Math.min(Math.round(deviceWidth / zoom), view.canvas.width);
+  const sx = Math.max(0, Math.round((view.canvas.width - sw) / 2));
 
-  canvas.width = sw;
-  canvas.height = windowPx;
-  canvas.style.width = `${sw / ratio}px`;
-  canvas.style.height = `${windowPx / ratio}px`;
+  canvas.width = Math.round(sw * zoom);
+  canvas.height = Math.round(windowPx * zoom);
+  canvas.style.width = `${canvas.width / ratio}px`;
+  canvas.style.height = `${canvas.height / ratio}px`;
 
   const ctx = context2d(canvas as unknown as CanvasLike);
-  ctx.drawImage(view.canvas, sx, sy, sw, windowPx, 0, 0, sw, windowPx);
+  ctx.imageSmoothingEnabled = zoom === 1;
+  ctx.drawImage(view.canvas, sx, sy, sw, windowPx, 0, 0, canvas.width, canvas.height);
 
   // Mark where the shared band begins and ends within this crop.
   const band = canvas.parentElement?.querySelector<HTMLElement>('.loupe__band');
   if (band) {
-    const top = (view.bandY - sy) / ratio;
-    band.style.transform = `translateY(${top}px)`;
-    band.style.height = `${view.bandHeight / ratio}px`;
+    band.style.transform = `translateY(${((view.bandY - sy) * zoom) / ratio}px)`;
+    band.style.height = `${(view.bandHeight * zoom) / ratio}px`;
     band.hidden = view.bandHeight <= 0;
   }
-  return 1 / ratio;
+  return zoom / ratio;
 }
 
 const stage = createStage({ paint: paintStage });
@@ -189,7 +240,8 @@ const reel = createReel({
 });
 
 const sheet = createSeamSheet({
-  onOverlap: (index, value) => store.update((s) => updateSeam(s, index, { overlapPx: clampOverlap(s, index, value) })),
+  onOverlap: (index, value) =>
+    store.update((s) => updateSeam(s, index, rescore(s, index, clampOverlap(s, index, value)))),
   onFront: (index, front) => store.update((s) => updateSeam(s, index, { front })),
   onDiff: (diff) => store.update((s) => setDiffMode(s, diff)),
   onRedetect: (index) => void detectRange(index, index + 1),
@@ -235,7 +287,7 @@ async function detectRange(from: number, to: number): Promise<void> {
     const state = store.getState();
     const layout = currentLayout(state);
     if (!layout) break;
-    const grays = workingGrays(analyzer, state.shots, baseWidth(state), layout);
+    const grays = cutGrays(state, layout);
     const upper = grays[i];
     const lower = grays[i + 1];
     if (!upper || !lower) continue;

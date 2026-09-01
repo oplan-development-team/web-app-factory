@@ -19,8 +19,11 @@
   --surface-1: oklch(20% 0.014 264);
   --surface-2: oklch(25.5% 0.015 264);
   --surface-3: oklch(31% 0.016 264);
-  --hairline: oklch(100% 0 0 / 0.11);
-  --hairline-strong: oklch(100% 0 0 / 0.2);
+  /* Measured, not guessed: at 0.11 alpha these lines came out at 1.17 contrast
+     against their own surface, which reads as no line at all on a dark ground.
+     Raised until the measured ratio cleared 1.4. */
+  --hairline: oklch(100% 0 0 / 0.26);
+  --hairline-strong: oklch(100% 0 0 / 0.38);
   --sheen: oklch(100% 0 0 / 0.06);
 
   --text: oklch(96% 0.004 264);
@@ -43,7 +46,10 @@
     'Noto Sans JP', system-ui, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, 'Roboto Mono', monospace;
 
-  --text-title: clamp(1.6rem, 1.35rem + 1.1vw, 2.125rem);
+  /* The title is the only large-scale element; at the previous clamp it landed
+     at 25.9px on a 390px screen, only 2.4x the caption size, which is not
+     enough separation to establish a hierarchy. */
+  --text-title: clamp(1.9rem, 1.5rem + 2.2vw, 2.5rem);
   --text-section: 0.6875rem;
   --text-body: 0.9375rem;
   --text-small: 0.8125rem;
@@ -74,6 +80,13 @@
   --shadow-card: 0 1px 2px oklch(0% 0 0 / 0.4), 0 8px 24px -12px oklch(0% 0 0 / 0.7);
   --shadow-sheet: 0 -12px 48px -12px oklch(0% 0 0 / 0.8);
   --shadow-float: 0 6px 20px -6px oklch(0% 0 0 / 0.65);
+
+  /* Shared so the sticky stage can repaint the identical backdrop; painted
+     with background-attachment: fixed in both places, the two line up exactly
+     and the stage's edge stops reading as a band across the page. */
+  --atmosphere:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E"),
+    radial-gradient(120% 70% at 50% -10%, oklch(24% 0.02 264) 0%, transparent 70%);
 
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);

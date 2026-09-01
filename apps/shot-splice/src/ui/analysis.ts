@@ -1,5 +1,6 @@
 import { MIN_OVERLAP_PX, detectOverlapGray } from '../core/alignment';
 import { detectCommonBands } from '../core/banding';
+import { seamCost } from '../core/gray';
 import { cropGray, squashWidth } from '../core/gray-scale';
 import type { AlignmentResult, BandCuts, BandDetection, GrayImage, Layout } from '../core/types';
 import { imageToGray } from '../imaging/raster';
@@ -8,6 +9,9 @@ import type { Shot } from './store';
 
 /** Width the coarse pass squashes to. Height is always left alone. */
 export const COARSE_WIDTH = 100;
+
+/** Rows sampled when re-scoring a seam during manual adjustment. */
+export const SCORE_ROW_SAMPLES = 192;
 
 export interface Analyzer {
   /** Luminance buffer for a shot, normalised to `width`. Cached per shot and width. */
@@ -99,4 +103,18 @@ export function detectBands(
 
 export function cutsEqual(a: BandCuts, b: BandCuts): boolean {
   return a.headerPx === b.headerPx && a.footerPx === b.footerPx && a.trimEnds === b.trimEnds;
+}
+
+/**
+ * Scores a seam at an arbitrary overlap, without searching.
+ *
+ * Manual adjustment invalidates the cost recorded by the last detection: the
+ * UI would otherwise keep reporting "matched, Δ0.00" for a seam the user has
+ * just dragged out of alignment, which is worse than showing nothing. Rows are
+ * sampled so this stays cheap enough to run on every drag frame.
+ */
+export function scoreOverlap(upper: GrayImage, lower: GrayImage, overlapPx: number): number | null {
+  if (overlapPx <= 0) return null;
+  const cost = seamCost(upper, lower, overlapPx, SCORE_ROW_SAMPLES);
+  return Number.isFinite(cost) ? cost : null;
 }

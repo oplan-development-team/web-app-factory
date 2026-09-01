@@ -28,9 +28,7 @@ body {
   background-color: var(--bg);
   /* Grain, then a cold vignette so the bench has some atmosphere without
      resorting to a decorative gradient blob. */
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E"),
-    radial-gradient(120% 70% at 50% -10%, oklch(24% 0.02 264) 0%, transparent 70%);
+  background-image: var(--atmosphere);
   background-attachment: fixed, fixed;
 }
 
