@@ -57,7 +57,7 @@
       `tokens.css` / `base.css`。配色・角丸・余白リズム・タイポスケール・ノイズ・safe-area・reduced-motion。
       → 検証: ビルドが通り、トークンが 1 箇所に集約されている
 
-- [ ] **T10** `ui/store.ts` — アプリ状態
+- [x] **T10** `ui/store.ts` — アプリ状態
       イミュータブル更新、購読、shots / seams / bands / activeSeam / diffMode / status。
       → 検証: 追加・削除・並べ替え時の seams 再構成、手動編集値の保持 (FR-207)
 
