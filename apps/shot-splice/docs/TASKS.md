@@ -13,7 +13,7 @@
 
 ## フェーズ 1: 足場
 
-- [ ] **T1** プロジェクト足場
+- [x] **T1** プロジェクト足場
       Vite + TS(strict) + Vitest(jsdom, v8 coverage 80%) + `deploy.json` + Dockerfile + `.dockerignore` + `.gitignore`。
       `vite.config.ts` に `base: './'`。
       → 検証: `npm run build` と空のスモークテストが通る
