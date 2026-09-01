@@ -104,7 +104,7 @@
       3 枚読み込み→一括検出→PNG 書き出しの通し。
       → 検証: Playwright スクリプトの全項目 PASS
 
-- [ ] **T21** README / Docker / Pages 確認 (NFR-008/009, AC-501/503/504)
+- [x] **T21** README / Docker / Pages 確認 (NFR-008/009, AC-501/503/504)
       README（機能・アルゴリズム・スタイル方向・開発手順・Docker）、`docker build` の実行確認、
       `deploy.json` とサブパス配信の確認。
       → 検証: `docker build` 成功、サブパス配信でアセットが読める
