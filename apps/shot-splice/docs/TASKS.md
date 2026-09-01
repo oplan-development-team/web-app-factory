@@ -42,7 +42,7 @@
 
 ## フェーズ 3: Canvas 層
 
-- [ ] **T7** `imaging/canvas.ts` / `imaging/grayscale.ts`
+- [x] **T7** `imaging/canvas.ts` / `imaging/grayscale.ts`
       画像→Canvas、上下カット、幅スケール、Canvas→`GrayImage`（フル / 幅のみ縮小）。
       narrow interface（`CanvasLike` / `Ctx2DLike` / `CanvasFactory`）を定義する。
       → 検証: フェイク Canvas でのソース矩形・スケール引数の検証

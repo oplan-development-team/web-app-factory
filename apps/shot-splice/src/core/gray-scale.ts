@@ -12,6 +12,29 @@ import type { GrayImage } from './types';
  * wrong one. Squashing horizontally costs the same amount of work and leaves
  * every row addressable at its original position.
  */
+/**
+ * Returns the rows left after removing `cutTop` rows from the top and
+ * `cutBottom` from the bottom.
+ *
+ * Band cuts are applied here, on the luminance buffer, rather than by
+ * re-rasterising the source image. Each shot is rasterised exactly once; every
+ * later change to the header/footer settings is then a pure slice, which keeps
+ * dragging the cut controls responsive.
+ */
+export function cropGray(source: GrayImage, cutTop: number, cutBottom: number): GrayImage {
+  const top = Math.max(0, Math.min(Math.round(cutTop), source.height));
+  const bottom = Math.max(0, Math.min(Math.round(cutBottom), source.height - top));
+  const height = source.height - top - bottom;
+  if (height <= 0) return { data: new Uint8ClampedArray(0), width: source.width, height: 0 };
+  if (top === 0 && bottom === 0) return source;
+  const start = top * source.width;
+  return {
+    data: source.data.slice(start, start + height * source.width),
+    width: source.width,
+    height,
+  };
+}
+
 export function squashWidth(source: GrayImage, targetWidth: number): GrayImage {
   const width = Math.max(1, Math.floor(targetWidth));
   if (source.width <= width || source.width === 0) return source;
