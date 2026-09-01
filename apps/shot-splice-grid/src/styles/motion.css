@@ -1,0 +1,40 @@
+@keyframes sweep-down {
+  0% {
+    transform: translateY(0);
+    opacity: 0.9;
+  }
+  95% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(var(--sweep-distance, 0px));
+    opacity: 0.4;
+  }
+}
+
+@keyframes pulse-corner {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-sweep {
+    animation: none;
+  }
+  .dropzone.is-loading .corner {
+    animation: none;
+  }
+  .btn,
+  .stepper-btn,
+  .segmented-btn,
+  .dropzone-remove,
+  .corner,
+  .dropzone {
+    transition: none;
+  }
+}

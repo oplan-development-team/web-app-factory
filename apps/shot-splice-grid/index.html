@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SHOT SPLICE GRID — スクリーンショット継ぎ足しツール</title>
+    <meta
+      name="description"
+      content="2枚に分けて撮ったスクリーンショットの重なりを自動/手動で検出し、1枚のシームレス画像に継ぎ足すツール。処理はすべてブラウザ内で完結します。"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app" data-state="empty">
+      <header class="site-header">
+        <div class="header-row">
+          <h1 class="wordmark">SHOT<br />SPLICE<br />GRID</h1>
+          <div class="header-meta">
+            <span class="meta-line">N&deg; 001 &mdash; 継ぎ足し精密測定ツール</span>
+            <span class="meta-line">REV. A &middot; CLIENT-SIDE ONLY</span>
+          </div>
+          <p class="header-tagline">
+            二分割で撮ったスクリーンショットの重なりを検出し、<br class="lb-desktop" />
+            1枚のシームレスな縦長画像に継ぎ足す。
+          </p>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="panel panel--canvas" aria-labelledby="canvas-heading">
+          <h2 id="canvas-heading" class="visually-hidden">プレビュー</h2>
+
+          <div id="dropzones" class="dropzones">
+            <div class="dropzone" data-slot="top" id="dropzone-top">
+              <span class="corner corner--tl" aria-hidden="true"></span>
+              <span class="corner corner--tr" aria-hidden="true"></span>
+              <span class="corner corner--bl" aria-hidden="true"></span>
+              <span class="corner corner--br" aria-hidden="true"></span>
+              <label class="dropzone-hit" for="input-top">
+                <input type="file" accept="image/*" id="input-top" class="visually-hidden" />
+                <span class="dropzone-index">01</span>
+                <span class="dropzone-label">TOP<br />上半分</span>
+                <span class="dropzone-hint">クリック、またはドラッグ&amp;ドロップ</span>
+              </label>
+              <div class="dropzone-filled" hidden>
+                <canvas class="dropzone-thumb"></canvas>
+                <div class="dropzone-meta">
+                  <span class="dropzone-filename"></span>
+                  <span class="dropzone-dims"></span>
+                </div>
+                <button type="button" class="dropzone-remove" aria-label="TOP画像を削除">&times;</button>
+              </div>
+              <p class="dropzone-error" role="alert"></p>
+            </div>
+
+            <div class="dropzone" data-slot="bottom" id="dropzone-bottom">
+              <span class="corner corner--tl" aria-hidden="true"></span>
+              <span class="corner corner--tr" aria-hidden="true"></span>
+              <span class="corner corner--bl" aria-hidden="true"></span>
+              <span class="corner corner--br" aria-hidden="true"></span>
+              <label class="dropzone-hit" for="input-bottom">
+                <input type="file" accept="image/*" id="input-bottom" class="visually-hidden" />
+                <span class="dropzone-index">02</span>
+                <span class="dropzone-label">BOTTOM<br />下半分</span>
+                <span class="dropzone-hint">クリック、またはドラッグ&amp;ドロップ</span>
+              </label>
+              <div class="dropzone-filled" hidden>
+                <canvas class="dropzone-thumb"></canvas>
+                <div class="dropzone-meta">
+                  <span class="dropzone-filename"></span>
+                  <span class="dropzone-dims"></span>
+                </div>
+                <button type="button" class="dropzone-remove" aria-label="BOTTOM画像を削除">&times;</button>
+              </div>
+              <p class="dropzone-error" role="alert"></p>
+            </div>
+          </div>
+
+          <div id="preview-stage" class="preview-stage" hidden tabindex="0" aria-label="継ぎ目プレビュー。矢印キーで重なり量を1px、Shiftキー同時押しで10px単位に調整できます。">
+            <div id="preview-scroll" class="preview-scroll">
+              <canvas id="preview-canvas"></canvas>
+              <div class="seam-guide seam-guide--top" id="seam-line-top"></div>
+              <div class="seam-guide seam-guide--bottom" id="seam-line-bottom"></div>
+              <div class="seam-readout" id="seam-readout">
+                <span id="seam-readout-value">0</span><span class="unit">px</span>
+              </div>
+            </div>
+            <div class="scan-sweep" id="scan-sweep" hidden aria-hidden="true"></div>
+          </div>
+        </section>
+
+        <aside class="panel panel--controls" aria-label="操作パネル">
+          <div class="control-card control-card--alignment">
+            <div class="control-card-head">
+              <span class="control-index">03</span>
+              <h3 class="control-title">ALIGNMENT<br />重なり量</h3>
+            </div>
+            <div class="readout-row">
+              <input
+                type="number"
+                id="overlap-input"
+                class="readout-number"
+                inputmode="numeric"
+                value="0"
+                min="0"
+                disabled
+              />
+              <span class="readout-unit">px</span>
+            </div>
+            <div class="stepper-row">
+              <button type="button" class="stepper-btn" data-step="-10">&minus;10</button>
+              <button type="button" class="stepper-btn" data-step="-1">&minus;1</button>
+              <button type="button" class="stepper-btn" data-step="1">+1</button>
+              <button type="button" class="stepper-btn" data-step="10">+10</button>
+            </div>
+            <button type="button" id="auto-detect-btn" class="btn btn--accent" disabled>
+              <span class="btn-label">AUTO DETECT</span>
+              <span class="btn-glyph" aria-hidden="true">&#8981;</span>
+            </button>
+            <p class="micro-readout" id="cost-readout" aria-live="polite">&mdash;</p>
+          </div>
+
+          <div class="control-card control-card--crop">
+            <div class="control-card-head">
+              <span class="control-index">04</span>
+              <h3 class="control-title">TRIM<br />端部カット</h3>
+            </div>
+            <label class="field-row">
+              <span class="field-label">TOP 下端</span>
+              <input type="number" id="top-cut-input" class="field-number" inputmode="numeric" value="0" min="0" disabled />
+              <span class="field-unit">px</span>
+            </label>
+            <label class="field-row">
+              <span class="field-label">BOTTOM 上端</span>
+              <input type="number" id="bottom-cut-input" class="field-number" inputmode="numeric" value="0" min="0" disabled />
+              <span class="field-unit">px</span>
+            </label>
+          </div>
+
+          <div class="control-card control-card--split">
+            <div class="control-card-block">
+              <div class="control-card-head">
+                <span class="control-index">05</span>
+                <h3 class="control-title control-title--sm">前面レイヤー</h3>
+              </div>
+              <div class="segmented" role="group" aria-label="前面に表示するレイヤー">
+                <button type="button" class="segmented-btn is-active" id="front-top-btn" aria-pressed="true" disabled>TOP</button>
+                <button type="button" class="segmented-btn" id="front-bottom-btn" aria-pressed="false" disabled>BOTTOM</button>
+              </div>
+            </div>
+            <div class="control-card-block">
+              <div class="control-card-head">
+                <span class="control-index">06</span>
+                <h3 class="control-title control-title--sm">表示モード</h3>
+              </div>
+              <div class="segmented" role="group" aria-label="プレビューの表示モード">
+                <button type="button" class="segmented-btn is-active" id="view-normal-btn" aria-pressed="true" disabled>NORMAL</button>
+                <button type="button" class="segmented-btn" id="view-diff-btn" aria-pressed="false" disabled>DIFF</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="control-card control-card--output">
+            <div class="control-card-head">
+              <span class="control-index">07</span>
+              <h3 class="control-title">OUTPUT<br />出力サイズ</h3>
+            </div>
+            <div class="output-size" id="output-size">
+              <span id="output-width">&mdash;</span>
+              <span class="output-x">&times;</span>
+              <span id="output-height">&mdash;</span>
+            </div>
+            <button type="button" id="download-btn" class="btn btn--primary" disabled>
+              <span class="btn-label">DOWNLOAD PNG</span>
+              <span class="btn-glyph" aria-hidden="true">&darr;</span>
+            </button>
+          </div>
+
+          <div class="control-actions">
+            <button type="button" id="swap-btn" class="btn btn--ghost" disabled>
+              <span aria-hidden="true">&#8645;</span> 上下入れ替え
+            </button>
+            <button type="button" id="clear-btn" class="btn btn--ghost" disabled>すべてクリア</button>
+          </div>
+
+          <p class="status-line" id="status-line" aria-live="polite"></p>
+        </aside>
+      </main>
+
+      <footer class="site-footer">
+        <span class="footer-item">△ PRECISION ALIGNMENT TOOL</span>
+        <span class="footer-item">処理はすべてブラウザ内で完結。画像は送信されません。</span>
+        <span class="footer-item">shot-splice-grid / app-factory prototype</span>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
