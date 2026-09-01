@@ -47,7 +47,7 @@
       narrow interface（`CanvasLike` / `Ctx2DLike` / `CanvasFactory`）を定義する。
       → 検証: フェイク Canvas でのソース矩形・スケール引数の検証
 
-- [ ] **T8** `imaging/compose.ts` — 合成描画
+- [x] **T8** `imaging/compose.ts` — 合成描画
       Layout に従った通常合成、継ぎ目ルーペ（等倍切り出し）、差分描画 (FR-401/402, FR-501/504)。
       → 検証: 描画順（前面レイヤ切替）、差分帯の座標、フル/プレビューの解像度分岐
 
