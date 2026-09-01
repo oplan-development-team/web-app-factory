@@ -84,3 +84,24 @@ export function fakeFactory(fill?: (i: number) => number): CanvasFactory & { cre
 export function fakeSource(width: number, height: number): CanvasImageSource {
   return { width, height } as unknown as CanvasImageSource;
 }
+
+/**
+ * Real DOM canvas elements with a stubbed 2D context.
+ *
+ * jsdom can create the element but cannot give it a context, and components
+ * append the element to the document — so neither a plain fake nor the real
+ * thing works on its own.
+ */
+export function domFakeFactory(): CanvasFactory & { created: HTMLCanvasElement[] } {
+  const created: HTMLCanvasElement[] = [];
+  const factory: CanvasFactory = (width: number, height: number) => {
+    const backing = fakeCanvas(width, height);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(width));
+    canvas.height = Math.max(1, Math.round(height));
+    Object.defineProperty(canvas, 'getContext', { value: () => backing.getContext('2d') });
+    created.push(canvas);
+    return canvas as unknown as CanvasLike;
+  };
+  return Object.assign(factory, { created });
+}
