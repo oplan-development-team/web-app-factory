@@ -35,6 +35,9 @@
 | 校正記号diffビューア（Proofmark Diff） | 改稿前後のテキストを、紙の校正で使われる校正記号（トルツメ・キャレット・ルビ訂正・移動矢印）の見た目で差分表示する | [Pages](https://oplan-development-team.github.io/web-app-factory/proofmark-diff/) | プロトタイプ（採否待ち） |
 | オーロラ・テルミン（Aurora Theremin） | マウス/指の位置と速度でWeb Audioのテルミン風シンセを演奏し、録音・ループ・重ね録りもできる楽器トイ | [Pages](https://oplan-development-team.github.io/web-app-factory/aurora-theremin/) | プロトタイプ（採否待ち） |
 | クラドニ図形ポスタージェネレーター（Chladni Cymatics Poster Lab） | 振動モードを指定すると、砂粒子がChladni図形の節線に収束する物理シミュレーションを描画し、実験記録ポスターとして書き出す | [Pages](https://oplan-development-team.github.io/web-app-factory/chladni-poster-lab/) | プロトタイプ（採否待ち） |
+| スクショ継ぎ足し工房（暗室版） | 2枚に分けたスクリーンショットの重なりを自動検出し1枚に継ぎ足す。写真暗室・アナログ現像室スタイル | [Pages](https://oplan-development-team.github.io/web-app-factory/shot-splice-darkroom/) | プロトタイプ（採否待ち） |
+| スクショ継ぎ足し工房（スイス様式版） | 同上の機能をスイス/インターナショナル・スタイルの計測器デザインで | [Pages](https://oplan-development-team.github.io/web-app-factory/shot-splice-grid/) | プロトタイプ（採否待ち） |
+| スクショ継ぎ足し工房（ネオブルータリズム版） | 同上の機能をネオブルータリズムの荒々しい実用ツールデザインで | [Pages](https://oplan-development-team.github.io/web-app-factory/shot-splice-brutal/) | プロトタイプ（採否待ち） |
 | タイピング心電図 | 打鍵のkeydown間隔だけを計測し、病院の心電図モニター風UIでリアルタイムに波形と診断結果を描くネタツール | — （Pages未対応、下記参照） | 保留 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
