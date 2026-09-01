@@ -114,13 +114,22 @@ export function seamList(state: AppState): SeamState[] {
   return out;
 }
 
-/** Drops measurements for pairs that no longer exist, so the map cannot grow forever. */
+/**
+ * Drops measurements that mention a shot which is no longer loaded.
+ *
+ * Deliberately keyed on whether the shots still exist, not on whether they are
+ * still adjacent. Pruning by adjacency looks tidier but throws work away on
+ * any round trip: moving a shot down and back up would pass through an
+ * arrangement where the original pairs are not adjacent, and every measurement
+ * would be gone by the time the user undid the move. The map stays bounded
+ * either way — twelve shots can only produce a few dozen pairs.
+ */
 function pruneSeams(state: AppState): Readonly<Record<string, SeamState>> {
+  const ids = new Set(state.shots.map((shot) => shot.id));
   const kept: Record<string, SeamState> = {};
-  for (let i = 0; i < state.shots.length - 1; i += 1) {
-    const key = seamKeyAt(state, i);
-    const value = key ? state.seams[key] : undefined;
-    if (key && value) kept[key] = value;
+  for (const [key, value] of Object.entries(state.seams)) {
+    const [upper, lower] = key.split('|');
+    if (upper && lower && ids.has(upper) && ids.has(lower)) kept[key] = value;
   }
   return kept;
 }

@@ -24,10 +24,10 @@ export const FIXTURE = {
   overlaps: [180, 240],
 };
 
-const PAGE_SCRIPT = ({ width, bodyHeight, headerHeight, footerHeight, starts }) => {
+const PAGE_SCRIPT = ({ width, bodyHeight, headerHeight, footerHeight, starts, seedShift = 0 }) => {
   const totalHeight = starts[starts.length - 1] + bodyHeight;
 
-  let seed = 20260901;
+  let seed = 20260901 + seedShift * 7919;
   const rand = () => {
     seed = (seed * 1664525 + 1013904223) >>> 0;
     return seed / 4294967296;
@@ -86,25 +86,66 @@ const PAGE_SCRIPT = ({ width, bodyHeight, headerHeight, footerHeight, starts }) 
   });
 };
 
-export async function makeFixtures() {
+async function render(spec, names, dir) {
   const browser = await chromium.launch();
   const page = await browser.newPage();
   await page.goto('about:blank');
-  const dataUrls = await page.evaluate(PAGE_SCRIPT, FIXTURE);
+  const dataUrls = await page.evaluate(PAGE_SCRIPT, spec);
   await browser.close();
 
-  mkdirSync(OUT_DIR, { recursive: true });
-  const names = [
-    'shot-1.png',
-    'shot-2.png',
-    'shot-3-with-an-unusually-long-file-name-to-test-truncation.png',
-  ];
-  const paths = dataUrls.map((url, i) => {
-    const file = join(OUT_DIR, names[i]);
+  mkdirSync(dir, { recursive: true });
+  return dataUrls.map((url, i) => {
+    const file = join(dir, names[i] ?? `shot-${i + 1}.png`);
     writeFileSync(file, Buffer.from(url.split(',')[1], 'base64'));
     return file;
   });
-  return paths;
+}
+
+export async function makeFixtures() {
+  return render(
+    FIXTURE,
+    [
+      'shot-1.png',
+      'shot-2.png',
+      'shot-3-with-an-unusually-long-file-name-to-test-truncation.png',
+    ],
+    OUT_DIR,
+  );
+}
+
+/**
+ * A run of `count` shots that each overlap the next by `overlap` rows.
+ * `stride = bodyHeight - overlap` is what makes the overlap exact.
+ */
+export async function makeSeries({ count, width = 390, bodyHeight = 700, overlap = 200, dir }) {
+  const stride = bodyHeight - overlap;
+  const spec = {
+    width,
+    bodyHeight,
+    headerHeight: FIXTURE.headerHeight,
+    footerHeight: FIXTURE.footerHeight,
+    starts: Array.from({ length: count }, (_, i) => i * stride),
+  };
+  return render(
+    spec,
+    Array.from({ length: count }, (_, i) => `series-${String(i + 1).padStart(2, '0')}.png`),
+    dir ?? join(OUT_DIR, `series-${count}-${width}`),
+  );
+}
+
+/** Two shots with nothing in common, for the "no seam found" path. */
+export async function makeUnrelated(dir) {
+  const a = await render(
+    { ...FIXTURE, starts: [0] },
+    ['unrelated-a.png'],
+    dir ?? join(OUT_DIR, 'unrelated'),
+  );
+  const b = await render(
+    { ...FIXTURE, width: FIXTURE.width + 0, starts: [0], seedShift: 1 },
+    ['unrelated-b.png'],
+    dir ?? join(OUT_DIR, 'unrelated'),
+  );
+  return [...a, ...b];
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

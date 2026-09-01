@@ -299,7 +299,10 @@ async function detectRange(from: number, to: number): Promise<void> {
         updateSeam(s, i, {
           overlapPx: result.matched ? result.overlapPx : 0,
           maxOverlapPx: result.maxOverlapPx,
-          cost: Number.isFinite(result.cost) ? result.cost : null,
+          // A rejected candidate's cost describes an offset that was thrown
+          // away; reporting it next to an overlap of 0 would put a precise
+          // number against a measurement that was never taken.
+          cost: result.matched ? result.cost : null,
           matched: result.matched,
         }),
         { kind: 'detecting', done: i - from + 1, total },

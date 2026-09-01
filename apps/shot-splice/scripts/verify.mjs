@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 
 import { chromium, devices, firefox, webkit } from 'playwright';
 
+import { loadShots, runDetection, settle } from './harness.mjs';
 import { FIXTURE, makeFixtures } from './make-fixtures.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -53,21 +54,7 @@ function over(color, backdrop) {
   return [r, g, b].map((c, i) => Math.round(c * alpha + backdrop[i] * (1 - alpha)));
 }
 
-async function loadFixtures(page, files) {
-  await page.setInputFiles('input[type="file"]', files);
-  await page.waitForFunction(() => document.querySelectorAll('.reel__shot').length === 3, null, {
-    timeout: 15000,
-  });
-}
-
-async function runDetection(page) {
-  await page.getByRole('button', { name: '自動で合わせる' }).click();
-  await page.waitForFunction(
-    () => document.querySelector('.toolbar__progress')?.hasAttribute('hidden') === true,
-    null,
-    { timeout: 30000 },
-  );
-}
+const loadFixtures = (page, files) => loadShots(page, files, 3);
 
 async function main() {
   mkdirSync(SHOTS_DIR, { recursive: true });
@@ -112,7 +99,7 @@ async function main() {
   );
 
   await runDetection(page);
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(400);
   await page.screenshot({ path: join(SHOTS_DIR, '02-detected.png'), fullPage: true });
 
   // getComputedStyle reports oklab() here; rasterise before judging the hue.
@@ -204,7 +191,7 @@ async function main() {
   );
 
   await page.getByRole('radio', { name: '差分' }).click();
-  await page.waitForTimeout(120);
+  await settle(page);
   await page.screenshot({ path: join(SHOTS_DIR, '04-diff.png') });
   const diffStats = await page.$eval('.loupe__canvas', (canvas) => {
     const ctx = canvas.getContext('2d');
@@ -226,7 +213,12 @@ async function main() {
   record('difference view reacts to a misaligned seam', diffStats.max > 20, JSON.stringify(diffStats));
 
   await page.getByRole('button', { name: 'この継ぎ目を再検出' }).click();
-  await page.waitForTimeout(400);
+  await page.waitForFunction(
+    (expected) => document.querySelector('.sheet__value')?.textContent === expected,
+    String(FIXTURE.overlaps[0]),
+    { timeout: 15000 },
+  );
+  await settle(page);
   const restored = Number((await page.locator('.sheet__value').textContent()).replace(/,/g, ''));
   record('re-detecting a single seam restores the exact overlap', restored === FIXTURE.overlaps[0], String(restored));
 

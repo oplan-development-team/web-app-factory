@@ -88,6 +88,17 @@ describe('seam identity', () => {
     expect(seamList(state)[1]?.overlapPx).toBe(0);
   });
 
+  it('survives a round-trip reorder', () => {
+    let state = withShots('a', 'b', 'c');
+    state = updateSeam(state, 0, { overlapPx: 180 });
+    state = updateSeam(state, 1, { overlapPx: 240 });
+    // Down and back up: the intermediate arrangement separates both pairs.
+    state = moveShot(state, 0, 1);
+    expect(seamList(state).map((s) => s.overlapPx)).toEqual([0, 0]);
+    state = moveShot(state, 1, 0);
+    expect(seamList(state).map((s) => s.overlapPx)).toEqual([180, 240]);
+  });
+
   it('forgets measurements for pairs that no longer exist', () => {
     let state = withShots('a', 'b');
     state = updateSeam(state, 0, { overlapPx: 50 });
