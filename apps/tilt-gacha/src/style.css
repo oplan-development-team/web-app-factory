@@ -243,9 +243,13 @@ body::before {
 
 .lede {
   margin: 0;
-  max-width: 30ch;
+  /* ch は等幅フォント基準だと日本語の実寸よりかなり狭くなる。
+     30ch では「埋め / る。」のように 1〜2 文字だけが行末に取り残される */
+  max-width: 38ch;
   color: var(--muted);
   line-height: 1.75;
+  /* 対応ブラウザでは文節で折る。非対応でも上の max-width で破綻しない */
+  word-break: auto-phrase;
 }
 
 .lede em {
@@ -304,7 +308,8 @@ body::before {
   font-size: var(--step-label);
   letter-spacing: 0.1em;
   color: var(--muted);
-  max-width: 30ch;
+  max-width: 42ch;
+  word-break: auto-phrase;
 }
 
 /* 傾き→系統の対応表。罫線だけで区切り、カードにしない */
