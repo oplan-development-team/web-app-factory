@@ -66,6 +66,15 @@
   width: min(100%, 320px);
 }
 
+.btn--danger {
+  color: oklch(97% 0.01 22);
+  background: var(--danger);
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--danger) 88%, black);
+}
+
 .icon-btn {
   display: grid;
   place-items: center;
@@ -98,8 +107,14 @@
   cursor: not-allowed;
 }
 
-.icon-btn--danger:hover:not(:disabled) {
+/* Danger buttons carry the warning colour at rest, not only on hover — a
+   delete control that looks identical to the reorder buttons until touched
+   is too easy to hit by mistake next to them. */
+.icon-btn--danger {
   color: var(--danger);
+}
+
+.icon-btn--danger:hover:not(:disabled) {
   background: var(--danger-soft);
 }
 
@@ -237,6 +252,14 @@
 }
 
 .reel__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-tight);
+}
+
+/* Reorder buttons stay a tight pair; the delete button sits a full gap away
+   so it is never the accidental target of a repeated tap on ↑/↓. */
+.reel__moves {
   display: flex;
   gap: 2px;
 }

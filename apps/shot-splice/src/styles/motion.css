@@ -39,6 +39,13 @@
   }
 }
 
+@keyframes toast-rise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

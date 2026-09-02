@@ -20,6 +20,7 @@ import {
 } from './ui/analysis';
 import { createAppShell } from './ui/app-shell';
 import { createBandCard } from './ui/band-card';
+import { createConfirmSheet } from './ui/confirm-sheet';
 import { el, frameThrottle } from './ui/dom';
 import { exportPng } from './ui/export';
 import { createShots, intakeMessage, sortByName } from './ui/intake';
@@ -27,6 +28,7 @@ import { createReel } from './ui/reel';
 import { createSeamRow } from './ui/seam-row';
 import { createSeamSheet } from './ui/seam-sheet';
 import { createStage } from './ui/stage';
+import { createUndoToast } from './ui/undo-toast';
 import {
   MAX_SHOTS,
   addShots,
@@ -230,11 +232,27 @@ function seamRowFor(index: number): HTMLElement {
   return row.element;
 }
 
+/** The state to restore if the most recent single-shot delete is undone. */
+let pendingRemoval: AppState | null = null;
+
+const undoToast = createUndoToast({
+  onUndo: () => {
+    if (!pendingRemoval) return;
+    store.set(pendingRemoval);
+    pendingRemoval = null;
+  },
+});
+
 const reel = createReel({
   onMove: (from, to) => store.update((s) => moveShot(s, from, to)),
   onRemove: (id) => {
+    const before = store.getState();
+    const shot = before.shots.find((s) => s.id === id);
+    if (!shot) return;
     analyzer.forget(id);
+    pendingRemoval = before;
     store.update((s) => removeShot(s, id));
+    undoToast.show(`${shot.name} を削除しました。`);
   },
   renderSeam: seamRowFor,
 });
@@ -249,16 +267,26 @@ const sheet = createSeamSheet({
   paint: paintLoupe,
 });
 
+const confirmSheet = createConfirmSheet();
+
 const toolbar = createToolbar({
   onAdd: (files) => void intake(files),
   onDetectAll: () => void detectRange(0, store.getState().shots.length - 1),
   onExport: () => void save(),
   onClear: () => {
     if (store.getState().shots.length === 0) return;
-    if (!confirm('読み込んだショットをすべて削除します。よろしいですか？')) return;
-    analyzer.clear();
-    seamRows.clear();
-    store.update((s) => setStatus(clearShots(s), { tone: 'info', message: 'すべて削除しました。' }));
+    confirmSheet.open({
+      title: 'すべて削除しますか？',
+      message: '読み込んだショットをすべて削除します。この操作は元に戻せません。',
+      confirmLabel: '削除する',
+      onConfirm: () => {
+        analyzer.clear();
+        seamRows.clear();
+        pendingRemoval = null;
+        undoToast.dismiss();
+        store.update((s) => setStatus(clearShots(s), { tone: 'info', message: 'すべて削除しました。' }));
+      },
+    });
   },
 });
 
@@ -444,7 +472,7 @@ function boot(): void {
   ]);
 
   shell.main.append(stage.element, empty, reel.element, bandCard.element, toolbar.element);
-  mount.append(shell.root, sheet.element);
+  mount.append(shell.root, sheet.element, confirmSheet.element, undoToast.element);
 
   store.subscribe(scheduleRender);
   wireDropTarget();

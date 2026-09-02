@@ -219,6 +219,56 @@
   display: none;
 }
 
+/* --- Undo toast ----------------------------------------------------------
+   Floats just above the fixed toolbar so it never covers the button that
+   caused it, and sits below the sheet/dropzone overlays. */
+
+.undo-toast {
+  position: fixed;
+  left: 50%;
+  right: auto;
+  bottom: calc(var(--toolbar-height) + var(--gap-tight));
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  width: max-content;
+  max-width: min(92vw, 420px);
+  padding: var(--gap-tight) var(--gap-tight) var(--gap-tight) var(--gap);
+  border-radius: var(--radius-md);
+  background: var(--surface-3);
+  box-shadow: var(--shadow-float), inset 0 1px 0 var(--sheen);
+  transform: translateX(-50%);
+  animation: toast-rise var(--dur-sheet) var(--ease-ios);
+}
+
+.undo-toast[hidden] {
+  display: none;
+}
+
+.undo-toast__message {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-small);
+  color: var(--text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.undo-toast__action {
+  flex: none;
+  min-height: var(--tap);
+  padding: 0 var(--gap-tight);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-small);
+  font-weight: 700;
+  color: var(--align);
+}
+
+.undo-toast__action:hover {
+  background: var(--surface-2);
+}
+
 /* --- Drop target -------------------------------------------------------- */
 
 .dropzone {

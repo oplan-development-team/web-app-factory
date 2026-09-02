@@ -242,3 +242,21 @@
   min-height: var(--tap);
   align-items: center;
 }
+
+/* --- Confirm sheet -------------------------------------------------------- */
+
+.confirm__message {
+  font-size: var(--text-body);
+  line-height: 1.5;
+  color: var(--text-dim);
+  text-wrap: pretty;
+}
+
+.confirm__actions {
+  justify-content: flex-end;
+}
+
+.confirm__actions .btn {
+  flex: none;
+  min-width: 96px;
+}

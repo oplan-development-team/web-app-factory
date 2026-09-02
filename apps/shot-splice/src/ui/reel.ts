@@ -77,7 +77,8 @@ function shotRow(
   const remove = iconButton('このショットを削除', '✕', () => callbacks.onRemove(shot.id));
   remove.classList.add('icon-btn--danger');
 
-  row.append(handle, meta, el('div', { class: 'reel__controls' }, [up, down, remove]));
+  const moves = el('div', { class: 'reel__moves' }, [up, down]);
+  row.append(handle, meta, el('div', { class: 'reel__controls' }, [moves, remove]));
   return row;
 }
 
