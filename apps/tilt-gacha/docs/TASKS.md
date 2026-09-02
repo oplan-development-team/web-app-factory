@@ -34,8 +34,8 @@
 - [x] **T16** `ui/dom.ts`（検査付き取得）・`ui/screens.ts`（画面切替と aria-live） — NFR-008.2, FR-050
 - [x] **T17** `index.html` の 3 画面マークアップ — FR-300, FR-400, FR-500
 - [x] **T18** `ui/motion.ts`: 許可要求・購読・シェイク検出・1200ms 自動降格 — FR-001〜003, FR-010, FR-020〜022
-- [ ] **T19** `ui/reveal.ts`: 出現演出画面の描画（グロー・バッジ・フレーバー） — FR-400〜404
-- [ ] **T20** `ui/collectionView.ts`: 図鑑の 4 セクション × 3 列グリッド・未収集表示・進捗 — FR-500〜504
+- [x] **T19** `ui/reveal.ts`: 出現演出画面の描画（グロー・バッジ・フレーバー） — FR-400〜404
+- [x] **T20** `ui/collectionView.ts`: 図鑑の 4 セクション × 3 列グリッド・未収集表示・進捗 — FR-500〜504
 - [ ] **T21** `ui/app.ts` + `main.ts`: 状態機械と全配線 — PLAN §3
 - [ ] **T22** `style.css`: ダーク・ミニマル意匠、グロー、レスポンシブ、reduced-motion — 1.2 節, NFR-004, NFR-005
 
