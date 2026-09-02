@@ -381,14 +381,21 @@ body::before {
   width: 100%;
 }
 
-/* 多段の放射グラデーションでソフトなブルームをつくる（filter: blur は使わない） */
+/*
+ * 多段の放射グラデーションでソフトなブルームをつくる（filter: blur は使わない）。
+ *
+ * ブルームの広がりはボックスの大きさではなくグラデーションの停止位置で決まる。
+ * 以前は inset: -8% でボックスごと外へ出していたが、
+ * 狭い画面（320〜414px）で最大 9px の横スクロールを生んでいた。
+ * ボックスは枠内に収め、停止位置を広げて同じ見え方を得る。
+ */
 .reveal__glow {
   position: absolute;
-  inset: -8%;
+  inset: 0;
   background:
-    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 45%),
-    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 62%),
-    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 78%);
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 49%),
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 67%),
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 84%);
 }
 
 .reveal__art {
