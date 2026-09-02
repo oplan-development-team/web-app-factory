@@ -27,7 +27,7 @@
 - [x] **T12** `lib/patterns/grid.ts`: ドット格子（1〜3 層） — FR-110
 - [x] **T13** `lib/patterns/radial.ts`: 同心円（1〜3 層） — FR-110
 - [x] **T14** `lib/patterns/noise.ts`: 散布点（1〜3 層） — FR-110
-- [ ] **T15** `lib/patterns/index.ts`: `buildPattern` ディスパッチと、600 標本の不変条件テスト — FR-100, AC-08〜11
+- [x] **T15** `lib/patterns/index.ts`: `buildPattern` ディスパッチと、600 標本の不変条件テスト — FR-100, AC-08〜11
 
 ## Phase D — UI
 
