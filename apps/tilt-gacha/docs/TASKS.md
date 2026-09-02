@@ -17,7 +17,7 @@
 - [x] **T05** `lib/rng.ts`: mulberry32 と範囲ヘルパ。単体テスト先行 — FR-100.1
 - [x] **T06** `lib/tilt.ts`: `classifyTilt`。境界値・異常値の単体テスト — FR-012, AC-01, AC-02
 - [x] **T07** `lib/gacha.ts`: `pickFamily` / `pickRarity` / `drawSpecimen`。境界値 + モンテカルロ分布テスト — FR-030〜033, AC-03〜07
-- [ ] **T08** `lib/collection.ts`: 収集状態の純粋な更新・型 ID・進捗集計・スキーマ検証 — FR-200, FR-201.2, AC-12〜15
+- [x] **T08** `lib/collection.ts`: 収集状態の純粋な更新・型 ID・進捗集計・スキーマ検証 — FR-200, FR-201.2, AC-12〜15
 - [ ] **T09** `lib/storage.ts`: `localStorage` 入出力（Storage 注入可能・例外を飲む） — FR-201.3, AC-16
 
 ## Phase C — 模様生成
