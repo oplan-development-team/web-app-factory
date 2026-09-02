@@ -14,7 +14,7 @@
 
 ## Phase B — ロジック（DOM 非依存）
 
-- [ ] **T05** `lib/rng.ts`: mulberry32 と範囲ヘルパ。単体テスト先行 — FR-100.1
+- [x] **T05** `lib/rng.ts`: mulberry32 と範囲ヘルパ。単体テスト先行 — FR-100.1
 - [ ] **T06** `lib/tilt.ts`: `classifyTilt`。境界値・異常値の単体テスト — FR-012, AC-01, AC-02
 - [ ] **T07** `lib/gacha.ts`: `pickFamily` / `pickRarity` / `drawSpecimen`。境界値 + モンテカルロ分布テスト — FR-030〜033, AC-03〜07
 - [ ] **T08** `lib/collection.ts`: 収集状態の純粋な更新・型 ID・進捗集計・スキーマ検証 — FR-200, FR-201.2, AC-12〜15
