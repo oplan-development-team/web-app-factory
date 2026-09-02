@@ -68,7 +68,7 @@
 
 ## Phase G — 模様の複雑さ強化
 
-- [ ] **T32** `lib/patterns/field.ts`: 極（attractor / vortex）によるベクトル場と点描ストローク — 新 FR-111
+- [x] **T32** `lib/patterns/field.ts`: 極（attractor / vortex）によるベクトル場と点描ストローク — 新 FR-111
 - [ ] **T33** FLOW: 場による歪みと点描レイヤー（Flow Dots 相当） — FR-110
 - [ ] **T34** RADIAL: 複数の渦中心による干渉した同心円 — FR-110
 - [ ] **T35** GRID / NOISE: 場による格子の歪みと密度の偏り — FR-110

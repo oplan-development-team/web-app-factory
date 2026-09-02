@@ -52,6 +52,19 @@ function strokeAttrString(stroke: StrokeAttrs): string {
   return parts.join(" ");
 }
 
+/**
+ * 点を連ねた質感のストローク（bookofshapes の "Flow Dots" 相当）。
+ *
+ * ほぼ長さ 0 の破片を丸いキャップで描くと、線ではなく点の連なりになる。
+ * 点を個別の要素として置くと数百要素になるので、
+ * 1 本のパスのままテクスチャだけを変えられるこの方法を採る（FR-110.2）。
+ *
+ * @param gap 点の間隔。小さいほど密になる
+ */
+export function dottedDash(gap: number): string {
+  return `0.01 ${num(gap)}`;
+}
+
 export function path(d: string, stroke: StrokeAttrs): string {
   return `<path d="${d}" ${strokeAttrString(stroke)}/>`;
 }
