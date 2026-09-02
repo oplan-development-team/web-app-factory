@@ -9,7 +9,7 @@
 
 - [x] **T01** SDD 成果物（SPEC / PLAN / TASKS）を追加
 - [x] **T02** プロジェクト雛形: `package.json` / `tsconfig.json` / `vite.config.ts`（`base: './'`）/ `index.html` / `deploy.json` / `.gitignore` / `.dockerignore` / `Dockerfile` — NFR-002, AC-31
-- [ ] **T03** Vitest + v8 カバレッジ（しきい値 80%）と Playwright の設定 — NFR-008.4
+- [x] **T03** Vitest + v8 カバレッジ（しきい値 80%）と Playwright の設定 — NFR-008.4
 - [ ] **T04** `lib/types.ts` + `lib/constants.ts`: 系統・レア度・傾き区分・重み・閾値・パラメータ範囲の単一情報源 — FR-030, FR-031, FR-110
 
 ## Phase B — ロジック（DOM 非依存）
