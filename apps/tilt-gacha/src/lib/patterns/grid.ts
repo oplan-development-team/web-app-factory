@@ -1,7 +1,8 @@
 import { CANVAS } from "../constants.ts";
 import { randInt, randRange } from "../rng.ts";
 import type { Rng } from "../types.ts";
-import { dot, line } from "./svg.ts";
+import { fieldOffset, makePoles, type Pole } from "./field.ts";
+import { dot, path, polylinePath, type Point } from "./svg.ts";
 
 /**
  * GRID / こうし — ドットの格子。
@@ -22,6 +23,9 @@ interface GridParams {
   /** 半径変調の中心。ずらすと格子に非対称なレンズ感が出る。 */
   focusX: number;
   focusY: number;
+  poles: Pole[];
+  /** 格子点をどれだけ場で押し流すか。0 なら真っ直ぐな升目 */
+  warp: number;
 }
 
 /**
@@ -38,6 +42,12 @@ function readParams(rng: Rng, density: number): GridParams {
     modulation: randRange(rng, 0.3, 1),
     focusX: randRange(rng, 0.35, 0.65),
     focusY: randRange(rng, 0.35, 0.65),
+    poles: makePoles(rng, randInt(rng, 2, 3), { min: 0, max: CANVAS.SIZE }),
+    /*
+     * 単層の COMMON は升目のまま素直に見せ、層が増えるほど流れを強くする。
+     * COMMON まで歪めると「格子」という型が読み取りにくくなる（FR-110.1）。
+     */
+    warp: density === 0 ? 0 : randRange(rng, 0.35, 0.7),
   };
 }
 
@@ -65,23 +75,43 @@ function lattice(params: GridParams, offset: number, count: number): string[] {
     for (let col = 0; col < count; col += 1) {
       const u = (col + offset) / (count - 1);
       const v = (row + offset) / (count - 1);
-      const x = LEFT + (col + offset) * step;
-      const y = TOP + (row + offset) * step;
-      if (x > LEFT + SPAN || y > TOP + SPAN) continue;
+      const baseX = LEFT + (col + offset) * step;
+      const baseY = TOP + (row + offset) * step;
+      if (baseX > LEFT + SPAN || baseY > TOP + SPAN) continue;
+
+      // 格子点を場で押し流す。升目が保たれたまま流れが乗る
+      const warp = fieldOffset(params.poles, baseX, baseY);
+      const x = baseX + warp.dx * params.warp;
+      const y = baseY + warp.dy * params.warp;
       elements.push(dot(x, y, radiusAt(params, u, v)));
     }
   }
   return elements;
 }
 
-/** 第 3 層。格子を結ぶヘアライン。升目の骨組みを薄く見せる。 */
+/**
+ * 第 3 層。格子を結ぶヘアライン。
+ * 点と同じ場で曲げることで、線と点が同じ流れの上にあるように見える。
+ */
 function hairlines(params: GridParams): string[] {
   const elements: string[] = [];
   const step = SPAN / (params.cols - 1);
+  const steps = 26;
+
+  const curve = (at: (t: number) => Point): string => {
+    const points: Point[] = [];
+    for (let s = 0; s <= steps; s += 1) {
+      const base = at(s / steps);
+      const warp = fieldOffset(params.poles, base.x, base.y);
+      points.push({ x: base.x + warp.dx * params.warp, y: base.y + warp.dy * params.warp });
+    }
+    return polylinePath(points);
+  };
+
   for (let i = 0; i < params.cols; i += 1) {
     const p = LEFT + i * step;
-    elements.push(line(p, TOP, p, TOP + SPAN, { width: 0.6 }));
-    elements.push(line(LEFT, TOP + i * step, LEFT + SPAN, TOP + i * step, { width: 0.6 }));
+    elements.push(path(curve((t) => ({ x: p, y: TOP + t * SPAN })), { width: 0.6 }));
+    elements.push(path(curve((t) => ({ x: LEFT + t * SPAN, y: TOP + i * step })), { width: 0.6 }));
   }
   return elements;
 }

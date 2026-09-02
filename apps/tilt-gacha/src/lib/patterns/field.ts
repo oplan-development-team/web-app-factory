@@ -42,9 +42,14 @@ export function makePoles(
     poles.push({
       x: bounds.min + randRange(rng, 0.15, 0.85) * span,
       y: bounds.min + randRange(rng, 0.15, 0.85) * span,
-      push: randRange(rng, -14, 14),
-      swirl: randRange(rng, -16, 16),
-      radius: randRange(rng, 0.22, 0.5) * span,
+      push: randRange(rng, -12, 12),
+      swirl: randRange(rng, -13, 13),
+      /*
+       * 影響半径の下限は広めに取る。狭い極は場の勾配が急になり、
+       * 隣り合う標本点の変位が食い違って線が折り返す
+       * （RADIAL の輪に「くちばし」状の自己交差が出た）。
+       */
+      radius: randRange(rng, 0.34, 0.62) * span,
     });
   }
   return poles;
@@ -83,10 +88,17 @@ export function fieldOffset(poles: readonly Pole[], x: number, y: number): Vec {
   return clampVec(dx, dy);
 }
 
-/** 変位を一定の長さに収める。方向は保ったまま大きさだけ抑える。 */
+/**
+ * 変位の大きさを滑らかに飽和させる。方向は保つ。
+ *
+ * 単純な打ち切り（length > MAX なら MAX に切る）だと、
+ * 上限に達する境界で変位の変化率が不連続になり、
+ * 輪や線がそこで折れて「くちばし」のような角が出る（実際に RADIAL で出た）。
+ * tanh は原点付近では恒等に近く、遠方で MAX へ漸近するので折れ目ができない。
+ */
 function clampVec(dx: number, dy: number): Vec {
   const length = Math.hypot(dx, dy);
-  if (length <= MAX_DISPLACEMENT || length === 0) return { dx, dy };
-  const scale = MAX_DISPLACEMENT / length;
+  if (length === 0) return { dx: 0, dy: 0 };
+  const scale = (MAX_DISPLACEMENT * Math.tanh(length / MAX_DISPLACEMENT)) / length;
   return { dx: dx * scale, dy: dy * scale };
 }
