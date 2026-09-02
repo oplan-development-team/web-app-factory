@@ -23,7 +23,7 @@
 ## Phase C — 模様生成
 
 - [x] **T10** `lib/patterns/svg.ts`: 数値丸め・パス組み立て・要素シリアライズ — FR-100.2, FR-101
-- [ ] **T11** `lib/patterns/flow.ts`: 波打つ縦線束（1〜3 層） — FR-110
+- [x] **T11** `lib/patterns/flow.ts`: 波打つ縦線束（1〜3 層） — FR-110
 - [ ] **T12** `lib/patterns/grid.ts`: ドット格子（1〜3 層） — FR-110
 - [ ] **T13** `lib/patterns/radial.ts`: 同心円（1〜3 層） — FR-110
 - [ ] **T14** `lib/patterns/noise.ts`: 散布点（1〜3 層） — FR-110
