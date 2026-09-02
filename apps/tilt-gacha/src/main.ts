@@ -1,3 +1,7 @@
+import "@fontsource-variable/space-grotesk";
+import "@fontsource-variable/jetbrains-mono";
 import "./style.css";
+import { App } from "./ui/app.ts";
 
-// ブートストラップのみを置く。配線は ui/app.ts が持つ（NFR-008.4 のカバレッジ除外対象）。
+// ブートストラップのみ。配線は ui/app.ts が持つ（カバレッジ除外対象）。
+new App({ root: document });
