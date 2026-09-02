@@ -38,6 +38,7 @@
 | スクショ継ぎ足し工房（暗室版） | 2枚に分けたスクリーンショットの重なりを自動検出し1枚に継ぎ足す。写真暗室・アナログ現像室スタイル | [Pages](https://oplan-development-team.github.io/web-app-factory/shot-splice-darkroom/) | プロトタイプ（採否待ち） |
 | スクショ継ぎ足し工房（スイス様式版） | 同上の機能をスイス/インターナショナル・スタイルの計測器デザインで | [Pages](https://oplan-development-team.github.io/web-app-factory/shot-splice-grid/) | プロトタイプ（採否待ち） |
 | スクショ継ぎ足し工房（ネオブルータリズム版） | 同上の機能をネオブルータリズムの荒々しい実用ツールデザインで | [Pages](https://oplan-development-team.github.io/web-app-factory/shot-splice-brutal/) | プロトタイプ（採否待ち） |
+| 傾きガチャ（Tilt Gacha） | 端末を振ると、その瞬間の傾きに応じた幾何学模様が1枚出現し、12種の型を集める図鑑が埋まっていく感覚トイ | [Pages](https://oplan-development-team.github.io/web-app-factory/tilt-gacha/) | 進行中 |
 | タイピング心電図 | 打鍵のkeydown間隔だけを計測し、病院の心電図モニター風UIでリアルタイムに波形と診断結果を描くネタツール | — （Pages未対応、下記参照） | 保留 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
