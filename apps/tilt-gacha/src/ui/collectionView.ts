@@ -4,7 +4,7 @@ import { patternSvg } from "../lib/patterns/index.ts";
 import type { Collection, Family, Rarity } from "../lib/types.ts";
 import { requireHtml, setText } from "./dom.ts";
 
-/** 図鑑画面の描画（FR-500〜504）。 */
+/** 図鑑画面の描画（FR-500〜504 / SPEC 1.2.1）。 */
 export class CollectionView {
   private readonly root: HTMLElement;
   private readonly sections: HTMLElement;
@@ -17,7 +17,7 @@ export class CollectionView {
     this.root = requireHtml(root, '[data-screen="collection"]');
     this.sections = requireHtml(this.root, "[data-collection-sections]");
     this.count = requireHtml(this.root, "[data-collection-count]");
-    this.meter = requireHtml(this.root, "[data-collection-meter]");
+    this.meter = requireHtml(this.root, "[role='progressbar']");
     this.meterFill = requireHtml(this.root, "[data-collection-meter-fill]");
     this.note = requireHtml(this.root, "[data-collection-note]");
   }
@@ -29,7 +29,7 @@ export class CollectionView {
     this.meter.setAttribute("aria-valuenow", String(collected));
     this.meterFill.style.width = `${(collected / TOTAL_TYPES) * 100}%`;
 
-    // 永続化できない環境では黙って消えるより先に伝える（FR-201.3）
+    // 永続化できない環境では、黙って消える前に伝える（FR-201.3）
     this.note.hidden = options.persistent;
     if (!options.persistent) {
       setText(
@@ -59,54 +59,57 @@ export class CollectionView {
     setText(requireHtml(head, ".family__ja"), label.ja);
     setText(
       requireHtml(head, ".family__tally"),
-      `${collectedInFamily(collection, family)}/${RARITIES.length}`,
+      `${collectedInFamily(collection, family)} / ${RARITIES.length}`,
     );
 
     const grid = document.createElement("div");
     grid.className = "family__grid";
-    grid.append(...RARITIES.map((rarity) => this.buildCell(family, rarity, collection)));
+    grid.append(...RARITIES.map((rarity) => this.buildSlot(family, rarity, collection)));
 
     section.append(head, grid);
     return section;
   }
 
-  private buildCell(family: Family, rarity: Rarity, collection: Collection): HTMLElement {
+  private buildSlot(family: Family, rarity: Rarity, collection: Collection): HTMLElement {
     const entry = collection[typeIdOf(family, rarity)];
-    const cell = document.createElement("div");
-    cell.className = "cell";
-    cell.dataset["rarity"] = rarity;
-    cell.dataset["state"] = entry === undefined ? "locked" : "found";
+    const slot = document.createElement("div");
+    slot.className = "slot";
+    slot.dataset["rarity"] = rarity;
+    slot.dataset["state"] = entry === undefined ? "locked" : "found";
 
-    const frame = document.createElement("div");
-    frame.className = "cell__frame";
+    const label = document.createElement("span");
+    label.className = "slot__label";
+    setText(label, rarity);
 
     if (entry === undefined) {
       // 未収集は破線枠 + ?（FR-502.2）
-      frame.innerHTML = `<span class="cell__unknown" aria-hidden="true">?</span>`;
-      cell.append(frame, this.buildCaption(rarity, "未発見"));
-      cell.setAttribute(
-        "aria-label",
-        `${FAMILY_LABEL[family].ja} の ${rarity}: 未発見`,
-      );
-      return cell;
+      const unknown = document.createElement("span");
+      unknown.className = "slot__unknown";
+      unknown.setAttribute("aria-hidden", "true");
+      setText(unknown, "?");
+      slot.append(unknown, label);
+      slot.setAttribute("aria-label", `${FAMILY_LABEL[family].ja} の ${rarity}: 未発見`);
+      return slot;
     }
 
     // 収集済みは firstSeed から再生成する。見た目は初回取得時から変わらない（FR-200.2）
-    frame.innerHTML = patternSvg(family, rarity, entry.firstSeed);
-    cell.append(frame, this.buildCaption(rarity, `×${entry.count}`));
-    cell.setAttribute(
+    const art = document.createElement("span");
+    art.className = "slot__art";
+    art.innerHTML = patternSvg(family, rarity, entry.firstSeed);
+    slot.append(art, label);
+
+    // 重複ぶんだけ控えめに添える。1 枚のときは出さず、モックアップの見た目を保つ
+    if (entry.count > 1) {
+      const count = document.createElement("span");
+      count.className = "slot__count";
+      setText(count, `×${entry.count}`);
+      slot.append(count);
+    }
+
+    slot.setAttribute(
       "aria-label",
       `${FAMILY_LABEL[family].ja} の ${rarity}: 発見済み、${entry.count}回`,
     );
-    return cell;
-  }
-
-  private buildCaption(rarity: Rarity, tally: string): HTMLElement {
-    const caption = document.createElement("p");
-    caption.className = "cell__caption";
-    caption.innerHTML = `<span class="cell__rarity"></span><span class="cell__tally"></span>`;
-    setText(requireHtml(caption, ".cell__rarity"), rarity);
-    setText(requireHtml(caption, ".cell__tally"), tally);
-    return caption;
+    return slot;
   }
 }

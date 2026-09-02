@@ -50,7 +50,8 @@ test("センサーが無くてもボタンひとつで抽選が成立する（AC
   await expect(page.locator("[data-reveal-family-en]")).toHaveText(/FLOW|GRID|RADIAL|NOISE/);
   await expect(page.locator("[data-reveal-rarity]")).toHaveText(/COMMON|RARE|EPIC/);
   await expect(page.locator("[data-reveal-tilt]")).toContainText("センサーなし");
-  await expect(page.locator("[data-reveal-index]")).toHaveText("№ 001");
+  // 通し番号は抽選回数ではなく「12 種のうちどれか」（SPEC 1.2.1）
+  await expect(page.locator("[data-reveal-type]")).toHaveText(/^TYPE (0[1-9]|1[0-2]) \/ 12$/);
 
   // 降格が UI に表れている（FR-302 / FR-053）
   await expect(page.locator("[data-shake-label]")).toHaveText("タップで引く");
@@ -59,32 +60,38 @@ test("センサーが無くてもボタンひとつで抽選が成立する（AC
 
 test("続けて引ける（AC-21）", async ({ page }) => {
   await drawOnce(page);
+  const first = await page.locator("[data-reveal-art]").innerHTML();
+
   await drawOnce(page);
-  await expect(page.locator("[data-reveal-index]")).toHaveText("№ 002");
+  // 型は重複しうるがシードは毎回変わるので、描画内容が変われば引き直せている
+  await expect
+    .poll(() => page.locator("[data-reveal-art]").innerHTML())
+    .not.toBe(first);
 });
 
 test("図鑑へ遷移し、引いた型が発見済みになる（AC-19 / AC-20）", async ({ page }) => {
   await drawOnce(page);
   const family = await page.locator("[data-reveal-family-en]").innerText();
-  const rarity = await page.locator("[data-reveal-rarity]").innerText();
+  // バッジは「EPIC · エピック」形式なので英名だけ取り出す
+  const rarity = (await page.locator("[data-reveal-rarity]").innerText()).split(" ")[0] ?? "";
 
   await page.click('[data-screen="reveal"] [data-open-collection]');
   await expect(page.locator('[data-screen="collection"][data-active="true"]')).toBeVisible();
   await expect(page.locator("[data-collection-count]")).toHaveText("1 / 12");
 
-  const cell = page.locator(`.family[data-family="${family}"] .cell[data-rarity="${rarity}"]`);
+  const cell = page.locator(`.family[data-family="${family}"] .slot[data-rarity="${rarity}"]`);
   await expect(cell).toHaveAttribute("data-state", "found");
   await expect(cell.locator("svg")).toBeVisible();
 
   // 残り 11 マスは未収集表示（破線 + ?）
-  await expect(page.locator('.cell[data-state="locked"]')).toHaveCount(11);
-  await expect(page.locator('.cell[data-state="locked"] .cell__unknown').first()).toHaveText("?");
+  await expect(page.locator('.slot[data-state="locked"]')).toHaveCount(11);
+  await expect(page.locator('.slot[data-state="locked"] .slot__unknown').first()).toHaveText("?");
 });
 
 test("空の図鑑でも 12 マスが崩れず描画される（FR-504）", async ({ page }) => {
   await page.click('[data-screen="standby"] [data-open-collection]');
-  await expect(page.locator(".cell")).toHaveCount(12);
-  await expect(page.locator('.cell[data-state="locked"]')).toHaveCount(12);
+  await expect(page.locator(".slot")).toHaveCount(12);
+  await expect(page.locator('.slot[data-state="locked"]')).toHaveCount(12);
   await expect(page.locator(".family")).toHaveCount(4);
 });
 
@@ -96,7 +103,8 @@ test("リロード後も図鑑が保持される（AC-22）", async ({ page }) =
 
 test("未収集マスの破線枠が地色に埋もれず知覚できる（visual-qa / R6）", async ({ page }) => {
   await page.click('[data-screen="standby"] [data-open-collection]');
-  const frame = page.locator('.cell[data-state="locked"] .cell__frame').first();
+  // 破線枠はスロット自身に付く
+  const frame = page.locator('.slot[data-state="locked"]').first();
 
   const style = await frame.evaluate((el) => {
     const computed = getComputedStyle(el);

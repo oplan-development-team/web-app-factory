@@ -69,6 +69,15 @@ function text(selector: string): string {
   return document.querySelector(selector)?.textContent?.trim() ?? "";
 }
 
+/**
+ * 出現中の模様のマークアップ。
+ * 「もう一度引けたか」の判定に使う — 型（TYPE nn / 12）は重複しうるが、
+ * シードは毎回変わるので描画内容は実質必ず変化する。
+ */
+function artMarkup(): string {
+  return document.querySelector("[data-reveal-art]")?.innerHTML ?? "";
+}
+
 /** 値を伴う devicemotion を作る。 */
 function motionEvent(x: number, y: number, z: number): Event {
   const event = new Event("devicemotion");
@@ -239,13 +248,14 @@ describe("センサーがある場合（AC-23 / AC-24）", () => {
     motionTarget.dispatchEvent(motionEvent(0, 0, 0));
     await new Promise((r) => setTimeout(r, SHAKE.MIN_SAMPLE_INTERVAL_MS + 10));
     motionTarget.dispatchEvent(motionEvent(30, 30, 30));
-    const first = text("[data-reveal-index]");
+    const first = artMarkup();
 
     // 直後にもう一度大きく振る
     await new Promise((r) => setTimeout(r, SHAKE.MIN_SAMPLE_INTERVAL_MS + 10));
     motionTarget.dispatchEvent(motionEvent(-30, -30, -30));
 
-    expect(text("[data-reveal-index]")).toBe(first);
+    // 2 枚目が引かれていなければ描画内容は変わらない
+    expect(artMarkup()).toBe(first);
   });
 
   it("値の無い devicemotion では降格判定が進まない（FR-010.4）", async () => {
@@ -282,14 +292,15 @@ describe("画面遷移（AC-19 / AC-21）", () => {
     mount();
     await draw();
     const family = text("[data-reveal-family-en]");
-    const rarity = text("[data-reveal-rarity]");
+    // バッジは「EPIC · エピック」形式なので英名だけ取り出す
+    const rarity = text("[data-reveal-rarity]").split(" ")[0] ?? "";
 
     click('[data-screen="reveal"] [data-open-collection]');
     expect(isActive("collection")).toBe(true);
     expect(text("[data-collection-count]")).toBe(`1 / ${TOTAL_TYPES}`);
 
     const cell = document.querySelector(
-      `.family[data-family="${family}"] .cell[data-rarity="${rarity}"]`,
+      `.family[data-family="${family}"] .slot[data-rarity="${rarity}"]`,
     );
     expect(cell?.getAttribute("data-state")).toBe("found");
     expect(cell?.querySelector("svg")).not.toBeNull();
@@ -298,10 +309,11 @@ describe("画面遷移（AC-19 / AC-21）", () => {
   it("「もう一度振る」で続けて引ける", async () => {
     mount();
     await draw();
-    expect(text("[data-reveal-index]")).toBe("№ 001");
+    const first = artMarkup();
 
     click("[data-shake-again]");
-    await vi.waitFor(() => expect(text("[data-reveal-index]")).toBe("№ 002"));
+    await vi.waitFor(() => expect(artMarkup()).not.toBe(first));
+    expect(isActive("reveal")).toBe(true);
   });
 
   it("図鑑から「もどる」で待機画面へ戻る", async () => {
@@ -324,8 +336,8 @@ describe("図鑑の表示（AC-20 / FR-504）", () => {
     mount();
     click('[data-screen="standby"] [data-open-collection]');
 
-    expect(document.querySelectorAll(".cell")).toHaveLength(TOTAL_TYPES);
-    expect(document.querySelectorAll('.cell[data-state="locked"]')).toHaveLength(TOTAL_TYPES);
+    expect(document.querySelectorAll(".slot")).toHaveLength(TOTAL_TYPES);
+    expect(document.querySelectorAll('.slot[data-state="locked"]')).toHaveLength(TOTAL_TYPES);
     expect(document.querySelectorAll(".family")).toHaveLength(4);
     expect(text("[data-collection-count]")).toBe(`0 / ${TOTAL_TYPES}`);
   });
@@ -333,8 +345,8 @@ describe("図鑑の表示（AC-20 / FR-504）", () => {
   it("未収集マスは「?」を持ち、模様を持たない", () => {
     mount();
     click('[data-screen="standby"] [data-open-collection]');
-    const locked = document.querySelector('.cell[data-state="locked"]');
-    expect(locked?.querySelector(".cell__unknown")?.textContent).toBe("?");
+    const locked = document.querySelector('.slot[data-state="locked"]');
+    expect(locked?.querySelector(".slot__unknown")?.textContent).toBe("?");
     expect(locked?.querySelector("svg")).toBeNull();
   });
 
@@ -343,7 +355,7 @@ describe("図鑑の表示（AC-20 / FR-504）", () => {
     click("[data-shake-button]");
     await vi.waitFor(() => expect(isActive("reveal")).toBe(true));
     click('[data-screen="reveal"] [data-open-collection]');
-    expect(document.querySelector("[data-collection-meter]")?.getAttribute("aria-valuenow")).toBe(
+    expect(document.querySelector("[role='progressbar']")?.getAttribute("aria-valuenow")).toBe(
       "1",
     );
   });
@@ -434,11 +446,12 @@ describe("「はじめて発見」の判定（FR-200.3）", () => {
     await vi.waitFor(() => expect(isActive("reveal")).toBe(true));
     expect(first?.hidden).toBe(false);
 
-    // 12 種すべて埋まるまで引き続ければ、必ずどこかで重複が起きる
+    // 12 種しか無いので、引き続ければ必ずどこかで重複が起きる
     let sawDuplicate = false;
     for (let i = 0; i < 40; i += 1) {
+      const before = artMarkup();
       click("[data-shake-again]");
-      await vi.waitFor(() => expect(text("[data-reveal-index]")).toBe(`№ ${String(i + 2).padStart(3, "0")}`));
+      await vi.waitFor(() => expect(artMarkup()).not.toBe(before));
       if (first?.hidden === true) {
         sawDuplicate = true;
         break;

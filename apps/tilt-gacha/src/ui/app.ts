@@ -1,6 +1,14 @@
-import { BUCKETS, FAMILY_LABEL, TOTAL_TYPES } from "../lib/constants.ts";
+import {
+  BUCKETS,
+  BUCKET_HINT_LABEL,
+  BUCKET_HINT_ROTATION,
+  FAMILY_LABEL,
+  RARITY_LABEL_JA,
+  TOTAL_TYPES,
+} from "../lib/constants.ts";
 import { recordSpecimen } from "../lib/collection.ts";
 import { drawSpecimen } from "../lib/gacha.ts";
+import { patternSvg } from "../lib/patterns/index.ts";
 import { randPick } from "../lib/rng.ts";
 import { defaultStorage, loadCollection, saveCollection, type StorageLike } from "../lib/storage.ts";
 import type { Collection, Rng, Specimen, TiltBucket } from "../lib/types.ts";
@@ -23,28 +31,42 @@ export interface AppOptions {
   motionTarget?: EventTarget;
 }
 
-const STANDBY_COPY: Record<StandbyState, { label: string; hint: string; state: string }> = {
+interface StandbyCopy {
+  label: string;
+  headline: string;
+  sub: string;
+  note: string;
+}
+
+const STANDBY_COPY: Record<StandbyState, StandbyCopy> = {
   idle: {
     label: "振ってみる",
-    hint: "タップしてセンサーを起動",
-    state: "4方向の傾きが、4つの系統と響き合う。",
+    headline: "端末を振ってみてください",
+    sub: "持ち方によって出やすい模様が変わります",
+    note: "",
   },
   requesting: {
     label: "準備中…",
-    hint: "センサーの使用許可を確認しています",
-    state: "センサーの使用許可を確認しています。",
+    headline: "端末を振ってみてください",
+    sub: "持ち方によって出やすい模様が変わります",
+    note: "センサーの使用許可を確認しています",
   },
   armed: {
     label: "振って！",
-    hint: "うまく振れないときはタップでも引けます",
-    state: "構えた向きが、出やすい系統を決める。",
+    headline: "そのまま振ってください",
+    sub: "構えた向きで出やすい模様が変わります",
+    note: "うまく振れないときはタップでも引けます",
   },
   fallback: {
     label: "タップで引く",
-    hint: "この端末では傾きを取得できないため、向きは無作為に決まります",
-    state: "傾きセンサーが使えないため、向きは無作為に選ばれます。",
+    headline: "タップしてみてください",
+    sub: "この端末では傾きを取得できないため、向きは無作為に決まります",
+    note: "",
   },
 };
+
+/** 待機画面のゴースト模様。毎回同じ見え方にしたいのでシードを固定する。 */
+const GHOST_SEED = 20260902;
 
 export class App {
   private readonly screens: ScreenManager;
@@ -58,14 +80,15 @@ export class App {
 
   private readonly shakeButton: HTMLButtonElement;
   private readonly shakeLabel: HTMLElement;
-  private readonly shakeHint: HTMLElement;
-  private readonly standbyState: HTMLElement;
+  private readonly shakeIcon: HTMLElement;
+  private readonly shakeNote: HTMLElement;
+  private readonly headline: HTMLElement;
+  private readonly sub: HTMLElement;
   private readonly standbyProgress: HTMLElement;
 
   private collection: Collection;
   private persistent: boolean;
   private standby: StandbyState = "idle";
-  private totalDraws = 0;
   /** 許可済みなら再要求しない（FR-403.1）。 */
   private permissionGranted = false;
 
@@ -92,18 +115,52 @@ export class App {
 
     this.shakeButton = requireButton(root, "[data-shake-button]");
     this.shakeLabel = requireHtml(root, "[data-shake-label]");
-    this.shakeHint = requireHtml(root, "[data-shake-hint]");
-    this.standbyState = requireHtml(root, "[data-standby-state]");
+    this.shakeIcon = requireHtml(root, "[data-shake-icon]");
+    this.shakeNote = requireHtml(root, "[data-shake-hint]");
+    this.headline = requireHtml(root, "[data-standby-headline]");
+    this.sub = requireHtml(root, "[data-standby-sub]");
     this.standbyProgress = requireHtml(root, "[data-standby-progress]");
 
     const loaded = loadCollection(this.storage);
     this.collection = loaded.collection;
     this.persistent = loaded.persistent;
 
+    this.renderGhost(root);
+    this.renderTiltHints(root);
     this.bind(root);
     this.setStandby("idle");
     this.syncProgress();
     this.screens.show("standby");
+  }
+
+  /** 待機画面中央の薄い模様。実際の生成器で描き、出てくるものの予告にする。 */
+  private renderGhost(root: ParentNode): void {
+    requireHtml(root, "[data-standby-ghost]").innerHTML = patternSvg(
+      "FLOW",
+      "COMMON",
+      GHOST_SEED,
+    );
+  }
+
+  /** 傾き 4 種を、端末の姿勢を模したアイコン列で示す（表では説明しない）。 */
+  private renderTiltHints(root: ParentNode): void {
+    const list = requireHtml(root, "[data-tilt-hints]");
+    list.replaceChildren(
+      ...BUCKETS.map((bucket) => {
+        const item = document.createElement("li");
+        item.className = "tilt-hint";
+        item.dataset["bucket"] = bucket;
+        item.innerHTML =
+          `<span class="tilt-hint__icon" aria-hidden="true">` +
+          `<svg viewBox="0 0 16 24" width="16" height="24" ` +
+          `style="transform:rotate(${BUCKET_HINT_ROTATION[bucket]}deg)">` +
+          `<rect x="1" y="1" width="14" height="22" rx="2.5" stroke="currentColor" ` +
+          `stroke-width="1.3" fill="none"/></svg></span>` +
+          `<span class="tilt-hint__label"></span>`;
+        setText(requireHtml(item, ".tilt-hint__label"), BUCKET_HINT_LABEL[bucket]);
+        return item;
+      }),
+    );
   }
 
   private bind(root: ParentNode): void {
@@ -121,6 +178,11 @@ export class App {
     }
     requireButton(root, "[data-close-collection]").addEventListener("click", () => {
       this.closeCollection();
+    });
+    requireButton(root, "[data-close-reveal]").addEventListener("click", () => {
+      this.motion.stop();
+      if (this.standby === "armed") this.setStandby("idle");
+      this.screens.show("standby");
     });
   }
 
@@ -188,28 +250,26 @@ export class App {
     const specimen = drawSpecimen(bucket, this.rng, fromSensor);
     const result = recordSpecimen(this.collection, specimen, this.now());
     this.collection = result.collection;
-    this.totalDraws += 1;
 
     if (this.storage !== null && this.persistent) {
       this.persistent = saveCollection(this.storage, this.collection);
     }
 
-    const collected = Object.keys(this.collection).length;
-    this.reveal.render(specimen, {
-      isFirstDiscovery: result.isFirstDiscovery,
-      totalDraws: this.totalDraws,
-      collected,
-      total: TOTAL_TYPES,
-    });
+    this.reveal.render(specimen, { isFirstDiscovery: result.isFirstDiscovery });
     this.syncProgress();
     this.screens.show("reveal");
-    this.screens.announce(this.announcement(specimen, result.isFirstDiscovery, collected));
+    this.screens.announce(
+      this.announcement(specimen, result.isFirstDiscovery, Object.keys(this.collection).length),
+    );
   }
 
   private announcement(specimen: Specimen, isFirst: boolean, collected: number): string {
     const label = FAMILY_LABEL[specimen.family];
     const first = isFirst ? "はじめて発見。" : "";
-    return `${label.en} ${label.ja} の ${specimen.rarity} が出ました。${first}図鑑は ${collected} / ${TOTAL_TYPES} です。`;
+    return (
+      `${label.en} ${label.ja} の ${RARITY_LABEL_JA[specimen.rarity]} が出ました。` +
+      `${first}図鑑は ${collected} / ${TOTAL_TYPES} です。`
+    );
   }
 
   private openCollection(): void {
@@ -228,10 +288,13 @@ export class App {
     this.standby = state;
     const copy = STANDBY_COPY[state];
     setText(this.shakeLabel, copy.label);
-    setText(this.shakeHint, copy.hint);
-    setText(this.standbyState, copy.state);
+    setText(this.headline, copy.headline);
+    setText(this.sub, copy.sub);
+    setText(this.shakeNote, copy.note);
     this.shakeButton.dataset["state"] = state;
     this.shakeButton.disabled = state === "requesting";
+    // センサーを使わないモードでは端末を振るアイコンを出さない
+    this.shakeIcon.hidden = state === "fallback";
   }
 
   private syncProgress(): void {

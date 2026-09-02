@@ -1,9 +1,16 @@
-import { BUCKET_LABEL, FAMILY_LABEL } from "../lib/constants.ts";
+import {
+  BUCKET_LABEL,
+  FAMILY_LABEL,
+  GLOW_OPACITY,
+  RARITY_LABEL_JA,
+  TOTAL_TYPES,
+  typeIndexOf,
+} from "../lib/constants.ts";
 import { patternSvg } from "../lib/patterns/index.ts";
 import type { Specimen } from "../lib/types.ts";
 import { requireHtml, setText } from "./dom.ts";
 
-/** 出現演出画面の描画（FR-400〜404）。 */
+/** 出現演出画面の描画（FR-400〜404 / SPEC 1.2.1）。 */
 export class RevealView {
   private readonly root: HTMLElement;
   private readonly stage: HTMLElement;
@@ -13,8 +20,7 @@ export class RevealView {
   private readonly familyEn: HTMLElement;
   private readonly familyJa: HTMLElement;
   private readonly tilt: HTMLElement;
-  private readonly index: HTMLElement;
-  private readonly progress: HTMLElement;
+  private readonly type: HTMLElement;
 
   constructor(root: ParentNode) {
     this.root = requireHtml(root, '[data-screen="reveal"]');
@@ -25,29 +31,28 @@ export class RevealView {
     this.familyEn = requireHtml(this.root, "[data-reveal-family-en]");
     this.familyJa = requireHtml(this.root, "[data-reveal-family-ja]");
     this.tilt = requireHtml(this.root, "[data-reveal-tilt]");
-    this.index = requireHtml(this.root, "[data-reveal-index]");
-    this.progress = requireHtml(this.root, "[data-reveal-progress]");
+    this.type = requireHtml(this.root, "[data-reveal-type]");
   }
 
-  render(
-    specimen: Specimen,
-    options: { isFirstDiscovery: boolean; totalDraws: number; collected: number; total: number },
-  ): void {
+  render(specimen: Specimen, options: { isFirstDiscovery: boolean }): void {
     const label = FAMILY_LABEL[specimen.family];
 
-    // レア度は色として全体に効かせる。CSS 側が --accent を読む（FR-401）
+    // レア度は色と光量として全体に効かせる。CSS 側が --accent / --glow-opacity を読む
     this.root.dataset["rarity"] = specimen.rarity;
+    this.root.style.setProperty("--glow-opacity", String(GLOW_OPACITY[specimen.rarity]));
 
     this.art.innerHTML = patternSvg(specimen.family, specimen.rarity, specimen.seed, {
-      title: `${label.en} ${label.ja} の${specimen.rarity}の模様`,
+      title: `${label.en} ${label.ja} の${RARITY_LABEL_JA[specimen.rarity]}の模様`,
     });
 
-    setText(this.rarity, specimen.rarity);
+    setText(this.rarity, `${specimen.rarity} · ${RARITY_LABEL_JA[specimen.rarity]}`);
     setText(this.familyEn, label.en);
     setText(this.familyJa, label.ja);
     setText(this.tilt, this.tiltText(specimen));
-    setText(this.index, `№ ${String(options.totalDraws).padStart(3, "0")}`);
-    setText(this.progress, `${options.collected} / ${options.total}`);
+
+    // 通し番号は抽選回数ではなく「12 種のうちどれか」を示す（SPEC 1.2.1）
+    const index = typeIndexOf(specimen.family, specimen.rarity);
+    setText(this.type, `TYPE ${String(index).padStart(2, "0")} / ${TOTAL_TYPES}`);
 
     this.first.hidden = !options.isFirstDiscovery;
 

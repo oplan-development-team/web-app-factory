@@ -1,45 +1,46 @@
 /*
- * 傾きガチャ — 標本カタログ × 計測器
+ * 傾きガチャ — 静かな観測器
  *
- * 意匠の方針: 角丸ゼロ、カードの積み上げをやめてヘアラインと余白の強弱だけで
- * 階層をつくる。地は単色で塗らず、微細な粒子と上方向のビネットで奥行きを出す。
- * 主要操作は親指の届く画面下部のバーに置く（モバイルファースト）。
+ * 承認済みモックアップ（docs/SPEC.md 1.2.1）の構成に従う。
+ * 中央寄せ・余白主体・ピル型。要素を詰め込まず、待っている状態そのものを画面にする。
+ *
+ * 1.2.2 の逸脱（罫線コントラスト・UI ラベルの line-height・グローの幅上限）は
+ * 実測に基づく正当な修正なので、レイアウトを変えても維持する。
  */
 
 /* ============ トークン ============ */
 :root {
   --bg: #0b0b0c;
   --surface: #131315;
+  /* 未収集スロットの面。地よりわずかに明るいだけの「へこみ」 */
+  --surface-sunken: #0e0e10;
   /*
-   * モックアップの罫線トークンは #232326 だが、実測すると地 (#0b0b0c) に対して
-   * コントラスト比 1.26 しかなく、粒子オーバーレイと重なると罫線として知覚できない。
-   * 見た目の性格は変えずに、知覚できる下限（約 1.45）まで持ち上げた実測値がこれ。
+   * モックアップの罫線は #232326 だが、地 (#0b0b0c) に対して比 1.26 しかなく、
+   * 粒子オーバーレイと重なると線として知覚できない（visual-qa の実測）。
+   * 見た目の性格は変えずに知覚できる下限（約 1.45）まで上げた値がこれ（SPEC 1.2.2）。
    */
   --line: #2e2e34;
-  /* 破線枠など、より確実に線として読ませたい用途（--surface の上でも 1.5 以上） */
-  --line-strong: #35353c;
+  /* 溝・区切りなど、より沈ませたい線 */
+  --line-quiet: #1c1c1f;
   --text: #eceae6;
   --muted: #8b8b90;
+  /* さらに暗い副色。ワードマーク・微細ラベル・傾きテキスト */
+  --muted-dim: #6f6f75;
+  /* 未収集の文字 */
+  --locked: #4a4a4e;
 
   --common: #8b8b90;
   --rare: #8fc4e0;
   --epic: #e0b56a;
   --accent: var(--common);
+  --glow-opacity: 0.14;
 
   --font-display: "Space Grotesk Variable", "Space Grotesk", system-ui, sans-serif;
   --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace;
 
-  --step-label: 0.6875rem;
-  --step-body: 0.875rem;
-  --step-lead: clamp(2rem, 9vw, 3rem);
-  --step-display: clamp(3.25rem, 17vw, 5.5rem);
-
-  --gap-hair: 0.5rem;
-  --gap-tight: 0.875rem;
-  --gap: 1.5rem;
-  --gap-loose: clamp(2rem, 7vw, 3.5rem);
-
-  --edge: clamp(1.25rem, 5vw, 2rem);
+  --edge: 24px;
+  --radius-pill: 999px;
+  --radius-slot: 14px;
 
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -53,60 +54,31 @@
 html,
 body {
   margin: 0;
-  /* 端末の高さ変動でレイアウトが跳ねないよう dvh を使う */
   min-height: 100dvh;
   background: var(--bg);
 }
 
 body {
   color: var(--text);
-  font-family: var(--font-mono);
-  font-size: var(--step-body);
+  font-family: var(--font-display);
+  font-size: 14px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-/* 地を平坦にしないための粒子。乗算ではなく極薄のオーバーレイ */
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* 地を平坦にしないための粒子 */
 .grain {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.035;
+  opacity: 0.03;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* 上方向へ向かうごく弱いビネット。中央上に光源があるように見せる */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: radial-gradient(120% 70% at 50% -10%, rgb(255 255 255 / 6%), transparent 60%);
-}
-
-/*
- * 1 行だけのラベル（見出しの上付き・バッジ・集計値・キャプション）は
- * body の line-height 1.6 を継承すると 11px の文字に 17.6px の行ボックスがつき、
- * padding を詰めても高さが落ちない。UI チャンクには明示的に行間を与える。
- */
-.eyebrow,
-.affinity__tilt,
-.affinity__family,
-.rarity-badge,
-.first-badge,
-.collection__count-label,
-.family__tally,
-.family__ja,
-.cell__caption,
-.cell__unknown,
-.back-button,
-.bar-button__label,
-.bar-button__hint,
-.ghost-button {
-  line-height: 1.15;
 }
 
 .visually-hidden {
@@ -121,11 +93,30 @@ body::before {
   border: 0;
 }
 
+/*
+ * 1 行だけのラベルは body の line-height を継承すると行ボックスだけが伸びる。
+ * UI チャンクには明示的に行間を与える（SPEC 1.2.2 / visual-qa）。
+ */
+.wordmark,
+.pill-button__label,
+.link-button,
+.reveal__type,
+.rarity-badge,
+.first-badge,
+.collection__count,
+.family__name,
+.family__tally,
+.slot__label,
+.slot__unknown,
+.tilt-hint__label {
+  line-height: 1.15;
+}
+
 /* ============ 画面 ============ */
 .app {
   position: relative;
   z-index: 1;
-  max-width: 34rem;
+  max-width: 420px;
   margin-inline: auto;
   min-height: 100dvh;
 }
@@ -133,8 +124,7 @@ body::before {
 .screen {
   display: none;
   min-height: 100dvh;
-  padding: var(--edge);
-  padding-bottom: calc(var(--edge) + env(safe-area-inset-bottom));
+  padding: 56px var(--edge) calc(32px + env(safe-area-inset-bottom));
 }
 
 .screen[data-active="true"] {
@@ -142,240 +132,250 @@ body::before {
   flex-direction: column;
 }
 
-/* ============ 共通の部品 ============ */
-.eyebrow {
-  margin: 0;
-  font-size: var(--step-label);
-  letter-spacing: 0.42em;
-  text-transform: uppercase;
-  color: var(--muted);
+.standby {
+  padding-top: 64px;
 }
 
-/* 画面下部の主操作バー。角丸なし・全幅で親指の届く位置に固定する */
-.bar-button {
+/* ============ 共通の部品 ============ */
+
+/* 幅いっぱいのピル。モックアップの主操作の形（SPEC 1.2.1） */
+.pill-button {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   width: 100%;
-  padding: 0.9rem 1.25rem;
-  border: 1px solid var(--accent);
-  border-radius: 0;
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  padding: 18px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: none;
   color: var(--text);
-  font-family: var(--font-mono);
-  text-align: left;
+  font-family: var(--font-display);
   cursor: pointer;
   transition:
-    background 200ms var(--ease),
-    border-color 200ms var(--ease),
-    transform 120ms var(--ease);
+    background 220ms var(--ease),
+    border-color 220ms var(--ease),
+    transform 120ms var(--ease),
+    opacity 220ms var(--ease);
 }
 
-.bar-button__label {
-  font-family: var(--font-display);
-  font-size: 1.125rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+.pill-button__label {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
-.bar-button__hint {
-  font-size: var(--step-label);
-  color: var(--muted);
-  letter-spacing: 0.04em;
+.pill-button__icon {
+  display: flex;
+  color: currentColor;
 }
 
-.bar-button:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
+.pill-button--outline {
+  border-color: rgb(236 234 230 / 28%);
+  background: rgb(236 234 230 / 5%);
 }
 
-.bar-button:active:not(:disabled) {
+.pill-button--outline:hover:not(:disabled) {
+  border-color: rgb(236 234 230 / 46%);
+  background: rgb(236 234 230 / 9%);
+}
+
+.pill-button--solid {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.pill-button--solid .pill-button__label {
+  font-weight: 700;
+}
+
+.pill-button--solid:hover:not(:disabled) {
+  background: #fff;
+}
+
+.pill-button:active:not(:disabled) {
   transform: translateY(1px);
 }
 
-.bar-button:disabled {
+.pill-button:disabled {
   cursor: progress;
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
-/* 振り待ち中はボタン自体が脈打って「振れ」と伝える */
-.bar-button[data-state="armed"] {
-  animation: pulse 1.6s ease-in-out infinite;
+/* 振り待ち中はボタンの縁が静かに脈打つ */
+.pill-button[data-state="armed"] {
+  animation: pulse 1.8s ease-in-out infinite;
 }
 
 @keyframes pulse {
   0%,
   100% {
-    border-color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    border-color: rgb(236 234 230 / 28%);
   }
   50% {
-    border-color: var(--text);
-    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    border-color: rgb(236 234 230 / 62%);
   }
 }
 
-.ghost-button {
+.link-button {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 6px;
   width: 100%;
-  margin-top: var(--gap-hair);
-  padding: 0.7rem 1.25rem;
-  border: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
-  color: var(--muted);
+  padding: 16px 0 0;
+  border: 0;
+  background: none;
+  color: var(--rare);
   font-family: var(--font-mono);
-  font-size: var(--step-label);
-  letter-spacing: 0.16em;
+  font-size: 12px;
+  letter-spacing: 1px;
   cursor: pointer;
-  transition:
-    color 200ms var(--ease),
-    border-color 200ms var(--ease);
+  transition: color 200ms var(--ease);
 }
 
-.ghost-button:hover,
-.ghost-button:focus-visible {
+.link-button:hover {
+  color: var(--epic);
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  margin: -6px;
+  border: 0;
+  background: none;
+  color: var(--muted-dim);
+  cursor: pointer;
+  transition: color 200ms var(--ease);
+}
+
+.icon-button:hover {
   color: var(--text);
-  border-color: var(--line-strong);
 }
 
-.ghost-button__count {
-  font-variant-numeric: tabular-nums;
+.collection__head .icon-button {
+  color: var(--text);
 }
 
 :where(button):focus-visible {
   outline: 2px solid var(--text);
-  outline-offset: 2px;
+  outline-offset: 3px;
+  border-radius: var(--radius-pill);
 }
 
 /* ============ 待機画面 ============ */
-.masthead {
-  margin-bottom: var(--gap-loose);
-}
-
 .wordmark {
-  margin: var(--gap-tight) 0 var(--gap);
-  font-family: var(--font-display);
-  font-size: var(--step-display);
-  font-weight: 700;
-  line-height: 0.92;
-  letter-spacing: -0.03em;
-}
-
-.wordmark__break {
-  display: block;
-  color: var(--muted);
-}
-
-.lede {
   margin: 0;
-  /* ch は等幅フォント基準だと日本語の実寸よりかなり狭くなる。
-     30ch では「埋め / る。」のように 1〜2 文字だけが行末に取り残される */
-  max-width: 38ch;
-  color: var(--muted);
-  line-height: 1.75;
-  /* 対応ブラウザでは文節で折る。非対応でも上の max-width で破綻しない */
-  word-break: auto-phrase;
-}
-
-.lede em {
-  font-style: normal;
-  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted-dim);
 }
 
 .standby__stage {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--gap);
-  padding: var(--gap-loose) 0;
+  justify-content: center;
+  gap: 28px;
+  /* 中央の空白そのものが「まだ何も出ていない」ことの表現。詰めない */
+  padding: 24px 0;
 }
 
-/* 3 重の輪。振る前の「まだ何も無い」状態を、空白ではなく待機として見せる */
-.dial {
-  position: relative;
-  width: min(46vw, 11rem);
-  aspect-ratio: 1;
-}
-
-.dial__ring {
-  position: absolute;
-  inset: 0;
-  border: 1px solid var(--line-strong);
-  border-radius: 50%;
-  animation: breathe 4s ease-in-out infinite;
-}
-
-.dial__ring:nth-child(2) {
-  inset: 18%;
-  animation-delay: 0.35s;
-}
-
-.dial__ring:nth-child(3) {
-  inset: 36%;
-  animation-delay: 0.7s;
-}
-
-@keyframes breathe {
-  0%,
-  100% {
-    opacity: 0.35;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.85;
-    transform: scale(1.04);
-  }
-}
-
-.standby__state {
-  margin: 0;
-  text-align: center;
-  font-size: var(--step-label);
-  letter-spacing: 0.1em;
-  color: var(--muted);
-  max-width: 42ch;
-  word-break: auto-phrase;
-}
-
-/* 傾き→系統の対応表。罫線だけで区切り、カードにしない */
-.affinity {
-  margin: 0 0 var(--gap);
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid var(--line);
-}
-
-.affinity li {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--gap-tight);
-  padding: 0.6rem 0;
-  border-bottom: 1px solid var(--line);
-  font-size: var(--step-label);
-}
-
-.affinity__tilt {
-  letter-spacing: 0.3em;
+/* 出現前のヒント。実際の生成器で描いた模様を薄く置く */
+.ghost {
+  width: min(188px, 52vw);
+  opacity: 0.32;
   color: var(--text);
 }
 
-.affinity__family {
-  letter-spacing: 0.14em;
+.ghost svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.standby__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.standby__headline {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+  /* 日本語が 1〜2 文字だけ行末に取り残されないようにする */
+  word-break: auto-phrase;
+}
+
+.standby__sub {
+  margin: 0;
+  max-width: 34ch;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  word-break: auto-phrase;
+}
+
+.standby__note {
+  margin: 10px 0 0;
+  min-height: 1.2em;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--muted-dim);
+  word-break: auto-phrase;
+}
+
+.standby__note:empty {
+  margin: 0;
+  min-height: 0;
+}
+
+/* 傾き→系統の対応は表で説明しない。姿勢の図を 4 つ並べるだけに留める */
+.tilt-hints {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 22px 0 0;
+  padding: 0 6px 22px;
+  list-style: none;
+  border-bottom: 1px solid var(--line-quiet);
+}
+
+.tilt-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.tilt-hint__icon {
+  display: flex;
   color: var(--muted);
 }
 
-.standby__foot {
-  margin-top: auto;
+.tilt-hint__label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--muted-dim);
+}
+
+.standby > .pill-button {
+  margin-bottom: 0;
 }
 
 /* ============ 出現演出画面 ============ */
-.reveal {
-  justify-content: center;
-}
-
 .reveal[data-rarity="COMMON"] {
   --accent: var(--common);
 }
@@ -386,49 +386,45 @@ body::before {
   --accent: var(--epic);
 }
 
-/* 通し番号は地に沈む巨大な数字として置き、グリッドを一度断ち切る */
-.reveal__index {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(3rem, 16vw, 5rem);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  color: color-mix(in srgb, var(--text) 7%, transparent);
-  /* 直下の図版に重ねて奥行きを出す */
-  margin-bottom: -0.35em;
-  pointer-events: none;
+.reveal__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reveal__type {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: var(--muted-dim);
 }
 
 .reveal__stage {
   position: relative;
-  display: grid;
-  place-items: center;
-  aspect-ratio: 1;
-  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /*
- * 多段の放射グラデーションでソフトなブルームをつくる（filter: blur は使わない）。
- *
- * ブルームの広がりはボックスの大きさではなくグラデーションの停止位置で決まる。
- * 以前は inset: -8% でボックスごと外へ出していたが、
- * 狭い画面（320〜414px）で最大 9px の横スクロールを生んでいた。
- * ボックスは枠内に収め、停止位置を広げて同じ見え方を得る。
+ * グローは 300px の円。狭い画面でも枠外に出さないよう幅に上限を掛ける
+ * （以前 inset:-8% で 320〜414px に横スクロールを出した。SPEC 1.2.2）。
  */
 .reveal__glow {
   position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 49%),
-    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 67%),
-    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 84%);
+  width: min(300px, 86vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 68%);
+  opacity: var(--glow-opacity);
+  filter: blur(6px);
 }
 
 .reveal__art {
   position: relative;
-  width: 100%;
-  color: var(--accent);
+  width: min(208px, 58vw);
+  color: var(--text);
 }
 
 .reveal__art svg {
@@ -437,9 +433,29 @@ body::before {
   height: auto;
 }
 
+.first-badge {
+  position: absolute;
+  top: 0;
+  /* モックアップは中央から左へ 108px。狭い画面でも枠内に留める */
+  left: max(0px, calc(50% - 108px));
+  margin: 0;
+  padding: 5px 10px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--accent);
+}
+
+.first-badge[hidden] {
+  display: none;
+}
+
 /* 出現: グローが先に開き、図版が続く。移動ではなく不透明度と微細なスケールだけ */
 .reveal__stage .reveal__glow,
-.reveal__stage .reveal__art {
+.reveal__stage .reveal__art,
+.reveal__stage .first-badge {
   opacity: 0;
 }
 
@@ -451,13 +467,17 @@ body::before {
   animation: emerge 700ms var(--ease) 120ms forwards;
 }
 
+.reveal__stage.is-revealed .first-badge:not([hidden]) {
+  animation: emerge 500ms var(--ease) 500ms forwards;
+}
+
 @keyframes bloom {
   from {
     opacity: 0;
     transform: scale(0.9);
   }
   to {
-    opacity: 1;
+    opacity: var(--glow-opacity);
     transform: scale(1);
   }
 }
@@ -473,114 +493,108 @@ body::before {
   }
 }
 
-.reveal__meta {
-  margin-top: var(--gap);
-}
-
-.reveal__badges {
+.reveal__identity {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--gap-hair);
-  margin: 0 0 var(--gap-hair);
-}
-
-.rarity-badge {
-  padding: 0.2rem 0.6rem;
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  font-size: var(--step-label);
-  letter-spacing: 0.26em;
-}
-
-.first-badge {
-  padding: 0.2rem 0.6rem;
-  background: var(--text);
-  color: var(--bg);
-  font-size: var(--step-label);
-  letter-spacing: 0.14em;
-}
-
-.first-badge[hidden] {
-  display: none;
+  gap: 14px;
+  margin-bottom: 28px;
 }
 
 .reveal__family {
   display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
 }
 
 .reveal__family-en {
-  font-size: var(--step-lead);
-  line-height: 1;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  line-height: 1.15;
 }
 
 .reveal__family-ja {
-  font-size: 1rem;
+  font-family: var(--font-mono);
+  font-size: 12px;
   font-weight: 400;
+  letter-spacing: 1px;
   color: var(--muted);
-  letter-spacing: 0.2em;
+}
+
+.rarity-badge {
+  margin: 0;
+  padding: 6px 14px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--accent);
 }
 
 .reveal__tilt {
-  margin: var(--gap-hair) 0 0;
-  font-size: var(--step-label);
-  letter-spacing: 0.1em;
-  color: var(--muted);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  text-align: center;
+  color: var(--muted-dim);
+  word-break: auto-phrase;
 }
 
 .reveal__actions {
-  margin-top: var(--gap-loose);
+  display: flex;
+  gap: 12px;
+}
+
+.reveal__actions .pill-button {
+  flex: 1;
+  padding: 16px;
+}
+
+.reveal__actions .pill-button__label {
+  font-size: 14.5px;
 }
 
 /* ============ 図鑑画面 ============ */
+.collection {
+  padding-bottom: calc(28px + env(safe-area-inset-bottom));
+}
+
 .collection__head {
-  padding-bottom: var(--gap);
-  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.back-button {
-  padding: 0.35rem 0;
-  border: 0;
-  background: none;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: var(--step-label);
-  letter-spacing: 0.18em;
-  cursor: pointer;
+.collection__title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.15;
 }
 
-.back-button:hover {
-  color: var(--text);
+.collection__stat {
+  margin: 18px 0 22px;
 }
 
 .collection__count {
-  display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  margin: var(--gap) 0 var(--gap-hair);
-  font-family: var(--font-display);
-  font-size: var(--step-lead);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 
-.collection__count-label {
-  font-family: var(--font-mono);
-  font-size: var(--step-label);
-  font-weight: 400;
-  letter-spacing: 0.28em;
-  color: var(--muted);
-}
-
 .meter {
-  height: 2px;
-  background: var(--line);
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--line-quiet);
+  overflow: hidden;
 }
 
 .meter__fill {
@@ -588,14 +602,17 @@ body::before {
   height: 100%;
   width: 0;
   background: var(--text);
+  opacity: 0.55;
   transition: width 600ms var(--ease);
 }
 
 .collection__note {
-  margin: var(--gap-tight) 0 0;
-  font-size: var(--step-label);
+  margin: 12px 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
   line-height: 1.6;
   color: var(--epic);
+  word-break: auto-phrase;
 }
 
 .collection__note[hidden] {
@@ -603,45 +620,43 @@ body::before {
 }
 
 .collection__body {
-  padding-top: var(--gap);
-}
-
-.family + .family {
-  margin-top: var(--gap-loose);
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 8px;
 }
 
 .family__head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--gap-tight);
-  padding-bottom: var(--gap-hair);
-  border-bottom: 1px solid var(--line);
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .family__name {
   display: flex;
   align-items: baseline;
-  gap: 0.55rem;
+  gap: 8px;
   margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 1px;
 }
 
 .family__ja {
   font-family: var(--font-mono);
-  font-size: var(--step-label);
+  font-size: 10.5px;
   font-weight: 400;
-  letter-spacing: 0.2em;
-  color: var(--muted);
+  color: var(--muted-dim);
 }
 
 .family__tally {
   margin: 0;
-  font-size: var(--step-label);
-  letter-spacing: 0.16em;
+  font-family: var(--font-mono);
+  font-size: 11px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
@@ -649,66 +664,96 @@ body::before {
 .family__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--gap-hair);
-  margin-top: var(--gap-tight);
+  gap: 10px;
 }
 
-.cell[data-rarity="COMMON"] {
+.slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 104px;
+  border-radius: var(--radius-slot);
+}
+
+.slot[data-rarity="COMMON"] {
   --accent: var(--common);
 }
-.cell[data-rarity="RARE"] {
+.slot[data-rarity="RARE"] {
   --accent: var(--rare);
 }
-.cell[data-rarity="EPIC"] {
+.slot[data-rarity="EPIC"] {
   --accent: var(--epic);
 }
 
-.cell__frame {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 1;
+.slot[data-state="found"] {
   background: var(--surface);
-  /* 面が --surface で一段明るいぶん、--line では枠が沈む（実測 1.18）。
-     ここは --line-strong を使って枠として成立させる */
-  border: 1px solid var(--line-strong);
-  color: var(--accent);
-  overflow: hidden;
+  /* 面が --surface で一段明るいぶん、--line だと枠が沈む（実測 1.18）。
+     ここは地に対しても面に対しても成立する明るさを使う（SPEC 1.2.2） */
+  border: 1px solid #35353c;
 }
 
-.cell__frame svg {
+.slot[data-state="locked"] {
+  background: var(--surface-sunken);
+  border: 1px dashed rgb(236 234 230 / 14%);
+}
+
+/*
+ * モックアップの図版は 34px だが、あれは 3 本線程度に単純化されたグリフ。
+ * こちらは実際の生成物（最大数百要素）を出すため、34px だと潰れて型が判別できない。
+ * スロット高 104px の内側で読める下限として 52px を採る（見た目の意図＝
+ * 「一目でどの型か分かる小さな標本」を満たすための逸脱）。
+ */
+.slot__art {
+  width: 52px;
+  height: 52px;
+  color: var(--accent);
+}
+
+.slot__art svg {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.cell[data-state="locked"] .cell__frame {
-  background: transparent;
-  border: 1px dashed var(--line-strong);
+.slot__unknown {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--locked);
 }
 
-.cell__unknown {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--line-strong);
+.slot__label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
 }
 
-.cell__caption {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.25rem;
-  margin: 0.4rem 0 0;
-  font-size: 0.625rem;
-  letter-spacing: 0.12em;
-  color: var(--muted);
-}
-
-.cell[data-state="found"] .cell__rarity {
+/* 収集済みは COMMON だけ控えめな灰、RARE / EPIC はアクセント色で報われ感を出す */
+.slot[data-state="found"] .slot__label {
   color: var(--accent);
 }
 
-.cell__tally {
+.slot[data-state="found"][data-rarity="COMMON"] .slot__label {
+  color: var(--muted-dim);
+}
+
+.slot[data-state="locked"] .slot__label {
+  color: var(--locked);
+}
+
+/*
+ * 重複して引いた数。1 枚のときは出さない。
+ * 行として積むと図版とラベルの中央揃えが崩れ、枚数のあるスロットだけ
+ * 別レイアウトに見えてしまうので、隅に小さく逃がす。
+ */
+.slot__count {
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--muted-dim);
   font-variant-numeric: tabular-nums;
 }
 
@@ -723,9 +768,14 @@ body::before {
   }
 
   /* アニメーションを止めても図版が消えたままにならないようにする */
-  .reveal__stage .reveal__glow,
-  .reveal__stage .reveal__art {
+  .reveal__stage .reveal__art,
+  .reveal__stage .first-badge {
     opacity: 1;
+    transform: none;
+  }
+
+  .reveal__stage .reveal__glow {
+    opacity: var(--glow-opacity);
     transform: none;
   }
 }
