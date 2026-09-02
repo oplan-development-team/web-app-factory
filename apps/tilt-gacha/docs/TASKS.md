@@ -45,4 +45,4 @@
 - [x] **T24** Playwright E2E: フォールバック経路・横スクロール・コンソールエラー・reduced-motion（3 ブラウザ） — AC-18, AC-25〜27
 - [x] **T25** カバレッジ 80% 到達と不足分の補強 — NFR-008.4, AC-29
 - [x] **T26** `visual-qa` による実測検証と、指摘の修正 — R6, NFR-006
-- [ ] **T27** `README.md` 作成、`docker build` 疎通確認、`PROJECTS.md` 更新 — AC-30
+- [x] **T27** `README.md` 作成、`docker build` 疎通確認、`PROJECTS.md` 更新 — AC-30
