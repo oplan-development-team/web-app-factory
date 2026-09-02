@@ -24,10 +24,17 @@ interface GridParams {
   focusY: number;
 }
 
+/**
+ * 焦点から最も遠い点でも、基準半径のこの割合は残す。
+ * これが小さすぎると外周の点が消え、単層の COMMON が
+ * 「ほぼ空白」に見えてしまう（最も出やすい型なので影響が大きい）。
+ */
+const MIN_RADIUS_RATIO = 0.45;
+
 function readParams(rng: Rng, density: number): GridParams {
   return {
     cols: randInt(rng, 8 + density, 12 + density),
-    baseRadius: randRange(rng, 1.2, 2.6),
+    baseRadius: randRange(rng, 1.5, 2.6),
     modulation: randRange(rng, 0.3, 1),
     focusX: randRange(rng, 0.35, 0.65),
     focusY: randRange(rng, 0.35, 0.65),
@@ -38,13 +45,16 @@ function readParams(rng: Rng, density: number): GridParams {
  * 焦点からの距離で半径を変える。
  * 均一な点の海になると「格子」の意図が読み取れないので、
  * 疎密のグラデーションで視線の落ち着き先をつくる。
+ *
+ * 縮小率には下限を設ける。変調をそのまま掛けると外周が 0 に潰れ、
+ * 疎密ではなく「欠け」に見える。
  */
 function radiusAt(params: GridParams, u: number, v: number): number {
   const dx = u - params.focusX;
   const dy = v - params.focusY;
   const distance = Math.min(1, Math.hypot(dx, dy) / Math.SQRT1_2);
-  const scale = 1 - params.modulation * distance;
-  return Math.max(0.3, params.baseRadius * scale);
+  const falloff = params.modulation * distance * (1 - MIN_RADIUS_RATIO);
+  return Math.max(0.55, params.baseRadius * (1 - falloff));
 }
 
 function lattice(params: GridParams, offset: number, count: number): string[] {
