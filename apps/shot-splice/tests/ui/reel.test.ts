@@ -79,6 +79,17 @@ describe('createReel', () => {
     expect(onRemove).toHaveBeenCalledWith('a');
   });
 
+  it('marks the delete button as danger and keeps it out of the reorder group', () => {
+    const { reel } = build();
+    reel.update(stateWith('a', 'b'));
+    const row = reel.element.querySelector('.reel__shot') as Element;
+    const moves = row.querySelector('.reel__moves') as Element;
+    expect(moves.querySelectorAll('button')).toHaveLength(2);
+    const remove = row.querySelector('.icon-btn--danger') as HTMLButtonElement;
+    expect(remove).not.toBeNull();
+    expect(moves.contains(remove)).toBe(false);
+  });
+
   it('rebuilds only when the shot order changes', () => {
     const { reel } = build();
     const state = stateWith('a', 'b');

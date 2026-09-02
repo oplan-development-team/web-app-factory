@@ -4,7 +4,7 @@ export const meta = {
   phases: [
     { title: 'Ideate', detail: '複数レンズで候補アイディアを並行生成。批評結果が基準に届かなければ深掘りしてもう1周（最大2周）' },
     { title: 'Critique', detail: '独立した批評パネルで採点。基準未達なら次のIdeateラウンドへフィードバックを返す' },
-    { title: 'Concept', detail: '採用案を要件・スタイル方向に具体化' },
+    { title: 'Concept', detail: '採用案を要件・スタイル方向に具体化し、ux-flow-reviewerが情報設計・操作導線を追加レビュー' },
     { title: 'Build', detail: 'apps/<slug>/にプロトタイプを実装' },
     { title: 'Review & Fix', detail: 'Design QA・Verifyを実行し、指摘があればprototype-builderに差し戻して再検証（最大2ラウンド）' },
   ],
@@ -66,6 +66,16 @@ const CONCEPT_SCHEMA = {
     outOfScope: { type: 'array', items: { type: 'string' } },
   },
   required: ['slug', 'title', 'oneLiner', 'styleDirection', 'requirements', 'techStack'],
+}
+
+const UX_REVIEW_SCHEMA = {
+  type: 'object',
+  properties: {
+    passed: { type: 'boolean' },
+    concerns: { type: 'array', items: { type: 'string' } },
+    additionalRequirements: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['passed', 'concerns', 'additionalRequirements'],
 }
 
 const BUILD_SCHEMA = {
@@ -199,7 +209,7 @@ if (!winnerIdea) {
 }
 
 phase('Concept')
-const concept = await agent(
+let concept = await agent(
   `次のアイディアを、実装可能なコンセプトに具体化してください。` +
   `タイトル: ${winnerIdea.title} / 概要: ${winnerIdea.summary} / 対象ユーザー: ${winnerIdea.targetUser || '未指定'}。` +
   `リポジトリルートの apps/ 配下の既存ディレクトリ名と衝突しないkebab-caseのslugを決めてください。` +
@@ -209,6 +219,22 @@ const concept = await agent(
   { agentType: 'concept-developer', phase: 'Concept', schema: CONCEPT_SCHEMA }
 )
 log(`コンセプト確定: ${concept.title} / ${concept.styleDirection} / apps/${concept.slug}/`)
+
+log('ux-flow-reviewerが情報設計・操作導線をレビューします')
+const uxReview = await agent(
+  `次のコンセプトを、情報設計(IA)・操作導線の観点でレビューしてください。見た目のテンプレ回避や描画忠実度は見なくてよい` +
+  `（それらは別のエージェントが担当します）。ナビ/CTAが状態（未ログイン等）に応じて出し分けられる設計か、` +
+  `ログイン・削除確認等の定型操作が一般的なパターンに従っているか、` +
+  `モバイルファーストが要件にある場合は操作と結果を同時に見せられる導線になっているか、を確認してください。` +
+  `コンセプト: ${JSON.stringify(concept)}` + runIdNote,
+  { agentType: 'ux-flow-reviewer', phase: 'Concept', schema: UX_REVIEW_SCHEMA }
+)
+if (uxReview && uxReview.additionalRequirements && uxReview.additionalRequirements.length) {
+  concept = { ...concept, requirements: concept.requirements.concat(uxReview.additionalRequirements) }
+  log(`ux-flow-reviewer: 要件に${uxReview.additionalRequirements.length}件追加（${uxReview.concerns.join(' / ')}）`)
+} else {
+  log('ux-flow-reviewer: 追加の懸念なし')
+}
 
 phase('Build')
 let build = await agent(
