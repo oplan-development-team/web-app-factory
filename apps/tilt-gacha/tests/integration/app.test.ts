@@ -401,6 +401,53 @@ describe("永続化（AC-22 / FR-201）", () => {
   });
 });
 
+describe("許可の再要求を行わない（FR-403.1）", () => {
+  it("一度 granted になったら「もう一度振る」で requestPermission を呼び直さない", async () => {
+    const requestPermission = vi.fn().mockResolvedValue("granted");
+    Object.defineProperty(globalThis, "DeviceMotionEvent", {
+      value: { requestPermission },
+      configurable: true,
+    });
+
+    mount();
+    click("[data-shake-button]");
+    await vi.waitFor(() => expect(text("[data-shake-label]")).toBe("振って！"));
+    expect(requestPermission).toHaveBeenCalledTimes(1);
+
+    // タップで 1 枚引いてから「もう一度振る」
+    click("[data-shake-button]");
+    await vi.waitFor(() => expect(isActive("reveal")).toBe(true));
+    click("[data-shake-again]");
+    await vi.waitFor(() => expect(text("[data-shake-label]")).toBe("振って！"));
+
+    expect(requestPermission).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("「はじめて発見」の判定（FR-200.3）", () => {
+  it("同じ型を 2 回目に引いたときは表示されない", async () => {
+    // 乱数を固定し、同じ型が続けて出る状況をつくる
+    mount({ seed: 4 });
+    const first = document.querySelector<HTMLElement>("[data-reveal-first]");
+
+    click("[data-shake-button]");
+    await vi.waitFor(() => expect(isActive("reveal")).toBe(true));
+    expect(first?.hidden).toBe(false);
+
+    // 12 種すべて埋まるまで引き続ければ、必ずどこかで重複が起きる
+    let sawDuplicate = false;
+    for (let i = 0; i < 40; i += 1) {
+      click("[data-shake-again]");
+      await vi.waitFor(() => expect(text("[data-reveal-index]")).toBe(`№ ${String(i + 2).padStart(3, "0")}`));
+      if (first?.hidden === true) {
+        sawDuplicate = true;
+        break;
+      }
+    }
+    expect(sawDuplicate).toBe(true);
+  });
+});
+
 describe("読み上げ（FR-050）", () => {
   it("抽選結果が live region に反映される", async () => {
     mount();
