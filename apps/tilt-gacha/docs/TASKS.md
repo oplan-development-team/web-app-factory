@@ -31,7 +31,7 @@
 
 ## Phase D — UI
 
-- [ ] **T16** `ui/dom.ts`（検査付き取得）・`ui/screens.ts`（画面切替と aria-live） — NFR-008.2, FR-050
+- [x] **T16** `ui/dom.ts`（検査付き取得）・`ui/screens.ts`（画面切替と aria-live） — NFR-008.2, FR-050
 - [ ] **T17** `index.html` の 3 画面マークアップ — FR-300, FR-400, FR-500
 - [ ] **T18** `ui/motion.ts`: 許可要求・購読・シェイク検出・1200ms 自動降格 — FR-001〜003, FR-010, FR-020〜022
 - [ ] **T19** `ui/reveal.ts`: 出現演出画面の描画（グロー・バッジ・フレーバー） — FR-400〜404
