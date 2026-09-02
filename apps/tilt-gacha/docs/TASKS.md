@@ -24,7 +24,7 @@
 
 - [x] **T10** `lib/patterns/svg.ts`: 数値丸め・パス組み立て・要素シリアライズ — FR-100.2, FR-101
 - [x] **T11** `lib/patterns/flow.ts`: 波打つ縦線束（1〜3 層） — FR-110
-- [ ] **T12** `lib/patterns/grid.ts`: ドット格子（1〜3 層） — FR-110
+- [x] **T12** `lib/patterns/grid.ts`: ドット格子（1〜3 層） — FR-110
 - [ ] **T13** `lib/patterns/radial.ts`: 同心円（1〜3 層） — FR-110
 - [ ] **T14** `lib/patterns/noise.ts`: 散布点（1〜3 層） — FR-110
 - [ ] **T15** `lib/patterns/index.ts`: `buildPattern` ディスパッチと、600 標本の不変条件テスト — FR-100, AC-08〜11
