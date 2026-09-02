@@ -1,3 +1,690 @@
-html {
-  background: #0b0b0c;
+/*
+ * 傾きガチャ — 標本カタログ × 計測器
+ *
+ * 意匠の方針: 角丸ゼロ、カードの積み上げをやめてヘアラインと余白の強弱だけで
+ * 階層をつくる。地は単色で塗らず、微細な粒子と上方向のビネットで奥行きを出す。
+ * 主要操作は親指の届く画面下部のバーに置く（モバイルファースト）。
+ */
+
+/* ============ トークン ============ */
+:root {
+  --bg: #0b0b0c;
+  --surface: #131315;
+  --line: #232326;
+  /* 破線枠など「線として知覚させたい」用途は地との差が足りないので一段明るくする */
+  --line-strong: #35353c;
+  --text: #eceae6;
+  --muted: #8b8b90;
+
+  --common: #8b8b90;
+  --rare: #8fc4e0;
+  --epic: #e0b56a;
+  --accent: var(--common);
+
+  --font-display: "Space Grotesk Variable", "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace;
+
+  --step-label: 0.6875rem;
+  --step-body: 0.875rem;
+  --step-lead: clamp(2rem, 9vw, 3rem);
+  --step-display: clamp(3.25rem, 17vw, 5.5rem);
+
+  --gap-hair: 0.5rem;
+  --gap-tight: 0.875rem;
+  --gap: 1.5rem;
+  --gap-loose: clamp(2rem, 7vw, 3.5rem);
+
+  --edge: clamp(1.25rem, 5vw, 2rem);
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  /* 端末の高さ変動でレイアウトが跳ねないよう dvh を使う */
+  min-height: 100dvh;
+  background: var(--bg);
+}
+
+body {
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--step-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* 地を平坦にしないための粒子。乗算ではなく極薄のオーバーレイ */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* 上方向へ向かうごく弱いビネット。中央上に光源があるように見せる */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 70% at 50% -10%, rgb(255 255 255 / 6%), transparent 60%);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============ 画面 ============ */
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 34rem;
+  margin-inline: auto;
+  min-height: 100dvh;
+}
+
+.screen {
+  display: none;
+  min-height: 100dvh;
+  padding: var(--edge);
+  padding-bottom: calc(var(--edge) + env(safe-area-inset-bottom));
+}
+
+.screen[data-active="true"] {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============ 共通の部品 ============ */
+.eyebrow {
+  margin: 0;
+  font-size: var(--step-label);
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* 画面下部の主操作バー。角丸なし・全幅で親指の届く位置に固定する */
+.bar-button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 0.9rem 1.25rem;
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--text);
+  font-family: var(--font-mono);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 200ms var(--ease),
+    border-color 200ms var(--ease),
+    transform 120ms var(--ease);
+}
+
+.bar-button__label {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.bar-button__hint {
+  font-size: var(--step-label);
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.bar-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.bar-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.bar-button:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+/* 振り待ち中はボタン自体が脈打って「振れ」と伝える */
+.bar-button[data-state="armed"] {
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+  50% {
+    border-color: var(--text);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+}
+
+.ghost-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: var(--gap-hair);
+  padding: 0.7rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--step-label);
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  transition:
+    color 200ms var(--ease),
+    border-color 200ms var(--ease);
+}
+
+.ghost-button:hover,
+.ghost-button:focus-visible {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.ghost-button__count {
+  font-variant-numeric: tabular-nums;
+}
+
+:where(button):focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+/* ============ 待機画面 ============ */
+.masthead {
+  margin-bottom: var(--gap-loose);
+}
+
+.wordmark {
+  margin: var(--gap-tight) 0 var(--gap);
+  font-family: var(--font-display);
+  font-size: var(--step-display);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+}
+
+.wordmark__break {
+  display: block;
+  color: var(--muted);
+}
+
+.lede {
+  margin: 0;
+  max-width: 30ch;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.lede em {
+  font-style: normal;
+  color: var(--text);
+}
+
+.standby__stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap);
+  padding: var(--gap-loose) 0;
+}
+
+/* 3 重の輪。振る前の「まだ何も無い」状態を、空白ではなく待機として見せる */
+.dial {
+  position: relative;
+  width: min(46vw, 11rem);
+  aspect-ratio: 1;
+}
+
+.dial__ring {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.dial__ring:nth-child(2) {
+  inset: 18%;
+  animation-delay: 0.35s;
+}
+
+.dial__ring:nth-child(3) {
+  inset: 36%;
+  animation-delay: 0.7s;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.04);
+  }
+}
+
+.standby__state {
+  margin: 0;
+  text-align: center;
+  font-size: var(--step-label);
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  max-width: 30ch;
+}
+
+/* 傾き→系統の対応表。罫線だけで区切り、カードにしない */
+.affinity {
+  margin: 0 0 var(--gap);
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.affinity li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-tight);
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--step-label);
+}
+
+.affinity__tilt {
+  letter-spacing: 0.3em;
+  color: var(--text);
+}
+
+.affinity__family {
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+
+.standby__foot {
+  margin-top: auto;
+}
+
+/* ============ 出現演出画面 ============ */
+.reveal {
+  justify-content: center;
+}
+
+.reveal[data-rarity="COMMON"] {
+  --accent: var(--common);
+}
+.reveal[data-rarity="RARE"] {
+  --accent: var(--rare);
+}
+.reveal[data-rarity="EPIC"] {
+  --accent: var(--epic);
+}
+
+/* 通し番号は地に沈む巨大な数字として置き、グリッドを一度断ち切る */
+.reveal__index {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 16vw, 5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: color-mix(in srgb, var(--text) 7%, transparent);
+  /* 直下の図版に重ねて奥行きを出す */
+  margin-bottom: -0.35em;
+  pointer-events: none;
+}
+
+.reveal__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  width: 100%;
+}
+
+/* 多段の放射グラデーションでソフトなブルームをつくる（filter: blur は使わない） */
+.reveal__glow {
+  position: absolute;
+  inset: -8%;
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 45%),
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 62%),
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 78%);
+}
+
+.reveal__art {
+  position: relative;
+  width: 100%;
+  color: var(--accent);
+}
+
+.reveal__art svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* 出現: グローが先に開き、図版が続く。移動ではなく不透明度と微細なスケールだけ */
+.reveal__stage .reveal__glow,
+.reveal__stage .reveal__art {
+  opacity: 0;
+}
+
+.reveal__stage.is-revealed .reveal__glow {
+  animation: bloom 900ms var(--ease) forwards;
+}
+
+.reveal__stage.is-revealed .reveal__art {
+  animation: emerge 700ms var(--ease) 120ms forwards;
+}
+
+@keyframes bloom {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes emerge {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.reveal__meta {
+  margin-top: var(--gap);
+}
+
+.reveal__badges {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-hair);
+  margin: 0 0 var(--gap-hair);
+}
+
+.rarity-badge {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: var(--step-label);
+  letter-spacing: 0.26em;
+}
+
+.first-badge {
+  padding: 0.2rem 0.6rem;
+  background: var(--text);
+  color: var(--bg);
+  font-size: var(--step-label);
+  letter-spacing: 0.14em;
+}
+
+.first-badge[hidden] {
+  display: none;
+}
+
+.reveal__family {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.reveal__family-en {
+  font-size: var(--step-lead);
+  line-height: 1;
+}
+
+.reveal__family-ja {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+}
+
+.reveal__tilt {
+  margin: var(--gap-hair) 0 0;
+  font-size: var(--step-label);
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.reveal__actions {
+  margin-top: var(--gap-loose);
+}
+
+/* ============ 図鑑画面 ============ */
+.collection__head {
+  padding-bottom: var(--gap);
+  border-bottom: 1px solid var(--line);
+}
+
+.back-button {
+  padding: 0.35rem 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--step-label);
+  letter-spacing: 0.18em;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  color: var(--text);
+}
+
+.collection__count {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: var(--gap) 0 var(--gap-hair);
+  font-family: var(--font-display);
+  font-size: var(--step-lead);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.collection__count-label {
+  font-family: var(--font-mono);
+  font-size: var(--step-label);
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  color: var(--muted);
+}
+
+.meter {
+  height: 2px;
+  background: var(--line);
+}
+
+.meter__fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--text);
+  transition: width 600ms var(--ease);
+}
+
+.collection__note {
+  margin: var(--gap-tight) 0 0;
+  font-size: var(--step-label);
+  line-height: 1.6;
+  color: var(--epic);
+}
+
+.collection__note[hidden] {
+  display: none;
+}
+
+.collection__body {
+  padding-top: var(--gap);
+}
+
+.family + .family {
+  margin-top: var(--gap-loose);
+}
+
+.family__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-tight);
+  padding-bottom: var(--gap-hair);
+  border-bottom: 1px solid var(--line);
+}
+
+.family__name {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.family__ja {
+  font-family: var(--font-mono);
+  font-size: var(--step-label);
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+.family__tally {
+  margin: 0;
+  font-size: var(--step-label);
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.family__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap-hair);
+  margin-top: var(--gap-tight);
+}
+
+.cell[data-rarity="COMMON"] {
+  --accent: var(--common);
+}
+.cell[data-rarity="RARE"] {
+  --accent: var(--rare);
+}
+.cell[data-rarity="EPIC"] {
+  --accent: var(--epic);
+}
+
+.cell__frame {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--accent);
+  overflow: hidden;
+}
+
+.cell__frame svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cell[data-state="locked"] .cell__frame {
+  background: transparent;
+  border: 1px dashed var(--line-strong);
+}
+
+.cell__unknown {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--line-strong);
+}
+
+.cell__caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem;
+  margin: 0.4rem 0 0;
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.cell[data-state="found"] .cell__rarity {
+  color: var(--accent);
+}
+
+.cell__tally {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============ モーション配慮（NFR-005 / AC-26） ============ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  /* アニメーションを止めても図版が消えたままにならないようにする */
+  .reveal__stage .reveal__glow,
+  .reveal__stage .reveal__art {
+    opacity: 1;
+    transform: none;
+  }
 }

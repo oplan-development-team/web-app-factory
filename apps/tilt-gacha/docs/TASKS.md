@@ -37,7 +37,7 @@
 - [x] **T19** `ui/reveal.ts`: 出現演出画面の描画（グロー・バッジ・フレーバー） — FR-400〜404
 - [x] **T20** `ui/collectionView.ts`: 図鑑の 4 セクション × 3 列グリッド・未収集表示・進捗 — FR-500〜504
 - [x] **T21** `ui/app.ts` + `main.ts`: 状態機械と全配線 — PLAN §3
-- [ ] **T22** `style.css`: ダーク・ミニマル意匠、グロー、レスポンシブ、reduced-motion — 1.2 節, NFR-004, NFR-005
+- [x] **T22** `style.css`: ダーク・ミニマル意匠、グロー、レスポンシブ、reduced-motion — 1.2 節, NFR-004, NFR-005
 
 ## Phase E — 検証
 
