@@ -32,6 +32,33 @@ export const BUCKET_LABEL: Readonly<Record<TiltBucket, string>> = {
   INVERTED: "さかさま",
 };
 
+/**
+ * 待機画面の傾きヒント列の表記（SPEC 1.2.1）。
+ * 出現演出のフレーバー（BUCKET_LABEL）が「たて」なのに対し、
+ * アイコンに添える短いラベルはモックアップどおり「縦」を使う。
+ */
+export const BUCKET_HINT_LABEL: Readonly<Record<TiltBucket, string>> = {
+  UPRIGHT: "縦",
+  LANDSCAPE: "横",
+  DIAGONAL: "ななめ",
+  INVERTED: "さかさま",
+};
+
+/** 傾きヒントのアイコン回転角（度）。端末の姿勢をそのまま図にする。 */
+export const BUCKET_HINT_ROTATION: Readonly<Record<TiltBucket, number>> = {
+  UPRIGHT: 0,
+  LANDSCAPE: 90,
+  DIAGONAL: 45,
+  INVERTED: 180,
+};
+
+/** 出現演出のグローの不透明度。レア度が上がるほど強く光る（SPEC 1.2.1）。 */
+export const GLOW_OPACITY: Readonly<Record<Rarity, number>> = {
+  COMMON: 0.14,
+  RARE: 0.34,
+  EPIC: 0.46,
+};
+
 /** 傾き区分と相性のよい系統（SPEC 2.1）。 */
 export const BUCKET_AFFINITY: Readonly<Record<TiltBucket, Family>> = {
   UPRIGHT: "FLOW",
@@ -42,6 +69,21 @@ export const BUCKET_AFFINITY: Readonly<Record<TiltBucket, Family>> = {
 
 /** 相性系統の重み。残りを他 3 系統で均等割りする（FR-030.1）。 */
 export const AFFINITY_WEIGHT = 0.55;
+
+/** レア度の和名（SPEC 1.2.1）。バッジは `RARE · レア` の形式で出す。 */
+export const RARITY_LABEL_JA: Readonly<Record<Rarity, string>> = {
+  COMMON: "コモン",
+  RARE: "レア",
+  EPIC: "エピック",
+};
+
+/**
+ * 図鑑での通し番号（TYPE nn / 12）。系統順 × レア度順で 1 起点。
+ * 抽選のたびに増える回数ではなく「12 種のうちどれか」を示す（SPEC 1.2.1）。
+ */
+export function typeIndexOf(family: Family, rarity: Rarity): number {
+  return FAMILIES.indexOf(family) * RARITIES.length + RARITIES.indexOf(rarity) + 1;
+}
 
 /** レア度の重み。FR-031.1。合計は 1.00。 */
 export const RARITY_WEIGHT: Readonly<Record<Rarity, number>> = {
