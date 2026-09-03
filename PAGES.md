@@ -34,6 +34,7 @@
 | スクショ継ぎ足し（Shot Splice） | 複数枚のスクリーンショットの重なりを自動検出して1枚に継ぎ足す。iOSライク・モバイルファーストの本実装版 | [Pages](https://oplan-development-team.github.io/web-app-factory/shot-splice/) | 完成 |
 | 傾きガチャ（Tilt Gacha） | 端末を振ると、その瞬間の傾きに応じた幾何学模様が1枚出現し、12種の型を集める図鑑が埋まっていく感覚トイ | [Pages](https://oplan-development-team.github.io/web-app-factory/tilt-gacha/) | 完成 |
 | ブルーノート風ジャズジャケット・ジェネレーター（Blue Note Cover Studio） | 架空のバンド名・アルバム名から、ブルーノート・レコードのグラフィックデザイン規範（斜めデュオトーン写真ブロック・極端な字間タイポグラフィ・限定2色配色）に従ったジャケットを自動生成する | [Pages](https://oplan-development-team.github.io/web-app-factory/blue-note-cover-studio/) | プロトタイプ（採否待ち） |
+| 墨流しマーブリング・スタジオ（Suminagashi Marbling Studio） | 水盤にインクを落とし、櫛・渦でなぞって模様を作り込み、紙に「浸して引き上げ」て継ぎ目のないタイル/ポスターとして持ち帰るデジタル工芸ツール | [Pages](https://oplan-development-team.github.io/web-app-factory/suminagashi-marbling/) | プロトタイプ（採否待ち） |
 | タイピング心電図 | 打鍵のkeydown間隔だけを計測し、病院の心電図モニター風UIでリアルタイムに波形と診断結果を描くネタツール | — （Pages未対応、下記参照） | 保留 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
