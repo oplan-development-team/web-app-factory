@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SHOT SPLICE — スクリーンショット継ぎ足し工房</title>
+    <meta
+      name="description"
+      content="2枚に分かれたスクリーンショットの重なりを検出・調整して1枚の縦長画像に継ぎ足すクライアントサイドツール"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <h1 class="wordmark">SHOT SPLICE<span class="wordmark-sub">継ぎ足し工房</span></h1>
+        <p class="topbar-tagline">2枚のスクショの重なりを検出して、1枚の縦長画像に貼り合わせる。</p>
+      </header>
+
+      <main class="workbench">
+        <aside class="panel-rail" aria-label="操作パネル">
+          <section class="panel panel--load" aria-labelledby="panel-load-title">
+            <h2 id="panel-load-title" class="panel-title">01 / 画像を読み込む</h2>
+            <div class="slot-grid">
+              <div class="slot" id="slot-top" data-role="top">
+                <input type="file" accept="image/*" id="file-top" class="slot-input" aria-label="上画像を選択" />
+                <div class="slot-body">
+                  <span class="slot-tag slot-tag--top">TOP</span>
+                  <p class="slot-hint">ドロップ or クリックして選択</p>
+                  <img class="slot-thumb" alt="上画像のサムネイル" hidden />
+                  <p class="slot-meta"></p>
+                </div>
+              </div>
+              <div class="slot" id="slot-bottom" data-role="bottom">
+                <input type="file" accept="image/*" id="file-bottom" class="slot-input" aria-label="下画像を選択" />
+                <div class="slot-body">
+                  <span class="slot-tag slot-tag--bottom">BOTTOM</span>
+                  <p class="slot-hint">ドロップ or クリックして選択</p>
+                  <img class="slot-thumb" alt="下画像のサムネイル" hidden />
+                  <p class="slot-meta"></p>
+                </div>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button type="button" id="btn-swap" class="btn btn--ghost">⇅ 上下入れ替え</button>
+              <button type="button" id="btn-clear" class="btn btn--ghost btn--danger">✕ 全部クリア</button>
+            </div>
+          </section>
+
+          <section class="panel panel--trim" aria-labelledby="panel-trim-title">
+            <h2 id="panel-trim-title" class="panel-title">02 / 端をカット</h2>
+            <label class="field">
+              <span class="field-label">上画像 下端カット<span class="field-unit">px</span></span>
+              <input type="number" id="input-cut-top" min="0" value="0" class="field-input" />
+            </label>
+            <label class="field">
+              <span class="field-label">下画像 上端カット<span class="field-unit">px</span></span>
+              <input type="number" id="input-cut-bottom" min="0" value="0" class="field-input" />
+            </label>
+            <p class="field-note">固定ヘッダー/フッターなど、継ぎ目に写り込んでほしくない部分を削る。</p>
+          </section>
+
+          <section class="panel panel--overlap" aria-labelledby="panel-overlap-title">
+            <h2 id="panel-overlap-title" class="panel-title">03 / 重なりを合わせる</h2>
+            <button type="button" id="btn-detect" class="btn btn--primary btn--block">
+              <span class="btn-label">⌁ 自動検出</span>
+            </button>
+            <label class="field">
+              <span class="field-label">重なり幅<span class="field-unit">px</span></span>
+              <input type="number" id="input-overlap" min="0" value="0" class="field-input" />
+            </label>
+            <div class="toggle-row" role="group" aria-label="重なり部分の前面画像">
+              <span class="toggle-row-label">前面に出す画像</span>
+              <div class="segmented" id="toggle-front">
+                <button type="button" class="segmented-btn is-active" data-front="top">TOP</button>
+                <button type="button" class="segmented-btn" data-front="bottom">BOTTOM</button>
+              </div>
+            </div>
+            <label class="switch-row">
+              <input type="checkbox" id="toggle-diff" class="switch-input" />
+              <span class="switch-track"><span class="switch-thumb"></span></span>
+              <span class="switch-label">差分表示モード（ズレの目視確認）</span>
+            </label>
+          </section>
+
+          <section class="panel panel--readout" aria-labelledby="panel-readout-title">
+            <h2 id="panel-readout-title" class="panel-title">04 / 計測値</h2>
+            <div class="readout-grid">
+              <div class="readout">
+                <span class="readout-label">出力サイズ</span>
+                <span class="readout-value" id="readout-size">— × —</span>
+              </div>
+              <div class="readout">
+                <span class="readout-label">重なり幅</span>
+                <span class="readout-value" id="readout-overlap">— px</span>
+              </div>
+            </div>
+          </section>
+
+          <button type="button" id="btn-download" class="btn btn--accent btn--block btn--download" disabled>
+            <span class="btn-label">⬇ PNGをダウンロード</span>
+          </button>
+        </aside>
+
+        <section class="stage" aria-label="プレビュー">
+          <div class="stage-toolbar">
+            <p class="stage-hint" id="stage-hint">画像を2枚読み込むとここにプレビューが表示される</p>
+            <div class="stage-status" id="stage-status" hidden>
+              <span class="stage-status-dot"></span>
+              <span class="stage-status-text"></span>
+            </div>
+          </div>
+          <div class="stage-viewport" id="stage-viewport">
+            <div class="stage-empty" id="stage-empty">
+              <p class="stage-empty-glyph">✂︎</p>
+              <p class="stage-empty-text">まだ何もない。左のパネルから画像を2枚放り込め。</p>
+            </div>
+            <div class="splice-frame" id="splice-frame" hidden>
+              <div class="splice-layer" id="layer-top-wrap">
+                <img id="layer-top" alt="上画像プレビュー" />
+              </div>
+              <div class="splice-layer" id="layer-bottom-wrap">
+                <img id="layer-bottom" alt="下画像プレビュー" />
+              </div>
+              <div
+                class="seam-handle"
+                id="seam-handle"
+                role="slider"
+                tabindex="0"
+                aria-label="重なり位置の調整ハンドル（矢印キーで1px、Shift+矢印キーで10px調整）"
+                aria-valuemin="0"
+                aria-valuenow="0"
+              >
+                <span class="seam-handle-grip"></span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="app-footer">
+        <p>全処理はブラウザ内で完結。画像はサーバーに送信されない。</p>
+      </footer>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

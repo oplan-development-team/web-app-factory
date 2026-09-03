@@ -9,3 +9,5 @@ build/
 .turbo/
 coverage/
 .claude/worktrees/
+.mcp.json
+.vscode/

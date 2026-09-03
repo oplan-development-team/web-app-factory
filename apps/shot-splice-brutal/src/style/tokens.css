@@ -1,0 +1,53 @@
+:root {
+  /* 色: 暗室・印刷工房を思わせる配色。tab-guilt-garden(からし/警告レッド/庭グリーン)とは
+     意図的に別系統(紙のクリーム地 + 現像液ブルー + アシッドライム + 警告オレンジ)にしている。 */
+  --paper: #ede6d6;
+  --paper-raised: #f8f3e8;
+  --paper-dim: #ddd4bd;
+  --ink: #14120f;
+  --ink-soft: #2a2620;
+
+  --blue: #2b4bf2;
+  --blue-deep: #1a2fa8;
+  --blue-tint: #dde3fd;
+
+  --lime: #c6f135;
+  --lime-deep: #93b30f;
+  --lime-tint: #eef8c9;
+
+  --orange: #ff5a1f;
+  --orange-deep: #c93e0c;
+  --orange-tint: #ffe0d1;
+
+  /* タイポグラフィ */
+  --font-display: 'Archivo Black', 'Hiragino Sans', sans-serif;
+  --font-body: 'Space Grotesk', 'Hiragino Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --text-xs: 0.72rem;
+  --text-sm: 0.84rem;
+  --text-base: 0.95rem;
+  --text-md: 1.15rem;
+  --text-lg: 1.6rem;
+  --text-xl: clamp(1.9rem, 1.5rem + 1.6vw, 2.8rem);
+
+  /* 余白: 均一グリッドを避け、意図的に不揃いな刻みにする */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 14px;
+  --space-4: 22px;
+  --space-5: 34px;
+  --space-6: 52px;
+
+  /* 枠線・シャドウ(紙工作風オフセット) */
+  --border-w: 3px;
+  --border-w-thick: 4px;
+  --shadow-sm: 4px 4px 0 var(--ink);
+  --shadow-md: 7px 7px 0 var(--ink);
+  --shadow-lg: 10px 10px 0 var(--ink);
+  --shadow-press: 2px 2px 0 var(--ink);
+
+  --duration-fast: 120ms;
+  --duration-normal: 220ms;
+  --ease-snap: cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}

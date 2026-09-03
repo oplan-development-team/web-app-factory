@@ -1,0 +1,342 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+.app__header {
+  padding: calc(var(--safe-top) + var(--gap-loose)) var(--pad-edge) var(--gap);
+}
+
+.app__title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35em;
+  font-size: var(--text-title);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.app__title-main {
+  color: var(--text);
+}
+
+/* The one place the alignment cyan appears outside a measurement: it names the
+   product, so the colour reads as "this is what a matched seam looks like". */
+.app__title-accent {
+  color: var(--align);
+}
+
+.app__tagline {
+  max-width: 34em;
+  margin-top: var(--gap-tight);
+  font-size: var(--text-small);
+  line-height: 1.55;
+  color: var(--text-dim);
+  text-wrap: pretty;
+}
+
+.app__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--gap-loose);
+  padding: 0 var(--pad-edge) calc(var(--toolbar-height) + var(--gap-section));
+}
+
+/* --- Preview stage ------------------------------------------------------ */
+
+.stage {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
+  margin: 0 calc(var(--pad-edge) * -1);
+  padding: var(--gap-tight) var(--pad-edge) var(--gap);
+}
+
+/*
+ * The stage's backdrop lives on a pseudo-element rather than on .stage itself.
+ * Masking the element directly also fades its children, which quietly turned
+ * the output-size readout half-transparent.
+ *
+ * It is opaque so content scrolling underneath does not show through, and it
+ * repaints the same fixed atmosphere as the body so its top edge does not read
+ * as a band across the page.
+ */
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-color: var(--bg);
+  background-image: var(--atmosphere);
+  background-attachment: fixed, fixed;
+  mask-image: linear-gradient(to bottom, #000 82%, transparent);
+}
+
+.stage__wash {
+  position: absolute;
+  inset: -20% -10% 20%;
+  z-index: -1;
+  pointer-events: none;
+  filter: blur(28px);
+  opacity: 0.85;
+  transition: background-image var(--dur) linear;
+}
+
+.stage__frame {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: hidden auto;
+  height: 34svh;
+  min-height: 168px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  background: var(--bg-deep);
+  box-shadow: var(--shadow-card), inset 0 1px 0 var(--sheen);
+  overscroll-behavior: contain;
+}
+
+.stage[data-mode='empty'] .stage__canvas,
+.stage[data-mode='partial'] .stage__canvas {
+  display: none;
+}
+
+.stage__placeholder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-hair);
+  align-self: center;
+  max-width: 30ch;
+  padding: var(--gap);
+  text-align: center;
+}
+
+.stage__placeholder[hidden] {
+  display: none;
+}
+
+.stage__placeholder-title {
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.stage__placeholder-text {
+  font-size: var(--text-small);
+  line-height: 1.55;
+  color: var(--text-dim);
+  text-wrap: pretty;
+}
+
+.stage__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-hair) var(--gap);
+  font-size: var(--text-small);
+  color: var(--text-dim);
+}
+
+.stage__size {
+  color: var(--text);
+}
+
+.stage__warning {
+  font-size: var(--text-small);
+  line-height: 1.5;
+  color: var(--drift);
+  text-wrap: pretty;
+}
+
+.stage__warning[hidden] {
+  display: none;
+}
+
+/* --- Empty state -------------------------------------------------------- */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
+  align-items: center;
+}
+
+.app:not([data-shots='0']) .empty {
+  display: none;
+}
+
+.empty__hint {
+  font-size: var(--text-small);
+  color: var(--text-faint);
+}
+
+/* --- Toolbar ------------------------------------------------------------ */
+
+.toolbar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  padding: var(--gap-tight) var(--pad-edge) calc(var(--gap-tight) + var(--safe-bottom));
+  border-top: 1px solid var(--hairline);
+  background: color-mix(in oklab, var(--surface-1) 82%, transparent);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+}
+
+.toolbar__row {
+  display: flex;
+  gap: var(--gap-tight);
+  align-items: stretch;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.toolbar__row .btn {
+  flex: 1;
+  min-width: 0;
+}
+
+.toolbar__progress {
+  display: flex;
+  gap: var(--gap-tight);
+  align-items: center;
+  justify-content: center;
+  padding-bottom: var(--gap-tight);
+  font-size: var(--text-small);
+  color: var(--text-dim);
+}
+
+.toolbar__progress[hidden] {
+  display: none;
+}
+
+/* --- Undo toast ----------------------------------------------------------
+   Floats just above the fixed toolbar so it never covers the button that
+   caused it, and sits below the sheet/dropzone overlays. */
+
+.undo-toast {
+  position: fixed;
+  left: 50%;
+  right: auto;
+  bottom: calc(var(--toolbar-height) + var(--gap-tight));
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  width: max-content;
+  max-width: min(92vw, 420px);
+  padding: var(--gap-tight) var(--gap-tight) var(--gap-tight) var(--gap);
+  border-radius: var(--radius-md);
+  background: var(--surface-3);
+  box-shadow: var(--shadow-float), inset 0 1px 0 var(--sheen);
+  transform: translateX(-50%);
+  animation: toast-rise var(--dur-sheet) var(--ease-ios);
+}
+
+.undo-toast[hidden] {
+  display: none;
+}
+
+.undo-toast__message {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-small);
+  color: var(--text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.undo-toast__action {
+  flex: none;
+  min-height: var(--tap);
+  padding: 0 var(--gap-tight);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-small);
+  font-weight: 700;
+  color: var(--align);
+}
+
+.undo-toast__action:hover {
+  background: var(--surface-2);
+}
+
+/* --- Drop target -------------------------------------------------------- */
+
+.dropzone {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: none;
+  place-items: center;
+  padding: var(--pad-edge);
+  background: color-mix(in oklab, var(--bg-deep) 78%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.app[data-dragging='true'] .dropzone {
+  display: grid;
+}
+
+.dropzone__text {
+  padding: var(--gap-loose) var(--gap-section);
+  border: 2px dashed var(--align);
+  border-radius: var(--radius-lg);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--align);
+}
+
+/* --- Desktop reflow ----------------------------------------------------- */
+
+@media (min-width: 900px) {
+  .app__main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
+    align-items: start;
+    gap: var(--gap-section);
+    max-width: 1180px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .stage {
+    position: sticky;
+    top: var(--gap);
+    grid-row: span 3;
+    margin: 0;
+    padding: 0;
+    background: none;
+  }
+
+  .stage::before {
+    display: none;
+  }
+
+  .stage__frame {
+    height: min(72svh, 760px);
+  }
+
+  .reel,
+  .band,
+  .empty {
+    grid-column: 2;
+  }
+
+  .toolbar {
+    position: sticky;
+    inset: auto;
+    grid-column: 2;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    padding: var(--gap-tight);
+  }
+}

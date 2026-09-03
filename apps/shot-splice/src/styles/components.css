@@ -1,0 +1,601 @@
+/* --- Buttons ------------------------------------------------------------ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap);
+  padding: 0 var(--gap);
+  border-radius: var(--radius-md);
+  font-size: var(--text-small);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transition:
+    transform var(--dur-fast) var(--ease-ios),
+    background-color var(--dur-fast) var(--ease-ios),
+    opacity var(--dur-fast) var(--ease-ios);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.btn:disabled {
+  opacity: 0.34;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background: var(--surface-3);
+  box-shadow: inset 0 1px 0 var(--sheen);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--surface-3) 80%, var(--align));
+}
+
+.btn--accent {
+  color: oklch(18% 0.03 200);
+  background: var(--align);
+}
+
+.btn--accent:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--align) 88%, white);
+}
+
+.btn--ghost {
+  border: 1px solid var(--hairline-strong);
+  background: transparent;
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.btn--quiet {
+  color: var(--text-dim);
+}
+
+.btn--quiet:hover:not(:disabled) {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.btn--wide {
+  width: min(100%, 320px);
+}
+
+.btn--danger {
+  color: oklch(97% 0.01 22);
+  background: var(--danger);
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--danger) 88%, black);
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  transition:
+    background-color var(--dur-fast) var(--ease-ios),
+    color var(--dur-fast) var(--ease-ios),
+    transform var(--dur-fast) var(--ease-ios);
+}
+
+.icon-btn__glyph {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.icon-btn:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.icon-btn:active:not(:disabled) {
+  transform: scale(0.9);
+}
+
+.icon-btn:disabled {
+  opacity: 0.24;
+  cursor: not-allowed;
+}
+
+/* Danger buttons carry the warning colour at rest, not only on hover — a
+   delete control that looks identical to the reorder buttons until touched
+   is too easy to hit by mistake next to them. */
+.icon-btn--danger {
+  color: var(--danger);
+}
+
+.icon-btn--danger:hover:not(:disabled) {
+  background: var(--danger-soft);
+}
+
+/* --- Status ------------------------------------------------------------- */
+
+.status {
+  margin: 0 var(--pad-edge) var(--gap);
+  padding: var(--gap-tight) var(--gap);
+  border-left: 3px solid var(--text-faint);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--surface-1);
+  font-size: var(--text-small);
+  line-height: 1.5;
+  color: var(--text-dim);
+  text-wrap: pretty;
+}
+
+.status[hidden] {
+  display: none;
+}
+
+.status[data-tone='success'] {
+  border-left-color: var(--align);
+  background: var(--align-soft);
+  color: var(--text);
+}
+
+.status[data-tone='error'] {
+  border-left-color: var(--drift);
+  background: var(--drift-soft);
+  color: var(--text);
+}
+
+/* --- Cards -------------------------------------------------------------- */
+
+.card {
+  padding: var(--gap) var(--gap);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-card), inset 0 1px 0 var(--sheen);
+}
+
+/* --- Reel --------------------------------------------------------------- */
+
+.reel {
+  display: flex;
+  flex-direction: column;
+}
+
+.app[data-shots='0'] .reel {
+  display: none;
+}
+
+.reel__shot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--gap);
+  align-items: center;
+  padding: var(--gap-tight) 0;
+  transition: opacity var(--dur) var(--ease-ios);
+}
+
+.reel__shot--dragging {
+  position: relative;
+  z-index: 5;
+  opacity: 0.92;
+  filter: drop-shadow(0 12px 24px oklch(0% 0 0 / 0.6));
+}
+
+.reel--reordering .reel__shot:not(.reel__shot--dragging) {
+  opacity: 0.45;
+}
+
+.reel__handle {
+  position: relative;
+  display: grid;
+  place-items: center;
+  touch-action: none;
+}
+
+/* The splice line: a continuous rail behind the thumbnails that makes the
+   shots read as one physical strip rather than a list of files. */
+.reel__handle::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--gap-tight) * -3);
+  bottom: calc(var(--gap-tight) * -3);
+  left: 50%;
+  width: 1px;
+  background: var(--hairline-strong);
+}
+
+.reel__shot:first-child .reel__handle::before {
+  top: 50%;
+}
+
+.reel__shot:last-child .reel__handle::before {
+  bottom: 50%;
+}
+
+.reel__thumb {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 6px;
+  background: var(--bg-deep);
+  box-shadow: 0 2px 10px -4px oklch(0% 0 0 / 0.9);
+}
+
+.reel__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.reel__index {
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+}
+
+.reel__name {
+  overflow: hidden;
+  font-size: var(--text-small);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reel__dims {
+  font-size: 0.6875rem;
+  color: var(--text-faint);
+}
+
+.reel__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-tight);
+}
+
+/* Reorder buttons stay a tight pair; the delete button sits a full gap away
+   so it is never the accidental target of a repeated tap on ↑/↓. */
+.reel__moves {
+  display: flex;
+  gap: 2px;
+}
+
+/* --- Seam --------------------------------------------------------------- */
+
+.reel__seam {
+  display: flex;
+}
+
+.seam {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--gap);
+  align-items: center;
+  width: 100%;
+  min-height: var(--tap);
+  padding: var(--gap-tight) var(--gap-tight) var(--gap-tight) 0;
+  border-radius: var(--radius-md);
+  text-align: left;
+  transition: background-color var(--dur-fast) var(--ease-ios);
+}
+
+.seam:hover {
+  background: var(--surface-1);
+}
+
+.seam__rail {
+  position: relative;
+  width: 54px;
+  height: 100%;
+  min-height: 54px;
+}
+
+/* The rail continues the splice line and is tinted by how well this seam
+   matches — the connection itself reports its own quality. */
+.seam__rail::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 3px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: var(--seam-tint);
+  transition: background-color var(--dur) var(--ease-out);
+}
+
+.seam__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.seam__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-tight);
+  align-items: baseline;
+}
+
+.seam__caption {
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.seam__grade {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--seam-tint);
+}
+
+.seam__readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3em;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.seam__value {
+  font-size: var(--text-readout-sm);
+  font-weight: 600;
+  line-height: 1.05;
+}
+
+.seam__unit,
+.seam__delta {
+  font-size: 0.6875rem;
+  color: var(--text-faint);
+}
+
+.seam__bar {
+  overflow: hidden;
+  width: min(100%, 180px);
+  height: 2px;
+  margin-top: 4px;
+  border-radius: 2px;
+  background: var(--hairline);
+}
+
+.seam__bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--seam-tint);
+  transition: width 180ms var(--ease-out);
+}
+
+.seam__chevron {
+  font-size: 1.25rem;
+  color: var(--text-faint);
+}
+
+/* --- Band card ---------------------------------------------------------- */
+
+.band__head {
+  display: flex;
+  gap: var(--gap);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.band__summary {
+  margin-top: var(--gap-hair);
+  font-size: var(--text-small);
+  line-height: 1.5;
+  color: var(--text-dim);
+  text-wrap: pretty;
+}
+
+.band__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  margin-top: var(--gap);
+  transition: opacity var(--dur) var(--ease-ios);
+}
+
+.band__body[data-disabled] {
+  opacity: 0.4;
+}
+
+.band[data-empty] .band__body {
+  display: none;
+}
+
+.band__fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+}
+
+.band__field {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--gap-hair);
+  min-width: 0;
+}
+
+.band__field-label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.band__drift {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-tight);
+  align-items: center;
+  font-size: var(--text-small);
+  color: var(--drift);
+}
+
+.band__drift[hidden] {
+  display: none;
+}
+
+.band__adopt {
+  min-height: var(--tap);
+  padding: 0 var(--gap-tight);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* --- Stepper ------------------------------------------------------------ */
+
+.stepper {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+.stepper__btn {
+  width: var(--tap);
+  height: var(--tap);
+  flex: none;
+  font-size: 1.125rem;
+  color: var(--text-dim);
+}
+
+.stepper__btn:hover {
+  color: var(--text);
+  background: var(--surface-3);
+}
+
+.stepper__input {
+  width: 100%;
+  min-width: 0;
+  height: var(--tap);
+  border: 0;
+  border-left: 1px solid var(--hairline);
+  border-right: 1px solid var(--hairline);
+  background: transparent;
+  text-align: center;
+  font-size: var(--text-body);
+  font-weight: 600;
+  -moz-appearance: textfield;
+}
+
+.stepper__input::-webkit-outer-spin-button,
+.stepper__input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+/* --- Switch and checkbox ------------------------------------------------ */
+
+.switch {
+  position: relative;
+  flex: none;
+  width: 52px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  transition: background-color var(--dur) var(--ease-ios);
+}
+
+/* A 52x32 pill is smaller than the 44px minimum, so the hit area is extended
+   past the visible control rather than inflating the control itself. */
+.switch::after {
+  content: '';
+  position: absolute;
+  inset: -6px -0px;
+  min-height: var(--tap);
+}
+
+.switch[aria-checked='true'] {
+  background: var(--align);
+}
+
+.switch:disabled {
+  opacity: 0.35;
+}
+
+.switch__knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 6px oklch(0% 0 0 / 0.5);
+  transition: transform var(--dur) var(--ease-ios);
+}
+
+.switch[aria-checked='true'] .switch__knob {
+  transform: translateX(20px);
+}
+
+.checkbox {
+  display: flex;
+  gap: var(--gap-tight);
+  align-items: center;
+  min-height: var(--tap);
+  cursor: pointer;
+}
+
+.checkbox__input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.checkbox__box {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 7px;
+  background: var(--surface-2);
+  transition:
+    background-color var(--dur-fast) var(--ease-ios),
+    border-color var(--dur-fast) var(--ease-ios);
+}
+
+.checkbox__box::after {
+  content: '✓';
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: oklch(18% 0.03 200);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-ios);
+}
+
+.checkbox__input:checked + .checkbox__box {
+  border-color: var(--align);
+  background: var(--align);
+}
+
+.checkbox__input:checked + .checkbox__box::after {
+  opacity: 1;
+}
+
+.checkbox__input:focus-visible + .checkbox__box {
+  outline: 2px solid var(--align);
+  outline-offset: 2px;
+}
+
+.checkbox__text {
+  font-size: var(--text-small);
+  color: var(--text-dim);
+  text-wrap: pretty;
+}

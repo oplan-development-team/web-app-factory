@@ -1,0 +1,65 @@
+@keyframes sheet-rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes sheet-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.toolbar__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--hairline-strong);
+  border-top-color: var(--align);
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
+/* Motion here is meant to explain a change, so it is scoped to the moments
+   where something actually changed: a shot joining the reel, a sheet arriving,
+   work being in progress. */
+.reel__shot {
+  animation: shot-in var(--dur) var(--ease-ios);
+}
+
+@keyframes shot-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes toast-rise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .toolbar__spinner {
+    /* A spinner that cannot spin still has to read as "working". */
+    animation: none;
+    border-top-color: var(--align);
+    border-right-color: var(--align);
+  }
+}
