@@ -1,0 +1,695 @@
+/* ==========================================================================
+   RISO PRINT SIMULATOR — design system
+   Style direction: Neo-Brutalism for the UI shell. The UI stays near-neutral
+   (paper off-white / ink black) with exactly one accent color driven by the
+   first selected riso ink (default: fluorescent pink). The poster canvas is
+   where the real riso ink colors get to be loud — the UI chrome never
+   competes with it.
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Archivo Black Fallback';
+  src: local('Arial Black'), local('Arial Bold');
+  size-adjust: 108%;
+}
+
+:root {
+  /* Paper / ink neutrals */
+  --color-paper: #f2eee4;
+  --color-paper-soft: #e9e2cd;
+  --color-ink-black: #141210;
+  --color-line: #141210;
+
+  /* Single UI accent — driven by the first selected ink preset (JS sets this) */
+  --accent: #ff48b0;
+  --accent-ink-text: #141210;
+
+  --font-heading: 'Archivo Black', 'Archivo Black Fallback', 'Arial Black', 'Helvetica Neue', sans-serif;
+  --font-display: 'Anton', 'Impact', 'Haettenschweiler', 'Arial Narrow Bold', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', sans-serif;
+
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+
+  --border-w: 3px;
+  --border-w-lg: 4px;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink-black);
+  font-family: var(--font-body);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Masthead                                                                */
+/* ---------------------------------------------------------------------- */
+
+.masthead {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-4);
+  background: var(--color-ink-black);
+  color: var(--color-paper);
+  border-bottom: var(--border-w-lg) solid var(--color-ink-black);
+  padding: var(--space-3) var(--space-4);
+}
+
+.masthead__mark {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  border: 2px solid var(--color-paper);
+  padding: 4px 8px;
+}
+
+.masthead__title {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  font-size: clamp(20px, 3vw, 30px);
+  margin: 0 0 4px;
+  line-height: 1.05;
+}
+
+.masthead__subtitle {
+  margin: 0;
+  font-size: 12.5px;
+  color: #c9c3b4;
+  max-width: 62ch;
+  line-height: 1.5;
+}
+
+.masthead__badge {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  background: var(--accent);
+  color: var(--accent-ink-text);
+  border: 2px solid var(--color-paper);
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Workspace grid: controls left, preview right (desktop) — always visible
+   together so slider adjustments never require scrolling back and forth.   */
+/* ---------------------------------------------------------------------- */
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(340px, 420px) 1fr;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  align-items: start;
+}
+
+.controls-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.preview-col {
+  position: sticky;
+  top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+@media (min-width: 1024px) {
+  .workspace {
+    min-height: calc(100vh - 96px);
+  }
+  .controls-col {
+    order: 1;
+    max-height: calc(100vh - 96px - var(--space-4) * 2);
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .preview-col {
+    order: 2;
+  }
+}
+
+@media (max-width: 1023px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+  .preview-col {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--color-paper);
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: var(--border-w-lg) solid var(--color-line);
+  }
+  .preview-frame {
+    max-width: 340px;
+    margin: 0 auto;
+  }
+}
+
+.section-label {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 12.5px;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Panels — thick borders, flat offset shadows, no radius. Alternating
+   shadow direction + slight horizontal stagger evokes plates slightly out
+   of register, without rotating interactive form controls (keeps sliders
+   and checkboxes fully usable).                                          */
+/* ---------------------------------------------------------------------- */
+
+.panel {
+  background: var(--color-paper-soft);
+  border: var(--border-w) solid var(--color-line);
+  box-shadow: 6px 6px 0 var(--color-line);
+  padding: var(--space-3) var(--space-3) var(--space-4);
+}
+
+.controls-col > .panel:nth-child(even) {
+  box-shadow: -6px 6px 0 var(--color-line);
+  margin-left: var(--space-2);
+}
+
+.controls-col > .panel:nth-child(odd) {
+  margin-right: var(--space-2);
+}
+
+.panel-title {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 13.5px;
+  line-height: 1.2;
+  margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-1);
+  border-bottom: var(--border-w) solid var(--color-line);
+}
+
+.panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Fields                                                                  */
+/* ---------------------------------------------------------------------- */
+
+.field-label {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #423d34;
+  margin: var(--space-1) 0 0;
+}
+
+.field-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.2;
+  min-width: 3ch;
+  text-align: right;
+}
+
+.field-notice {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.3;
+  color: #7a3a12;
+  min-height: 1.4em;
+  margin: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.field-notice.is-visible {
+  opacity: 1;
+}
+
+.field-error {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.3;
+  color: #b31c1c;
+  min-height: 1.2em;
+  margin: 0;
+}
+
+.text-input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 8px 10px;
+  border: var(--border-w) solid var(--color-line);
+  background: var(--color-paper);
+  color: var(--color-ink-black);
+  resize: none;
+}
+
+.text-input:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.slider-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Range sliders — square zero-radius thumb, thin black track.            */
+/* ---------------------------------------------------------------------- */
+
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 24px;
+  background: transparent;
+  margin: 0;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  background: var(--color-line);
+}
+
+input[type='range']::-moz-range-track {
+  height: 4px;
+  background: var(--color-line);
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 0;
+  background: var(--color-paper);
+  border: 3px solid var(--color-line);
+  margin-top: -7px;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+input[type='range']::-webkit-slider-thumb:hover {
+  background: var(--accent);
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 0;
+  background: var(--color-paper);
+  border: 3px solid var(--color-line);
+  cursor: pointer;
+}
+
+input[type='range']:focus-visible {
+  outline: none;
+}
+
+input[type='range']:focus-visible::-webkit-slider-thumb {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+input[type='range']:focus-visible::-moz-range-thumb {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Buttons                                                                 */
+/* ---------------------------------------------------------------------- */
+
+.btn {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 12.5px;
+  line-height: 1.2;
+  padding: 10px 14px;
+  background: var(--color-paper);
+  color: var(--color-ink-black);
+  border: var(--border-w) solid var(--color-line);
+  box-shadow: 4px 4px 0 var(--color-line);
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.08s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--color-line);
+}
+
+.btn:active:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 var(--color-line);
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  box-shadow: 2px 2px 0 var(--color-line);
+  transform: none;
+}
+
+.btn-small {
+  font-size: 11px;
+  padding: 6px 10px;
+  box-shadow: 3px 3px 0 var(--color-line);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-ink-text);
+}
+
+.btn-export {
+  width: 100%;
+  font-size: 14px;
+  padding: 14px;
+  margin-top: var(--space-1);
+}
+
+.toggle-btn.is-active {
+  background: var(--accent);
+  color: var(--accent-ink-text);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Button-styled radio groups (layout presets, shape, aspect, scale)      */
+/* ---------------------------------------------------------------------- */
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.button-group__option {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  font-size: 11.5px;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  padding: 8px 12px;
+  border: var(--border-w) solid var(--color-line);
+  background: var(--color-paper);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.1s ease, color 0.1s ease, transform 0.08s ease;
+}
+
+.button-group__input:checked + .button-group__option {
+  background: var(--color-ink-black);
+  color: var(--color-paper);
+}
+
+.button-group__input:focus-visible + .button-group__option {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Ink swatches                                                            */
+/* ---------------------------------------------------------------------- */
+
+.ink-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+}
+
+.ink-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.ink-swatch__box {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 3px solid var(--color-line);
+  box-shadow: 3px 3px 0 var(--color-line);
+  position: relative;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.ink-swatch[data-selected='true'] .ink-swatch__box {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 var(--color-line);
+}
+
+.ink-swatch[data-selected='true'] .ink-swatch__box::after {
+  content: '\2713';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  color: #ffffff;
+  mix-blend-mode: difference;
+}
+
+.ink-swatch[data-disabled='true'] {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.ink-swatch[data-disabled='true'] .ink-swatch__box {
+  background-image: repeating-linear-gradient(45deg, rgba(20, 18, 16, 0.35) 0 4px, transparent 4px 8px);
+}
+
+.ink-swatch__input:focus-visible + .ink-swatch__box {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.ink-swatch__label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Plate stack rows (variable-height block driven by ink plate count)     */
+/* ---------------------------------------------------------------------- */
+
+.plate-rows {
+  display: flex;
+  flex-direction: column;
+  border: var(--border-w) solid var(--color-line);
+}
+
+.plate-row {
+  display: grid;
+  grid-template-columns: 20px 1fr auto auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.plate-row + .plate-row {
+  border-top: 2px solid var(--color-line);
+}
+
+.plate-row__chip {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--color-line);
+  display: inline-block;
+}
+
+.plate-row__role {
+  color: #5a5346;
+  text-transform: uppercase;
+  font-size: 10.5px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Photo dropzone                                                          */
+/* ---------------------------------------------------------------------- */
+
+.dropzone {
+  border: var(--border-w) dashed var(--color-line);
+  padding: var(--space-4) var(--space-3);
+  text-align: center;
+  cursor: pointer;
+  background: var(--color-paper);
+  transition: background-color 0.12s ease, border-style 0.12s ease;
+}
+
+.dropzone:hover,
+.dropzone.is-dragover {
+  background: #fff;
+  border-style: solid;
+}
+
+.dropzone:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.dropzone__text {
+  margin: 0 0 4px;
+  font-family: var(--font-heading);
+  font-size: 12.5px;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.dropzone__hint {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.3;
+  color: #6b6355;
+}
+
+.photo-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.photo-preview:empty {
+  display: none;
+}
+
+.photo-preview__name {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Preview column                                                          */
+/* ---------------------------------------------------------------------- */
+
+.preview-frame {
+  position: relative;
+  border: var(--border-w-lg) solid var(--color-line);
+  box-shadow: 8px 8px 0 var(--color-line);
+  background: repeating-linear-gradient(
+    45deg,
+    #ded6bf 0 10px,
+    #e6dfca 10px 20px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.preview-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.preview-canvas.is-hidden {
+  display: none;
+}
+
+.preview-empty {
+  display: none;
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
+  max-width: 46ch;
+}
+
+.preview-empty.is-visible {
+  display: block;
+}
+
+.preview-empty__title {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  font-size: 15px;
+  margin: 0 0 var(--space-2);
+}
+
+.preview-empty__body {
+  font-size: 13px;
+  color: #4a453a;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.preview-caption {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.3;
+  text-align: center;
+  color: #5a5346;
+  margin: 0;
+}

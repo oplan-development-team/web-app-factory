@@ -36,6 +36,7 @@
 | ブルーノート風ジャズジャケット・ジェネレーター（Blue Note Cover Studio） | 架空のバンド名・アルバム名から、ブルーノート・レコードのグラフィックデザイン規範（斜めデュオトーン写真ブロック・極端な字間タイポグラフィ・限定2色配色）に従ったジャケットを自動生成する | [Pages](https://oplan-development-team.github.io/web-app-factory/blue-note-cover-studio/) | プロトタイプ（採否待ち） |
 | 墨流しマーブリング・スタジオ（Suminagashi Marbling Studio） | 水盤にインクを落とし、櫛・渦でなぞって模様を作り込み、紙に「浸して引き上げ」て継ぎ目のないタイル/ポスターとして持ち帰るデジタル工芸ツール | [Pages](https://oplan-development-team.github.io/web-app-factory/suminagashi-marbling/) | プロトタイプ（採否待ち） |
 | 枯山水コンポーザー（Karesansui Composer） | 砂庭に石を置くと、石を避けながら砂紋（箒目）が自動で流れる禅庭シミュレーター。完成した庭をPNG/SVGポスターとして書き出せる | [Pages](https://oplan-development-team.github.io/web-app-factory/karesansui-composer/) | プロトタイプ（採否待ち） |
+| リソグラフ再現ポスターメーカー（Riso Print Simulator） | 写真・テキスト・図形を2〜3色のリソグラフ風インク版に分解し、網点化・版ズレ・オーバープリントまで再現してポスターとして書き出すツール | [Pages](https://oplan-development-team.github.io/web-app-factory/riso-print-simulator/) | プロトタイプ（採否待ち） |
 | タイピング心電図 | 打鍵のkeydown間隔だけを計測し、病院の心電図モニター風UIでリアルタイムに波形と診断結果を描くネタツール | — （Pages未対応、下記参照） | 保留 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
