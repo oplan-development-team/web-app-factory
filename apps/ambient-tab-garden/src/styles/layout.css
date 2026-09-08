@@ -1,0 +1,293 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  /* The scene is a fixed ambient object; nothing here is meant to scroll, and
+     locking it also removes any chance of a stray overflow at narrow widths. */
+  overflow: hidden;
+  background: var(--c-bg-2);
+  font-family: var(--font-ui);
+  /* Set explicitly so panel text does not inherit an unexpected leading. */
+  line-height: 1.5;
+  color: var(--c-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- wordmark -------------------------------------------------------- */
+
+.wordmark {
+  position: fixed;
+  z-index: 3;
+  left: 56px;
+  top: 52px;
+}
+
+.wordmark__ja {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  color: var(--c-ink);
+}
+
+.wordmark__en {
+  margin: 4px 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--c-ink-3);
+}
+
+.hud {
+  display: contents;
+}
+
+/* --- notices --------------------------------------------------------- */
+
+.notices {
+  position: fixed;
+  z-index: 4;
+  right: var(--space-edge);
+  bottom: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  width: min(300px, calc(100vw - 96px));
+}
+
+.notice {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--glass-fill-soft);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-drop), var(--glass-inset), var(--glass-ring);
+  animation: notice-in var(--dur) var(--ease-out);
+}
+
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.notice__title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--c-ink-3);
+}
+
+.notice__body {
+  margin: 8px 0 0;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--c-ink-2);
+}
+
+.notice__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.notice__action {
+  padding: 7px 12px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--c-accent-1), var(--c-accent-2));
+  box-shadow: 0 8px 16px rgba(168, 147, 212, 0.45);
+  color: #ffffff;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    filter var(--dur-fast) var(--ease-out);
+}
+
+.notice__action:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.notice__action:active {
+  transform: translateY(1px);
+}
+
+.notice__action--quiet {
+  background: transparent;
+  border: 1px solid rgba(150, 140, 200, 0.3);
+  box-shadow: none;
+  color: var(--c-ink-3);
+}
+
+.notice__action--quiet:hover {
+  color: var(--c-ink);
+  filter: none;
+}
+
+.notice__action:focus-visible {
+  outline: 2px solid var(--c-accent-2);
+  outline-offset: 3px;
+}
+
+/* --- loading curtain -------------------------------------------------- */
+
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(160deg, var(--c-bg-1) 0%, var(--c-bg-2) 60%, var(--c-bg-4) 100%);
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+
+.curtain--gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.curtain__label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.22em;
+  color: var(--c-ink-3);
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .curtain__label {
+    animation: none;
+    opacity: 0.8;
+  }
+
+  .notice,
+  .readout__value--flash,
+  .upgrade__buy--bought {
+    animation: none;
+  }
+}
+
+/* --- narrow viewports -------------------------------------------------- */
+
+@media (max-width: 860px) {
+  :root {
+    --space-edge: 20px;
+  }
+
+  .wordmark {
+    left: 20px;
+    top: 20px;
+  }
+
+  .wordmark__ja {
+    font-size: 26px;
+  }
+
+  .wordmark__en {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+  }
+
+  .panel--stats {
+    top: 18px;
+    right: 18px;
+    width: auto;
+    min-width: 138px;
+    padding: 12px 14px 12px;
+  }
+
+  /* The eyebrow and the "longest running" line are the first things to go:
+     both are context, not state. */
+  .panel--stats .panel__eyebrow,
+  .panel--stats .panel__rule,
+  .panel--stats #longest-note {
+    display: none;
+  }
+
+  .readout {
+    margin-top: 0;
+  }
+
+  .readout__row {
+    gap: 14px;
+  }
+
+  .readout__label {
+    font-size: 11px;
+  }
+
+  .readout__value {
+    font-size: 18px;
+  }
+
+  .panel__footnote--rate {
+    margin-top: 8px;
+  }
+
+  .panel--upgrades {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    max-height: 46vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .notices {
+    right: 12px;
+    left: 12px;
+    bottom: auto;
+    top: 112px;
+    width: auto;
+    align-items: stretch;
+  }
+}
