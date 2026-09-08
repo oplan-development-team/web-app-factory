@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Guilloche Currency Studio — 架空紙幣スタジオ</title>
+    <meta
+      name="description"
+      content="国名・通貨単位・額面・肖像シードから、ギヨーシェ彫刻紋様を持つ架空紙幣をその場で生成し書き出せるスタジオ。"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <header class="vault-header">
+        <div class="vault-header__mark" aria-hidden="true">&#8225;</div>
+        <div class="vault-header__text">
+          <p class="vault-header__eyebrow">MINT VAULT · APPRAISAL DESK</p>
+          <h1 class="vault-header__title">Guilloche Currency Studio</h1>
+        </div>
+        <p class="vault-header__sub">架空紙幣スタジオ — 存在しない国の紙幣を、その場で彫る</p>
+      </header>
+
+      <main class="studio">
+        <!-- ============ CONTROL PANEL ============ -->
+        <aside class="panel" id="panel" aria-label="紙幣の設定パネル">
+          <section class="panel__group">
+            <h2 class="panel__label">01 — Identity Seed</h2>
+
+            <label class="field">
+              <span class="field__label">国名 <em>Country</em></span>
+              <input type="text" id="in-country" maxlength="28" autocomplete="off" spellcheck="false" />
+            </label>
+
+            <label class="field">
+              <span class="field__label">通貨単位 <em>Currency</em></span>
+              <input type="text" id="in-currency" maxlength="16" autocomplete="off" spellcheck="false" />
+            </label>
+
+            <label class="field">
+              <span class="field__label">発行年 <em>Year</em></span>
+              <input type="text" id="in-year" maxlength="4" inputmode="numeric" autocomplete="off" />
+            </label>
+
+            <label class="field">
+              <span class="field__label">肖像モチーフの種 <em>Portrait Seed</em></span>
+              <input type="text" id="in-portrait" maxlength="24" autocomplete="off" spellcheck="false" />
+              <span class="field__hint">
+                実写の肖像画は使用しません。この文字列をハッシュ化し、中央メダリオンの幾何学模様に変換した
+                <strong>「肖像に見立てた抽象紋様」</strong>です。
+              </span>
+            </label>
+
+            <div class="field">
+              <span class="field__label">文字表記 <em>Script</em></span>
+              <div class="segmented" id="script-row" role="group" aria-label="額面表記の言語を選択">
+                <button type="button" class="segmented__btn" data-script="EN">EN</button>
+                <button type="button" class="segmented__btn" data-script="JA">JA</button>
+              </div>
+            </div>
+          </section>
+
+          <div class="panel__hairline" role="separator"></div>
+
+          <section class="panel__group">
+            <h2 class="panel__label">02 — Denomination</h2>
+            <div class="chip-row" id="denomination-row" role="group" aria-label="額面を選択">
+              <!-- populated by JS -->
+            </div>
+          </section>
+
+          <div class="panel__hairline" role="separator"></div>
+
+          <section class="panel__group">
+            <div class="button-row">
+              <button type="button" id="btn-random" class="btn btn--brass">
+                <span class="btn__glyph" aria-hidden="true">&#10022;</span>
+                ランダム生成
+              </button>
+              <button type="button" id="btn-undo" class="btn btn--ghost" disabled>
+                元に戻す
+              </button>
+            </div>
+          </section>
+
+          <div class="panel__hairline" role="separator"></div>
+
+          <section class="panel__group">
+            <h2 class="panel__label">03 — Engraving</h2>
+
+            <label class="field field--slider">
+              <span class="field__label">精密さ <em>Precision</em></span>
+              <input type="range" id="in-precision" min="0" max="100" step="1" />
+              <output class="field__readout" id="out-precision">—</output>
+            </label>
+
+            <label class="field field--slider">
+              <span class="field__label">線の太さ <em>Line Weight</em></span>
+              <input type="range" id="in-weight" min="0" max="100" step="1" />
+              <output class="field__readout" id="out-weight">—</output>
+            </label>
+          </section>
+
+          <div class="panel__hairline" role="separator"></div>
+
+          <section class="panel__group">
+            <h2 class="panel__label">04 — Ink</h2>
+            <div class="swatch-row" id="ink-row" role="group" aria-label="インク色を選択"></div>
+          </section>
+
+          <section class="panel__group">
+            <h2 class="panel__label">05 — Paper</h2>
+            <div class="swatch-row" id="paper-row" role="group" aria-label="紙色を選択"></div>
+          </section>
+
+          <div class="panel__hairline" role="separator"></div>
+
+          <section class="panel__group">
+            <h2 class="panel__label">06 — Export</h2>
+
+            <label class="field">
+              <span class="field__label">解像度 <em>PNG Scale</em></span>
+              <select id="in-scale">
+                <option value="2">2× — 標準</option>
+                <option value="3">3× — 高精細</option>
+                <option value="4">4× — 最大</option>
+              </select>
+            </label>
+
+            <div class="button-row">
+              <button type="button" id="btn-export-png" class="btn btn--brass-outline">PNG 書き出し</button>
+              <button type="button" id="btn-export-svg" class="btn btn--brass-outline">SVG 書き出し</button>
+            </div>
+            <p class="field__hint field__hint--footer">
+              すべてブラウザ内で完結します。サーバー送信・保存は行いません。
+            </p>
+          </section>
+        </aside>
+
+        <!-- ============ PREVIEW STAGE ============ -->
+        <section class="stage" aria-label="紙幣プレビュー">
+          <div class="stage__desk">
+            <div class="stage__vignette" aria-hidden="true"></div>
+            <div class="stage__note-well">
+              <canvas id="note-canvas" width="1050" height="450"></canvas>
+            </div>
+          </div>
+          <p class="stage__caption" id="stage-caption">生成中…</p>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
