@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>カーソル相撲 — Cursor Sumo</title>
+<link rel="stylesheet" href="./style.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap" rel="stylesheet" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ミュートボタン: 常時同一位置に固定表示 -->
+  <button id="mute-btn" class="mute-btn" type="button" aria-pressed="false">
+    <span class="mute-icon" aria-hidden="true">♪</span>
+    <span class="mute-label">音あり</span>
+  </button>
+
+  <!-- タイトル画面 -->
+  <section id="screen-title" class="screen screen--title">
+    <div class="washi-frame">
+      <p class="banzuke-eyebrow">同一キーボード対戦・和風ブルータリズム土俵劇</p>
+      <h1 class="stamp-title">
+        <span class="stamp-title__main">カーソル相撲</span>
+        <span class="stamp-title__sub">CURSOR SUMO</span>
+      </h1>
+
+      <div id="mobile-warning" class="mobile-warning hidden" role="alert">
+        <strong>注意:</strong> 本ゲームはPC＋物理キーボードでの2人プレイを想定しています。タッチ操作のみの端末では遊べません。
+      </div>
+
+      <div class="control-banzuke">
+        <div class="control-card control-card--shu">
+          <p class="control-card__side">東</p>
+          <p class="control-card__name">プレイヤー1</p>
+          <div class="key-diagram">
+            <div class="key-row">
+              <span class="key" data-key="W">W</span>
+            </div>
+            <div class="key-row">
+              <span class="key" data-key="A">A</span>
+              <span class="key" data-key="S">S</span>
+              <span class="key" data-key="D">D</span>
+            </div>
+            <div class="key-row key-row--dash">
+              <span class="key key--dash" data-key="Space">Space</span>
+              <span class="key-desc">突っ張りダッシュ</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-vs">VS</div>
+
+        <div class="control-card control-card--ai">
+          <p class="control-card__side">西</p>
+          <p class="control-card__name">プレイヤー2</p>
+          <div class="key-diagram">
+            <div class="key-row">
+              <span class="key" data-key="↑">↑</span>
+            </div>
+            <div class="key-row">
+              <span class="key" data-key="←">←</span>
+              <span class="key" data-key="↓">↓</span>
+              <span class="key" data-key="→">→</span>
+            </div>
+            <div class="key-row key-row--dash">
+              <span class="key key--dash" data-key="Enter">Enter/RShift</span>
+              <span class="key-desc">突っ張りダッシュ</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="rule-line">3本先取で勝者を決める。土俵の外に出た瞬間、負け。</p>
+
+      <button id="start-btn" class="btn btn--gold btn--big" type="button">
+        はっけよい <span class="btn-sub">対戦開始</span>
+      </button>
+      <p class="hint-line">試合中は Esc でいつでもタイトルへ戻れます</p>
+    </div>
+  </section>
+
+  <!-- ゲーム画面 -->
+  <section id="screen-game" class="screen screen--game hidden">
+    <div class="hud">
+      <div class="hud-side hud-side--shu">
+        <p class="hud-label">東 P1</p>
+        <div class="score-marks" id="score-p1"></div>
+        <div class="gauge" aria-label="P1 突っ張りゲージ">
+          <div class="gauge__fill" id="gauge-p1"></div>
+        </div>
+      </div>
+
+      <div class="hud-center">
+        <p class="hud-center__round" id="round-label">第1本</p>
+      </div>
+
+      <div class="hud-side hud-side--ai">
+        <p class="hud-label">西 P2</p>
+        <div class="score-marks" id="score-p2"></div>
+        <div class="gauge" aria-label="P2 突っ張りゲージ">
+          <div class="gauge__fill" id="gauge-p2"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ring-wrap">
+      <canvas id="ring-canvas" width="960" height="560"></canvas>
+
+      <div id="countdown-overlay" class="countdown-overlay hidden">
+        <span id="countdown-text" class="countdown-text"></span>
+      </div>
+
+      <div id="stamp-overlay" class="stamp-overlay hidden">
+        <div class="hanko" id="hanko">
+          <p class="hanko__main" id="hanko-main"></p>
+          <p class="hanko__sub" id="hanko-sub"></p>
+        </div>
+      </div>
+    </div>
+
+    <p class="pause-hint">Esc: 試合を中断してタイトルへ</p>
+  </section>
+
+  <!-- マッチ終了画面 -->
+  <section id="screen-matchend" class="screen screen--matchend hidden">
+    <div class="washi-frame washi-frame--result">
+      <p class="banzuke-eyebrow" id="matchend-eyebrow">勝負あり</p>
+      <h2 class="result-kanji" id="result-kanji">勝</h2>
+      <p class="result-winner" id="result-winner">東の勝ち</p>
+      <p class="result-score" id="result-score"></p>
+      <div class="hanko hanko--final" id="hanko-final">
+        <p class="hanko__main" id="hanko-final-main"></p>
+        <p class="hanko__sub" id="hanko-final-sub"></p>
+      </div>
+
+      <div class="result-actions">
+        <button id="rematch-btn" class="btn btn--gold btn--big" type="button">
+          リマッチ <span class="btn-sub">対戦キー再押下</span>
+        </button>
+        <button id="title-btn" class="btn btn--outline" type="button">
+          タイトルへ <span class="btn-sub">Esc</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

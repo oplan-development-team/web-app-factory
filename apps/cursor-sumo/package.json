@@ -1,0 +1,11 @@
+{
+  "name": "cursor-sumo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "カーソル相撲 (Cursor Sumo) — 同一キーボード2人対戦の物理相撲プロトタイプ",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.js",
+    "build": "node scripts/build.js"
+  }
+}
