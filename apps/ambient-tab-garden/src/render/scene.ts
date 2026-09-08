@@ -21,15 +21,30 @@ export interface Stage {
 /**
  * Pulls the camera back far enough that the whole cluster field fits.
  *
- * Clusters are placed from their seed alone, with no knowledge of the viewport,
- * so a tall phone screen would otherwise push half of them off the sides.
+ * Clusters are placed from their seed alone, with no knowledge of the viewport
+ * -- they have to be, since every tab draws every other tab's cluster and the
+ * windows are different sizes. So the viewport is fitted around the field
+ * rather than the other way round.
+ *
+ * On a portrait screen the field is turned a quarter turn first (see
+ * `fieldRotation`). The field is a wide ellipse; without rotating it, fitting
+ * its full width onto a phone pushes the camera roughly 1.4x further back and
+ * the clusters shrink to specks.
  */
 export function fitCameraDistance(aspect: number): number {
   const halfFov = (FOV * Math.PI) / 180 / 2;
   const safeAspect = aspect > 0 && Number.isFinite(aspect) ? aspect : 1;
-  const forHeight = HALF_HEIGHT_NEEDED / Math.tan(halfFov);
-  const forWidth = HALF_WIDTH_NEEDED / (Math.tan(halfFov) * safeAspect);
+  const portrait = safeAspect < 1;
+  const needWidth = portrait ? HALF_HEIGHT_NEEDED : HALF_WIDTH_NEEDED;
+  const needHeight = portrait ? HALF_WIDTH_NEEDED : HALF_HEIGHT_NEEDED;
+  const forHeight = needHeight / Math.tan(halfFov);
+  const forWidth = needWidth / (Math.tan(halfFov) * safeAspect);
   return Math.max(forHeight, forWidth);
+}
+
+/** A quarter turn on portrait, so the field's long axis runs with the screen's. */
+export function fieldRotation(aspect: number): number {
+  return aspect < 1 ? Math.PI / 2 : 0;
 }
 
 /**
@@ -74,6 +89,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage | null {
     camera.aspect = width / height;
     camera.position.z = fitCameraDistance(camera.aspect);
     camera.updateProjectionMatrix();
+    scene.rotation.z = fieldRotation(camera.aspect);
   };
   resize();
 

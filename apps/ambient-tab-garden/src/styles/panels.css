@@ -249,3 +249,85 @@
       0 0 0 22px rgba(205, 188, 255, 0);
   }
 }
+
+/* --- narrow viewports -------------------------------------------------- */
+/* These live here rather than in layout.css: layout.css is imported first,
+   so an override there would lose to the base rules above on equal
+   specificity, and the panels would silently keep their desktop widths. */
+
+@media (max-width: 860px) {
+  .panel--stats {
+    top: 18px;
+    right: 18px;
+    width: auto;
+    min-width: 0;
+    padding: 12px 14px;
+  }
+
+  /* Context goes before state: the eyebrow and the "longest running" line are
+     the first things to drop when there is no room. */
+  .panel--stats .panel__eyebrow,
+  .panel--stats .panel__rule,
+  .panel--stats #longest-note {
+    display: none;
+  }
+
+  .readout {
+    margin-top: 0;
+  }
+
+  .readout__row {
+    gap: 14px;
+  }
+
+  .readout__label {
+    font-size: 11px;
+  }
+
+  .readout__value {
+    font-size: 18px;
+  }
+
+  .panel__footnote--rate {
+    margin-top: 8px;
+  }
+
+  .panel--upgrades {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    max-height: 46vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (max-width: 480px) {
+  .panel--stats {
+    top: 12px;
+    right: 12px;
+    padding: 10px 12px;
+  }
+
+  .readout__row {
+    gap: 10px;
+  }
+
+  .readout__row + .readout__row {
+    margin-top: 6px;
+  }
+
+  .readout__label {
+    font-size: 10px;
+  }
+
+  .readout__value {
+    font-size: 16px;
+  }
+
+  .panel__footnote--rate {
+    margin-top: 6px;
+    font-size: 10px;
+  }
+}
