@@ -93,6 +93,9 @@ function boot(): void {
    */
   function tick(): void {
     const now = Date.now();
+    // Storage is authoritative, so a purchase made in another tab lands here
+    // even when BroadcastChannel is unavailable and no message ever arrives.
+    progress = store.loadProgress();
     const rate = ratePerTab(progress.levels);
 
     const stored = store.loadTabs();
@@ -166,10 +169,8 @@ function boot(): void {
     tick();
   }
 
-  channel.onMessage((msg) => {
-    if (msg.kind === 'progress') progress = store.loadProgress();
-    tick();
-  });
+  // Only to make the update feel immediate; `tick` re-reads storage regardless.
+  channel.onMessage(() => tick());
 
   // A cleanly closed tab removes itself immediately, so other tabs do not have
   // to wait out the ghost timeout. `pagehide` fires in cases `unload` does not,

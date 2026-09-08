@@ -91,7 +91,7 @@ export function effectsOf(levels: UpgradeLevels): UpgradeEffects {
     particleBonus: levels.density * PARTICLES_PER_DENSITY,
     orbitStrength: levels.orbit,
     haloScale: 1 + levels.bloom * 0.42,
-    haloOpacity: 0.16 + levels.bloom * 0.085,
+    haloOpacity: 0.26 + levels.bloom * 0.09,
     rateMultiplier: 1 + levels.resonance * 0.35,
     paletteSize: 2 + levels.spectrum,
   };

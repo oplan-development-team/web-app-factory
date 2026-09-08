@@ -127,7 +127,7 @@ function makeMaterial(opts: {
 function buildGeometry(cluster: ClusterView, effects: UpgradeEffects): THREE.BufferGeometry {
   const count = cluster.particleCount;
   const rnd = makeRandom(cluster.seed ^ 0x1a2b3c4d);
-  const spread = 0.55 + cluster.stage * 0.3 + effects.particleBonus * 0.012;
+  const spread = 0.78 + cluster.stage * 0.38 + effects.particleBonus * 0.014;
 
   const positions = new Float32Array(count * 3);
   const centers = new Float32Array(count * 3);
@@ -147,7 +147,7 @@ function buildGeometry(cluster: ClusterView, effects: UpgradeEffects): THREE.Buf
 
     if (i === 0) {
       // The core orb: every cluster has exactly one anchor, and it grows.
-      scale = 3.4 + cluster.stage * 0.55;
+      scale = 4.2 + cluster.stage * 0.6;
     } else {
       const angle = rnd() * TAU;
       const radius = spread * Math.sqrt(rnd());
@@ -254,7 +254,7 @@ export class Garden {
         u.uMotion.value = motion;
         u.uOrbit.value = effects.orbitStrength;
       }
-      entry.halo.material.uniforms.uScaleMul.value = 3 * effects.haloScale;
+      entry.halo.material.uniforms.uScaleMul.value = 3.4 * effects.haloScale;
       entry.halo.material.uniforms.uOpacity.value = effects.haloOpacity;
     }
 
@@ -278,7 +278,7 @@ export class Garden {
     const halo = this.addLayer(
       geometry,
       makeMaterial({
-        scaleMul: 3 * effects.haloScale,
+        scaleMul: 3.4 * effects.haloScale,
         opacity: effects.haloOpacity,
         coreWhite: 0.25,
         alphaPow: 1.6,

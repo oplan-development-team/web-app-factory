@@ -78,7 +78,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage | null {
   resize();
 
   let frame = 0;
-  const clock = new THREE.Clock();
+  const startedAt = performance.now();
   let onResize: (() => void) | null = null;
 
   return {
@@ -96,7 +96,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage | null {
       window.addEventListener('resize', onResize);
       const loop = () => {
         frame = requestAnimationFrame(loop);
-        onFrame(clock.getElapsedTime());
+        onFrame((performance.now() - startedAt) / 1000);
         renderer.render(scene, camera);
       };
       loop();
