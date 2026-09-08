@@ -573,6 +573,9 @@ input[type='color']:focus-visible {
 
 .paper-wrapper {
   position: relative;
+  width: 100%;
+  max-width: 636px;
+  box-sizing: border-box;
   padding: 18px;
   background: linear-gradient(160deg, #322a1c, #17130c);
   border-radius: 4px;
@@ -601,7 +604,7 @@ input[type='color']:focus-visible {
 
 .paper {
   position: relative;
-  width: min(52vw, 600px);
+  width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 2px;
   overflow: hidden;
@@ -622,7 +625,8 @@ input[type='color']:focus-visible {
   align-items: center;
   gap: 14px;
   margin-top: 20px;
-  width: min(52vw, 600px);
+  width: 100%;
+  max-width: 600px;
 }
 
 .status-bar__gauge {
