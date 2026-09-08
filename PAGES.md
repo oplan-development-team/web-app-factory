@@ -38,5 +38,6 @@
 | 枯山水コンポーザー（Karesansui Composer） | 砂庭に石を置くと、石を避けながら砂紋（箒目）が自動で流れる禅庭シミュレーター。完成した庭をPNG/SVGポスターとして書き出せる | [Pages](https://oplan-development-team.github.io/web-app-factory/karesansui-composer/) | プロトタイプ（採否待ち） |
 | 架空紙幣スタジオ（Guilloche Currency Studio） | 国名・通貨単位・額面・肖像シードから、ギヨーシェ彫刻風の紋様を自前実装で生成し、実在しない国の紙幣として高解像度PNG/SVGで書き出す | [Pages](https://oplan-development-team.github.io/web-app-factory/guilloche-currency-studio/) | プロトタイプ（採否待ち） |
 | タイピング心電図 | 打鍵のkeydown間隔だけを計測し、病院の心電図モニター風UIでリアルタイムに波形と診断結果を描くネタツール | — （Pages未対応、下記参照） | 保留 |
+| 指先の集会 — コイン・セアンス | 複数人が同じ画面に指を置き、多点タッチの重心を「玉」として追跡・自律ドリフトさせる疑似こっくりさんボード | [Pages](https://oplan-development-team.github.io/web-app-factory/coin-seance/) | プロトタイプ（採否待ち、PRレビュー中） |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
