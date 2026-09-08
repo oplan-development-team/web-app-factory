@@ -16,6 +16,7 @@
 | 声の地層（Voice Strata Poster） | マイクで録った声の音量・ピッチ・間を、地質調査のボーリングコア風の縞地層としてリアルタイム描画する | [Pages](https://oplan-development-team.github.io/web-app-factory/voice-strata-poster/) | プロトタイプ（採否待ち） | 2026-08-25 |
 | レシート詩集ジェネレーター | 品名・数量・金額を入力すると感熱レシート風にプレビューされ、「詩として読む」切替で品名だけの詩に姿を変える | [Pages](https://oplan-development-team.github.io/web-app-factory/receipt-poem-generator/) | プロトタイプ（採否待ち） | 2026-08-25 |
 | サイアノタイプ・ポスターメーカー | 写真をプルシアンブルーの二階調に変換し、植物標本ラベル付きのサイアノタイプ風ポスターにする | [Pages](https://oplan-development-team.github.io/web-app-factory/cyanotype-poster-maker/) | 完成 | 2026-08-26 |
+| サウンド・レコードレーベル・ジェネレーター（Vinyl Groove Label） | 音声の振幅エンベロープをレコード盤面の同心円グルーヴに変調して描画し、高解像度PNGで書き出せるツール | [Pages](https://oplan-development-team.github.io/web-app-factory/vinyl-groove-label/) | プロトタイプ（採否待ち） | 2026-08-28 |
 | The Column Daily（コラムメディアサイト） | ヴィンテージ新聞・エディトリアルスタイルのコラムメディアサイト（記事閲覧・検索・投稿UIのデモ） | [Pages](https://oplan-development-team.github.io/web-app-factory/column-daily/) | 完成 | 2026-08-28 |
 | レシート詩集ポスター（Receipt Poetry Scroll） | 買い物リスト等の行区切りテキストを、値段付きの感熱紙ロール風縦長ポスターに変換する（姉妹アプリと違い値段は自動算出） | [Pages](https://oplan-development-team.github.io/web-app-factory/receipt-poetry-scroll/) | プロトタイプ（採否待ち） | 2026-08-26 |
 | アンビエント映画字幕オーバーレイ | Webカメラ映像に、音量・動き検出だけで映画風のフェイク字幕をリアルタイムに重ねるネタツール | [Pages](https://oplan-development-team.github.io/web-app-factory/ambient-subtitle-cam/) | プロトタイプ（採否待ち） | 2026-08-26 |
@@ -27,7 +28,9 @@
 | 液だまり（Puddle Tilt） | 端末を傾けると画面の中の水たまりが実際に流れ・波打ち、油膜のように虹色に光る感覚トイ | [Pages](https://oplan-development-team.github.io/web-app-factory/puddle-tilt/) | プロトタイプ（採否待ち） | 2026-08-31 |
 | 校正記号diffビューア（Proofmark Diff） | 改稿前後のテキストを、紙の校正で使われる校正記号（トルツメ・キャレット・ルビ訂正・移動矢印）の見た目で差分表示する | [Pages](https://oplan-development-team.github.io/web-app-factory/proofmark-diff/) | プロトタイプ（採否待ち） | 2026-08-28 |
 | オーロラ・テルミン（Aurora Theremin） | マウス/指の位置と速度でWeb Audioのテルミン風シンセを演奏し、録音・ループ・重ね録りもできる楽器トイ | [Pages](https://oplan-development-team.github.io/web-app-factory/aurora-theremin/) | プロトタイプ（採否待ち） | 2026-08-29 |
+| ハーモノグラフ・ジェネレーター 振り子の詩 | 複数の減衰振り子の合成ベクトルをリアルタイム計算し、実機ハーモノグラフ玩具さながらのインクの渦巻き曲線を紙面に描く作品性ツール | [Pages](https://oplan-development-team.github.io/web-app-factory/harmonograph-generator/) | プロトタイプ（採否待ち） | 2026-08-29 |
 | クラドニ図形ポスタージェネレーター（Chladni Cymatics Poster Lab） | 振動モードを指定すると、砂粒子がChladni図形の節線に収束する物理シミュレーションを描画し、実験記録ポスターとして書き出す | [Pages](https://oplan-development-team.github.io/web-app-factory/chladni-poster-lab/) | プロトタイプ（採否待ち） | 2026-08-30 |
+| せーのテレパシー（Sync Reveal Party Game） | 2人で画面を回し使いし、伏せ字で入力したお題への回答を「せーの」で同時公開して一致度を競うパーティーゲーム | [Pages](https://oplan-development-team.github.io/web-app-factory/sync-reveal-party/) | プロトタイプ（採否待ち） | 2026-08-30 |
 | スクショ継ぎ足し工房（暗室版） | 2枚に分けたスクリーンショットの重なりを自動検出し1枚に継ぎ足す。写真暗室・アナログ現像室スタイル | [Pages](https://oplan-development-team.github.io/web-app-factory/shot-splice-darkroom/) | プロトタイプ（採否待ち） | 2026-09-01 |
 | スクショ継ぎ足し工房（スイス様式版） | 同上の機能をスイス/インターナショナル・スタイルの計測器デザインで | [Pages](https://oplan-development-team.github.io/web-app-factory/shot-splice-grid/) | プロトタイプ（採否待ち） | 2026-09-01 |
 | スクショ継ぎ足し工房（ネオブルータリズム版） | 同上の機能をネオブルータリズムの荒々しい実用ツールデザインで | [Pages](https://oplan-development-team.github.io/web-app-factory/shot-splice-brutal/) | プロトタイプ（採否待ち） | 2026-09-01 |
@@ -35,6 +38,7 @@
 | 傾きガチャ（Tilt Gacha） | 端末を振ると、その瞬間の傾きに応じた幾何学模様が1枚出現し、12種の型を集める図鑑が埋まっていく感覚トイ | [Pages](https://oplan-development-team.github.io/web-app-factory/tilt-gacha/) | 完成 | 2026-09-02 |
 | ブルーノート風ジャズジャケット・ジェネレーター（Blue Note Cover Studio） | 架空のバンド名・アルバム名から、ブルーノート・レコードのグラフィックデザイン規範（斜めデュオトーン写真ブロック・極端な字間タイポグラフィ・限定2色配色）に従ったジャケットを自動生成する | [Pages](https://oplan-development-team.github.io/web-app-factory/blue-note-cover-studio/) | プロトタイプ（採否待ち） | 2026-09-01 |
 | 墨流しマーブリング・スタジオ（Suminagashi Marbling Studio） | 水盤にインクを落とし、櫛・渦でなぞって模様を作り込み、紙に「浸して引き上げ」て継ぎ目のないタイル/ポスターとして持ち帰るデジタル工芸ツール | [Pages](https://oplan-development-team.github.io/web-app-factory/suminagashi-marbling/) | プロトタイプ（採否待ち） | 2026-08-31 |
+| 年輪ポスター（Life Rings） | 生まれた年と人生の出来事を入力すると、有機的に歪んだ年輪・節・放射割れ・木目テクスチャを持つ「自分だけの年輪ポスター」を書き出せるツール | [Pages](https://oplan-development-team.github.io/web-app-factory/life-rings-poster/) | プロトタイプ（採否待ち） | 2026-08-31 |
 | 枯山水コンポーザー（Karesansui Composer） | 砂庭に石を置くと、石を避けながら砂紋（箒目）が自動で流れる禅庭シミュレーター。完成した庭をPNG/SVGポスターとして書き出せる | [Pages](https://oplan-development-team.github.io/web-app-factory/karesansui-composer/) | プロトタイプ（採否待ち） | 2026-09-02 |
 | 架空紙幣スタジオ（Guilloche Currency Studio） | 国名・通貨単位・額面・肖像シードから、ギヨーシェ彫刻風の紋様を自前実装で生成し、実在しない国の紙幣として高解像度PNG/SVGで書き出す | [Pages](https://oplan-development-team.github.io/web-app-factory/guilloche-currency-studio/) | プロトタイプ（採否待ち） | 2026-09-03 |
 | リソグラフ再現ポスターメーカー（Riso Print Simulator） | 写真・テキスト・図形を2〜3色のリソグラフ風インク版に分解し、網点化・版ズレ・オーバープリントまで再現してポスターとして書き出すツール | [Pages](https://oplan-development-team.github.io/web-app-factory/riso-print-simulator/) | プロトタイプ（採否待ち） | 2026-09-04 |
