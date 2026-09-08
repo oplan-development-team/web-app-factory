@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>浮遊光庭 — Ambient Tab Garden</title>
+    <meta
+      name="description"
+      content="開いているタブの数だけ光の群れが増える、観賞用のアンビエント・ジェネレーティブアート。"
+    />
+    <meta name="theme-color" content="#f0ecfa" />
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Atmosphere lives in CSS so the WebGL canvas can stay transparent and cheap. -->
+    <div class="backdrop" aria-hidden="true">
+      <div class="backdrop__glow backdrop__glow--blush"></div>
+      <div class="backdrop__glow backdrop__glow--periwinkle"></div>
+      <div class="backdrop__glow backdrop__glow--mint"></div>
+      <div class="backdrop__dust"></div>
+    </div>
+
+    <!-- Purely ornamental: the readable state of the garden lives in the panels. -->
+    <canvas id="stage" class="stage" aria-hidden="true"></canvas>
+
+    <div class="fallback" id="fallback" hidden aria-hidden="true">
+      <span class="fallback__orb fallback__orb--a"></span>
+      <span class="fallback__orb fallback__orb--b"></span>
+      <span class="fallback__orb fallback__orb--c"></span>
+    </div>
+
+    <header class="wordmark">
+      <h1 class="wordmark__ja">浮遊光庭</h1>
+      <p class="wordmark__en">ambient tab garden</p>
+    </header>
+
+    <main class="hud">
+      <section class="panel panel--stats" aria-labelledby="stats-heading">
+        <h2 class="panel__eyebrow" id="stats-heading">
+          <svg class="panel__eyebrow-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" />
+          </svg>
+          current session
+        </h2>
+
+        <dl class="readout">
+          <div class="readout__row">
+            <dt class="readout__label">きらめき</dt>
+            <dd class="readout__value" id="glimmer-value" aria-live="off">0</dd>
+          </div>
+          <div class="readout__row">
+            <dt class="readout__label">開いているタブ</dt>
+            <dd class="readout__value" id="tab-count">1</dd>
+          </div>
+        </dl>
+
+        <hr class="panel__rule" />
+
+        <p class="panel__footnote" id="longest-note">最長放置 0秒 / タブA</p>
+        <p class="panel__footnote panel__footnote--rate" id="rate-note">+0 /秒</p>
+      </section>
+
+      <section class="panel panel--upgrades" aria-labelledby="upgrades-heading">
+        <h2 class="panel__eyebrow" id="upgrades-heading">upgrades</h2>
+        <ul class="upgrades" id="upgrade-list"></ul>
+      </section>
+    </main>
+
+    <div class="notices" id="notices"></div>
+
+    <div class="curtain" id="curtain">
+      <p class="curtain__label">光を灯しています</p>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
