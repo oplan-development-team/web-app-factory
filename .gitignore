@@ -11,3 +11,4 @@ coverage/
 .claude/worktrees/
 .mcp.json
 .vscode/
+.playwright-mcp/
