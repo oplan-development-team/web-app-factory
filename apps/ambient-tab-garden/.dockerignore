@@ -1,0 +1,6 @@
+node_modules
+dist
+coverage
+docs
+*.dc.html
+.DS_Store

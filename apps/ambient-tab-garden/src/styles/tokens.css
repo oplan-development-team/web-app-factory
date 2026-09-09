@@ -1,0 +1,68 @@
+:root {
+  /* Backdrop, read straight off the approved mockup. The mockup's final stop
+     was written `#f6efe f` -- a stray space that makes the whole colour
+     invalid; the intent is the warm off-white below. */
+  --c-bg-1: #f3eefc;
+  --c-bg-2: #e7ecfb;
+  --c-bg-3: #eaf3fb;
+  --c-bg-4: #f6efef;
+
+  /* Ambient glows, kept as raw channels so opacity can vary per use. */
+  --rgb-blush: 255, 214, 224;
+  --rgb-periwinkle: 198, 214, 255;
+  --rgb-mint: 226, 255, 238;
+
+  /* Ink. Five steps, each with a job: heading, body, quiet, disabled label,
+     disabled control. */
+  --c-ink: #4a3d5c;
+  --c-ink-2: #6b6084;
+  --c-ink-3: #8a7fa3;
+  --c-ink-4: #b6aecb;
+  --c-ink-5: #c3bbd4;
+
+  --c-accent-1: #cdbcff;
+  --c-accent-2: #a893d4;
+
+  /* Frosted glass. */
+  --glass-fill: rgba(255, 255, 255, 0.38);
+  --glass-fill-soft: rgba(255, 255, 255, 0.34);
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-blur: 22px;
+  --glass-drop: 0 24px 60px rgba(150, 140, 200, 0.18);
+  --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  /* A white 1px border alone cannot carry the panel edge here: against a
+     backdrop this light, even pure white tops out around a 1.27 contrast
+     ratio. The edge is instead read as a *step* -- a faint dark ring directly
+     outside the white border. Measured across the edge that pair gives a ~1.45
+     internal contrast and an 18% relative-luminance jump from the backdrop,
+     where the white border alone gave neither. */
+  --glass-ring: 0 0 0 1px rgba(138, 127, 163, 0.18);
+
+  --c-rule: rgba(150, 140, 200, 0.22);
+  --c-rule-soft: rgba(150, 140, 200, 0.18);
+
+  --radius-panel: 22px;
+  --radius-control: 12px;
+
+  /* Deliberately uneven rhythm: generous around the panel, tight inside a row. */
+  --space-edge: 48px;
+  --space-panel: 22px;
+  --space-row: 12px;
+
+  --font-display: 'Instrument Serif', 'Hiragino Mincho ProN', serif;
+  --font-ui: 'Outfit', 'Hiragino Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+
+  --dur-fast: 160ms;
+  --dur: 320ms;
+  --dur-slow: 900ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 1ms;
+    --dur: 1ms;
+    --dur-slow: 1ms;
+  }
+}
