@@ -7,6 +7,10 @@ description: フロントエンドの見た目を実装したあと、スクリ�
 
 CSSを書いたことと、意図した見た目が実際に出ていることは別。「コードは正しく見える」で完了にせず、レンダリング結果を測って確認する。参照画像があるとき（`pixel-fidelity`）だけでなく、ゼロから独自デザインを作るとき（`frontend-design`）にも同じ精度で使う。
 
+## 実行方法
+
+各チェックの`getComputedStyle`等のJSスニペットは、ブラウザ上で実際に評価する必要がある。プロジェクトで使えるツールに合わせて実行する（例: Playwrightの`browser_evaluate`、`claude-in-chrome`の`javascript_tool`、devtoolsコンソールへの直接貼り付けなど）。コードを読んで「動くはず」で済ませず、必ず実際に評価した結果の値を確認する。
+
 ## 使うタイミング
 
 - `frontend-design`で実装したあと、完了報告の前に必ず一度通す
@@ -39,31 +43,50 @@ CSSのプロパティは「そう書いた」であって「そう見える」�
 `border`や`divider`を指定しても、地色との明度差が小さすぎると実質見えない。これは「バグ」として気づきにくい——コード上は正しいので、レビュー時にコードだけ読むと問題なしに見える。
 
 ```python
-def relative_luminance(hex_color):
-    hex_color = hex_color.lstrip('#')
-    r, g, b = (int(hex_color[i:i+2], 16) / 255 for i in (0, 2, 4))
+import re
+
+def parse_color(color):
+    # '#RRGGBB' と、getComputedStyleが返す 'rgb(r, g, b)' / 'rgba(r, g, b, a)' の両方を受け付ける
+    color = color.strip()
+    if color.startswith('#'):
+        hex_color = color.lstrip('#')
+        r, g, b = (int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+        return (r, g, b), 1.0
+    nums = [float(x) for x in re.findall(r'[\d.]+', color)]
+    rgb, alpha = tuple(nums[:3]), (nums[3] if len(nums) > 3 else 1.0)
+    return rgb, alpha
+
+def composite_over(fg_rgb, alpha, bg_rgb):
+    # 半透明色（rgba）は背景と合成した実効色でコントラストを見る
+    return tuple(alpha * f + (1 - alpha) * b for f, b in zip(fg_rgb, bg_rgb))
+
+def relative_luminance(rgb):
     def lin(c):
+        c = c / 255
         return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
-    r, g, b = lin(r), lin(g), lin(b)
+    r, g, b = (lin(c) for c in rgb)
     return 0.2126 * r + 0.7152 * g + 0.0722 * b
 
-def contrast_ratio(hex1, hex2):
-    l1, l2 = relative_luminance(hex1), relative_luminance(hex2)
+def contrast_ratio(color1, color2):
+    (rgb1, alpha1), (rgb2, _) = parse_color(color1), parse_color(color2)
+    if alpha1 < 1.0:
+        rgb1 = composite_over(rgb1, alpha1, rgb2)
+    l1, l2 = relative_luminance(rgb1), relative_luminance(rgb2)
     lighter, darker = max(l1, l2), min(l1, l2)
     return (lighter + 0.05) / (darker + 0.05)
 ```
 
 - 本文の文字色 vs 背景: WCAG AA基準で4.5:1以上（小さい文字）/ 3:1以上（大きい文字・太字）
-- 装飾目的の境界線・仕切り線: アクセシビリティ基準ではなく「意図通り視認できるか」が目的。目安としてコントラスト比1.4〜1.5以上、または相対輝度差にして地色から10〜15%以上離れていないと、紙のグレインやグラデーションのある背景では実質的に消える
+- 装飾目的の境界線・仕切り線: アクセシビリティ基準ではなく「意図通り視認できるか」が目的。目安としてコントラスト比1.4〜1.5以上、または相対輝度差にして地色から10〜15%以上離れていないと、紙のグレインやグラデーションのある背景では実質的に消える。この数値は公式基準ではなく経験則なので、プロジェクト側に別途基準があればそちらを優先する
 - 同じ役割の色トークンが複数ある設計（例: 罫線用に薄い色と濃い色の2段階）では、**使う箇所ごとに「その背景の上で実際に知覚できるか」を確認してから選ぶ**。トークン名の响き（"rule" vs "rule-strong"）だけで選ばない
 
-実装後、対象要素とその背景色をそれぞれ`getComputedStyle`で取得し、上記の関数で比を計算する。閾値を下回っていたら、より強いトークンに差し替える。
+実装後、対象要素とその背景色をそれぞれ`getComputedStyle`で取得し、上記の関数で比を計算する。閾値を下回っていたら、より強いトークンに差し替える。境界線に`rgba()`など半透明色を使っている場合は、`parse_color`がalphaを検出して自動的に背景との合成後の実効色で判定する。
 
 ```js
 const el = document.querySelector('.paper-panel');
 const cs = getComputedStyle(el);
 ({border: cs.borderColor, background: cs.backgroundColor})
-// 取得した2色をcontrast_ratio()に渡して検算する
+// getComputedStyleは通常 'rgb(...)' / 'rgba(...)' 形式で返る。取得した2色の文字列をそのままcontrast_ratio()に渡して検算する
 ```
 
 ## チェック3: UIチャンク（ボタン・ナビ・タグ・バッジ）にbody由来のタイポグラフィが漏れていないか
@@ -91,7 +114,7 @@ const cs = getComputedStyle(document.querySelector('.nav-link'));
 
 - 影・境界線・区切りがあるはずの箇所を`zoom`（部分拡大）して、実際に視認できるか確認する
 - hover/focus/active状態は実際にその状態を発火させてスクリーンショットを撮る（コードを読んで「実装されているはず」で済まさない）
-- 375/768/1440幅など複数幅で、崩れ・意図しない折り返し・要素の重なりがないか確認する
+- 320/768/1024/1440幅など複数幅で、崩れ・意図しない折り返し・要素の重なりがないか確認する
 
 ## チェック6: 色は「意味」を持っているか、それとも「そこにあるだけ」か
 
@@ -136,6 +159,20 @@ Google Fonts等の外部フォントを指定しても、URLの綴り間違い�
 // status が 'loaded' になっていないカスタムフォントは読み込みに失敗している
 ```
 
+## チェック11: アニメーション・トランジションは実際に発火し、reduced-motion時は縮退しているか
+
+`transition`や`animation`をコードに書いても、発火条件（class付与のタイミング、JSトリガーの発火条件）が想定と違うと、実際には一度も動かないまま気づかれないことがある。また`prefers-reduced-motion: reduce`への対応を書いたつもりでも、対象箇所の一部だけに`@media`が適用されていて縮退し漏れているケースがある。
+
+**確認手順**: 対象要素の状態を実際に発火させ（hover・class付与・ページ遷移など）、変化前後でスクリーンショットを撮って意図した動きが起きているか確認する。次に`prefers-reduced-motion: reduce`をエミュレートした状態で同じ操作を行い、アニメーションが無効化または大幅に短縮されているか確認する。
+
+```js
+matchMedia('(prefers-reduced-motion: reduce)').matches
+```
+
+## テーマ（ライト/ダーク）が両方ある場合
+
+複数テーマをサポートする実装では、チェック1〜10は**テーマごとに**通す。一方のテーマだけを確認して「良さそう」とせず、テーマを切り替えた状態で改めてスクリーンショットを撮り、特にチェック2（境界線・仕切り線のコントラスト）を再計算する。ライトモード用に選んだ境界線色をそのまま流用すると、暗い背景の上ではコントラストが不足して見えなくなるケースが多い。
+
 ## 参照画像がある場合
 
 このスキルの手順に加えて、色・寸法を参照画像の実測値と突き合わせる作業が必要になる。その手順は`pixel-fidelity`スキルを参照（このスキルは「実装が意図通りに見えているか」の一般的な検証、`pixel-fidelity`は「特定の1枚絵とどれだけ数値的に一致しているか」の検証で、役割が異なる）。
@@ -149,5 +186,8 @@ Google Fonts等の外部フォントを指定しても、URLの綴り間違い�
 - 主要なテキスト箇所は、最長ケースを想定した文字列でも崩れないことを確認した
 - 固定サイズ枠の画像は`object-fit`が指定され、引き伸ばし・潰れが起きていないことを確認した
 - カスタムフォントは`document.fonts`で`loaded`になっていることを確認した
+- アニメーション・トランジションは実際に発火させて確認し、`prefers-reduced-motion`時に縮退することも確認した
+- 複数テーマ（ライト/ダーク）をサポートする実装では、チェック1〜10を両テーマで実施した
 - スクリーンショットは「眺めた」のではなく、Quality Gateの各項目に対して具体的な根拠箇所を指せる状態で確認した
 - 見つかった問題は実装に反映してから完了報告している（「気になったが直していない」状態で終えない）
+- 修正した箇所は、直しっぱなしにせず同じチェックをもう一度実行して閾値を満たすことを検算した
