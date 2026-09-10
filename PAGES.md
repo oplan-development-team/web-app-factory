@@ -46,6 +46,7 @@
 | カーソル相撲（Cursor Sumo） | 同じキーボードを囲んだ2人が円形の力士を土俵から押し出し合う、突っ張りダッシュと行司の煽りコメントが核のローカル対戦フィジックスゲーム | [Pages](https://oplan-development-team.github.io/web-app-factory/cursor-sumo/) | プロトタイプ（採否待ち） | 2026-09-06 |
 | タイピング心電図 | 打鍵のkeydown間隔だけを計測し、病院の心電図モニター風UIでリアルタイムに波形と診断結果を描くネタツール | — （Pages未対応、下記参照） | 保留 | 2026-08-24 |
 | 指先の集会 — コイン・セアンス | 複数人が同じ画面に指を置き、多点タッチの重心を「玉」として追跡・自律ドリフトさせる疑似こっくりさんボード | [Pages](https://oplan-development-team.github.io/web-app-factory/coin-seance/) | プロトタイプ（採否待ち） | 2026-09-07 |
+| 紙雪の結晶スタジオ（Kirigami Snowflake Studio） | 「折る→切る→開く」の紙工作手順を疑似体験しながら六角対称の切り紙雪結晶をデザインし、ハサミで作れるSVG型紙とPNG完成イメージを書き出せるツール | [Pages](https://oplan-development-team.github.io/web-app-factory/kirigami-snowflake-studio/) | プロトタイプ（採否待ち） | 2026-09-08 |
 | 浮遊光庭（Ambient Tab Garden） | このアプリを複数タブで開くと、タブごとに光のパーティクル群が育つ観賞用アンビエント・ジェネレーティブアート。放置時間で貯まる「きらめき」でアップグレードしていく | [Pages](https://oplan-development-team.github.io/web-app-factory/ambient-tab-garden/) | 完成 | 2026-09-08 |
 | ステンドグラス・コンポーザー（Rosette Glass Composer） | ゴシック窓の輪郭内に宝石色の点を打つと、距離場ベースの鉛線分割で1枚のステンドグラスが自動生成され、バックライト/自然光の2状態でPNG書き出しできる | [Pages](https://oplan-development-team.github.io/web-app-factory/rosette-glass-composer/) | プロトタイプ（採否待ち） | 2026-09-09 |
 
