@@ -9,6 +9,7 @@ import {
   hasSeenIntro,
   markIntroSeen,
   updateStageIndicator,
+  updateWindHud,
   positionPressZone,
   positionAffordance,
 } from './ui.ts';
@@ -20,6 +21,7 @@ import {
   getStageWeights,
   TOTAL_BURN_SECONDS,
 } from './sparkler-physics.ts';
+import { WindSystem, StabilityMeter } from './wind.ts';
 import { buildFileName, downloadPng, isIOS } from './afterglowExport.ts';
 
 type Phase = 'idle' | 'burning' | 'misfiring' | 'naturalEnding' | 'result';
@@ -29,6 +31,8 @@ const NATURAL_END_DURATION = 1.4;
 const MAX_FRAME_DT = 0.05;
 const IDLE_EMBER_BRIGHTNESS = 0.06;
 const INTRO_AUTO_HIDE_MS = 6000;
+/** px/s² applied to lit sparks at full gust strength — visibly blows them sideways. */
+const WIND_PARTICLE_FORCE = 220;
 
 function init(): void {
   const root = document.getElementById('app');
@@ -46,6 +50,12 @@ function init(): void {
   let brightnessAtTransition = 0;
   let transitionTimer = 0;
   let lastTime = performance.now();
+
+  const wind = new WindSystem();
+  const stability = new StabilityMeter();
+  let pointerOffsetX = 0;
+  let pointerOffsetY = 0;
+  let hasPointerControl = false;
 
   function syncGeometry(): void {
     renderer.resize();
@@ -69,14 +79,22 @@ function init(): void {
     el.pressAffordance.classList.remove('is-visible');
   }
 
-  function startBurning(): void {
+  function startBurning(source: 'pointer' | 'keyboard'): void {
     if (phase !== 'idle') return;
     el.intro.classList.remove('is-visible');
     hideAffordance();
     el.stageIndicator.classList.add('is-visible');
+    el.windHud.classList.add('is-visible');
     phase = 'burning';
     progress = 0;
     particles.clear();
+    stability.reset();
+    pointerOffsetX = 0;
+    pointerOffsetY = 0;
+    // A pointer hold can always aim a counter-nudge, even if it stays put —
+    // staying put then correctly counts as "no counter" (see wind.ts).
+    // Keyboard holds have no position to report and get a fixed leniency.
+    hasPointerControl = source === 'pointer';
   }
 
   function releaseHold(): void {
@@ -85,6 +103,7 @@ function init(): void {
     transitionTimer = 0;
     particles.emitMisfireBurst();
     phase = 'misfiring';
+    el.windHud.classList.remove('is-visible');
   }
 
   function finishNaturally(currentBrightness: number): void {
@@ -92,6 +111,7 @@ function init(): void {
     transitionTimer = 0;
     particles.emitFinalEmbers();
     phase = 'naturalEnding';
+    el.windHud.classList.remove('is-visible');
   }
 
   function enterResult(): void {
@@ -113,6 +133,8 @@ function init(): void {
     el.resultOverlay.hidden = true;
     el.iosFallback.classList.remove('is-visible');
     el.iosFallback.hidden = true;
+    el.windHud.classList.remove('is-visible');
+    stability.reset();
     updateStageIndicator(el.stageDots, 0);
     showAffordance();
   }
@@ -144,11 +166,31 @@ function init(): void {
 
     if (phase === 'burning') {
       progress = Math.min(100, progress + (dt / TOTAL_BURN_SECONDS) * 100);
-      particles.update(dt, progress);
-      emberBrightness = emberBrightnessForProgress(progress);
-      pulseStrength = getStageWeights(progress).bud;
-      updateStageIndicator(el.stageDots, progress);
-      if (progress >= 100) finishNaturally(emberBrightness);
+
+      // Difficulty ramps up as the burn progresses — a calm bud stage, a
+      // genuinely tense 散り際. See wind.ts for the gust timeline itself.
+      const difficultyScale = 0.35 + 0.65 * (progress / 100);
+      const gust = wind.update(dt, difficultyScale);
+      const windAX = gust.dx * WIND_PARTICLE_FORCE;
+      const windAY = gust.dy * WIND_PARTICLE_FORCE;
+      particles.update(dt, progress, windAX, windAY);
+
+      const emberDropped = stability.update(
+        dt,
+        gust,
+        pointerOffsetX,
+        pointerOffsetY,
+        hasPointerControl,
+      );
+      updateWindHud(el, gust.angle, gust.strength, stability.value);
+      if (emberDropped) {
+        releaseHold();
+      } else {
+        emberBrightness = emberBrightnessForProgress(progress);
+        pulseStrength = getStageWeights(progress).bud;
+        updateStageIndicator(el.stageDots, progress);
+        if (progress >= 100) finishNaturally(emberBrightness);
+      }
     } else if (phase === 'misfiring' || phase === 'naturalEnding') {
       transitionTimer += dt;
       particles.decay(dt, progress);
@@ -162,7 +204,7 @@ function init(): void {
       showStick = false;
     }
 
-    renderer.renderFrame(particles.particles, emberBrightness, pulseStrength, showStick);
+    renderer.renderFrame(dt, particles.particles, emberBrightness, pulseStrength, showStick);
     requestAnimationFrame(frame);
   }
 
@@ -173,6 +215,11 @@ function init(): void {
   bindHoldInput(el.pressZone, {
     onHoldStart: startBurning,
     onHoldEnd: releaseHold,
+    onMove: (offsetX, offsetY) => {
+      hasPointerControl = true;
+      pointerOffsetX = offsetX;
+      pointerOffsetY = offsetY;
+    },
   });
 
   el.saveButton.addEventListener('click', handleSaveClick);

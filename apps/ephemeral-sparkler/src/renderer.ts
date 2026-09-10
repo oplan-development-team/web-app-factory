@@ -18,6 +18,17 @@ const BG_COLOR = '#0a0806';
 const PAPER_COLOR = '#7a6444';
 const PAPER_HIGHLIGHT = '#c9a86a';
 
+// A real 線香花火 is held with the twisted-paper grip at the TOP, between the
+// fingers, with the ember hanging DOWN under it — that drooping silhouette is
+// the toy's whole visual signature. handY sits near the top of the screen,
+// emberY well below it, leaving open space further down for the burst and
+// falling sparks (gravity keeps pulling them away from the grip, unchanged).
+const GRIP_Y_RATIO = 0.16;
+const EMBER_Y_RATIO = 0.46;
+
+/** Short rolling "shutter" window for the afterglow export — see resetAfterglow/fadeAfterglow. */
+const AFTERGLOW_WINDOW_SECONDS = 1.5;
+
 /** Fixed, seeded wiggle points so the twisted-paper stick reads as hand-made, not jittery. */
 function buildStickWiggle(): StickWiggle[] {
   const points: StickWiggle[] = [];
@@ -83,14 +94,33 @@ export class SparklerRenderer {
     this.afterglowCtx.fillRect(0, 0, this.cssWidth, this.cssHeight);
   }
 
+  /**
+   * Dims the afterglow buffer toward the background color each frame so old
+   * light contributions fade out over a bounded ~AFTERGLOW_WINDOW_SECONDS
+   * window instead of accumulating for the entire ~45s burn. Accumulating
+   * for the whole burn was tried first and saturated to a flat white blob —
+   * a real long-exposure photo has a shutter time, not infinite exposure.
+   * Exponential decay with time-constant window/3 leaves ~5% of a
+   * contribution's brightness remaining after one full window has passed.
+   */
+  private fadeAfterglow(dt: number): void {
+    const timeConstant = AFTERGLOW_WINDOW_SECONDS / 3;
+    const decayAlpha = 1 - Math.exp(-dt / timeConstant);
+    this.afterglowCtx.save();
+    this.afterglowCtx.globalCompositeOperation = 'source-over';
+    this.afterglowCtx.fillStyle = `rgba(10, 8, 6, ${decayAlpha})`;
+    this.afterglowCtx.fillRect(0, 0, this.cssWidth, this.cssHeight);
+    this.afterglowCtx.restore();
+  }
+
   get geometry(): Geometry {
     return {
       width: this.cssWidth,
       height: this.cssHeight,
       emberX: this.cssWidth / 2,
-      emberY: this.cssHeight * 0.44,
+      emberY: this.cssHeight * EMBER_Y_RATIO,
       handX: this.cssWidth / 2,
-      handY: this.cssHeight * 0.7,
+      handY: this.cssHeight * GRIP_Y_RATIO,
     };
   }
 
@@ -153,26 +183,45 @@ export class SparklerRenderer {
     ctx.restore();
   }
 
+  /**
+   * Draws each spark as its short jittered trail (see Particle.path) rather
+   * than a static round point-sprite: a thin bright core stroke plus a wider
+   * soft pass underneath for glow. Combined with the branch children the
+   * physics layer already spawns, this is what makes the burst read as
+   * forking filament threads (松葉/pine-needle-like) instead of a blooming
+   * cloud of dots.
+   */
   private drawParticles(ctx: CanvasRenderingContext2D, particles: readonly Particle[]): void {
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     for (const particle of particles) {
       const alpha = alphaAt(particle);
-      if (alpha <= 0.01) continue;
+      if (alpha <= 0.01 || particle.path.length < 2) continue;
       const color = colorAt(particle);
-      const gradient = ctx.createRadialGradient(
-        particle.x,
-        particle.y,
-        0,
-        particle.x,
-        particle.y,
-        particle.size * 3.2,
-      );
-      gradient.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha})`);
-      gradient.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, 0)`);
-      ctx.fillStyle = gradient;
+      const rgb = `${color.r}, ${color.g}, ${color.b}`;
+
       ctx.beginPath();
-      ctx.arc(particle.x, particle.y, particle.size * 3.2, 0, Math.PI * 2);
+      const first = particle.path[0]!;
+      ctx.moveTo(first.x, first.y);
+      for (let i = 1; i < particle.path.length; i++) {
+        const point = particle.path[i]!;
+        ctx.lineTo(point.x, point.y);
+      }
+
+      ctx.strokeStyle = `rgba(${rgb}, ${alpha * 0.32})`;
+      ctx.lineWidth = Math.max(1, particle.size * 2.4);
+      ctx.stroke();
+
+      ctx.strokeStyle = `rgba(${rgb}, ${alpha})`;
+      ctx.lineWidth = Math.max(0.5, particle.size * 0.65);
+      ctx.stroke();
+
+      const tip = particle.path[particle.path.length - 1]!;
+      ctx.fillStyle = `rgba(${rgb}, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(tip.x, tip.y, particle.size * 0.55, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.restore();
@@ -184,6 +233,7 @@ export class SparklerRenderer {
    * module stays a pure drawing layer with no burn-curve knowledge.
    */
   renderFrame(
+    dt: number,
     particles: readonly Particle[],
     emberBrightness: number,
     pulseStrength: number,
@@ -198,10 +248,9 @@ export class SparklerRenderer {
     this.drawEmber(this.sceneCtx, geo, emberBrightness, pulse);
     this.drawParticles(this.sceneCtx, particles);
 
-    // Afterglow: particles only, never cleared — this is the keepsake photo.
-    // Stamping the ember glow here too (every frame, for the full ~45s burn)
-    // was tried and saturated the origin to a flat white blob that drowned
-    // out the particle trails — the whole point of the photo.
+    // Afterglow: a bounded rolling exposure (see fadeAfterglow), not
+    // infinite accumulation — this is the keepsake photo.
+    this.fadeAfterglow(dt);
     this.drawParticles(this.afterglowCtx, particles);
   }
 

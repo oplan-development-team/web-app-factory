@@ -5,8 +5,20 @@
 const DEAD_ZONE_MARGIN_PX = 14;
 
 export interface HoldCallbacks {
-  onHoldStart: () => void;
+  /**
+   * `source` distinguishes a pointer-driven hold (can aim a counter-nudge,
+   * even if it chooses not to move — see wind.ts) from a keyboard-driven
+   * hold (no position to report, gets a fixed accessibility leniency).
+   */
+  onHoldStart: (source: 'pointer' | 'keyboard') => void;
   onHoldEnd: () => void;
+  /**
+   * Fired while holding via pointer, with the pointer's offset from the
+   * press-zone center normalized to roughly -1..1 on each axis. Used to let
+   * the player counter wind gusts by nudging against them. Never fires for
+   * keyboard-driven holds (no pointer position to report).
+   */
+  onMove?: (offsetX: number, offsetY: number) => void;
 }
 
 function isWithinZone(clientX: number, clientY: number, rect: DOMRect, margin: number): boolean {
@@ -16,6 +28,10 @@ function isWithinZone(clientX: number, clientY: number, rect: DOMRect, margin: n
     clientY >= rect.top - margin &&
     clientY <= rect.bottom + margin
   );
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
 }
 
 export function bindHoldInput(zone: HTMLElement, callbacks: HoldCallbacks): () => void {
@@ -35,7 +51,7 @@ export function bindHoldInput(zone: HTMLElement, callbacks: HoldCallbacks): () =
     activePointerId = event.pointerId;
     holding = true;
     zone.setPointerCapture(event.pointerId);
-    callbacks.onHoldStart();
+    callbacks.onHoldStart('pointer');
   };
 
   const onPointerMove = (event: PointerEvent): void => {
@@ -43,7 +59,12 @@ export function bindHoldInput(zone: HTMLElement, callbacks: HoldCallbacks): () =
     const rect = zone.getBoundingClientRect();
     if (!isWithinZone(event.clientX, event.clientY, rect, DEAD_ZONE_MARGIN_PX)) {
       endHold();
+      return;
     }
+    if (!callbacks.onMove) return;
+    const offsetX = clamp((event.clientX - (rect.left + rect.width / 2)) / (rect.width / 2), -1, 1);
+    const offsetY = clamp((event.clientY - (rect.top + rect.height / 2)) / (rect.height / 2), -1, 1);
+    callbacks.onMove(offsetX, offsetY);
   };
 
   const onPointerUp = (event: PointerEvent): void => {
@@ -62,7 +83,7 @@ export function bindHoldInput(zone: HTMLElement, callbacks: HoldCallbacks): () =
     event.preventDefault();
     if (holding) return;
     holding = true;
-    callbacks.onHoldStart();
+    callbacks.onHoldStart('keyboard');
   };
 
   const onKeyUp = (event: KeyboardEvent): void => {

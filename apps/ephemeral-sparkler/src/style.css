@@ -64,9 +64,15 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/*
+ * The grip/press-zone now lives near the top of the screen (see
+ * GRIP_Y_RATIO in renderer.ts) — the intro text sits below it, in the open
+ * lower field where sparks eventually fall, instead of competing with the
+ * hit area for space.
+ */
 .intro {
   position: absolute;
-  top: 9vh;
+  top: 60vh;
   left: 50%;
   transform: translate(-50%, -6px);
   width: min(22rem, 84vw);
@@ -120,6 +126,70 @@ body {
   background: var(--gold);
   border-color: var(--gold-bright);
   box-shadow: 0 0 6px 1px rgba(232, 205, 148, 0.55);
+}
+
+/*
+ * A wordless instrument, not a game HUD: a bare hairline arrow + bare
+ * hairline meter, no panel/border/backdrop — floating on the void the same
+ * way the stage-dots do. Sits above the grip (see renderer.ts GRIP_Y_RATIO)
+ * and is only shown while actually burning.
+ */
+.wind-hud {
+  position: absolute;
+  top: max(2.4vh, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out-soft);
+  pointer-events: none;
+}
+
+.wind-hud.is-visible {
+  opacity: 1;
+}
+
+.wind-arrow {
+  display: block;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 8px solid var(--gold);
+  opacity: 0;
+  transform-origin: 50% 65%;
+  transition: opacity var(--duration-fast) linear;
+  filter: drop-shadow(0 0 3px rgba(232, 205, 148, 0.45));
+}
+
+.stability-track {
+  display: block;
+  width: 56px;
+  height: 1px;
+  background: rgba(107, 90, 62, 0.65);
+  overflow: hidden;
+}
+
+.stability-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--gold);
+  transform-origin: left center;
+  transition: width var(--duration-fast) linear, background var(--duration-fast) linear;
+}
+
+/* Instability climbing — the meter warms toward the same red the ember
+   itself turns in 散り際, rather than an unrelated alarm color. */
+.stability-fill.is-warning {
+  background: var(--gold-bright);
+}
+
+.stability-fill.is-danger {
+  background: #c23b2e;
 }
 
 .press-zone {
@@ -312,7 +382,10 @@ body {
   .result-overlay,
   .ios-fallback,
   .btn,
-  .stage-dot {
+  .stage-dot,
+  .wind-hud,
+  .wind-arrow,
+  .stability-fill {
     transition: none;
   }
 }

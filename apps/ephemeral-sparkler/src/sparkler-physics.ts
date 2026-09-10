@@ -222,6 +222,19 @@ export function branchProbabilityForMatsuba(progressPercent: number): number {
   return lerp(0.15, 1.4, Math.min(1, Math.max(0, local)));
 }
 
+/**
+ * Rolling render-only trail of recent (jittered) positions, oldest first.
+ * Capped short (not the particle's full lifetime) — just enough to draw a
+ * jagged little filament segment behind each spark, which is what makes the
+ * burst read as branching threads instead of point-sprite dots.
+ */
+const MAX_TRAIL_POINTS = 7;
+
+export interface TrailPoint {
+  x: number;
+  y: number;
+}
+
 export interface Particle {
   x: number;
   y: number;
@@ -233,6 +246,11 @@ export interface Particle {
   colorStart: RGB;
   colorEnd: RGB;
   size: number;
+  /** Render-only jittered trail; physics always uses x/y, never this. */
+  path: TrailPoint[];
+  /** Per-particle phase/frequency so the jag wobble is stable, not flicker. */
+  jitterPhase: number;
+  jitterFreq: number;
 }
 
 export interface EmberState {
@@ -262,11 +280,15 @@ export class ParticleSystem {
     this.spawnAccumulator = 0;
   }
 
-  /** Advances the whole system by dt seconds at the given burn progress. */
-  update(dt: number, progressPercent: number): void {
+  /**
+   * Advances the whole system by dt seconds at the given burn progress.
+   * `windAX`/`windAY` (px/s²) let a wind gust visibly push lit sparks —
+   * see `integrateParticles`.
+   */
+  update(dt: number, progressPercent: number, windAX = 0, windAY = 0): void {
     this.updateBurstClock(dt, progressPercent);
     this.spawnParticles(dt, progressPercent);
-    this.integrateParticles(dt, progressPercent);
+    this.integrateParticles(dt, progressPercent, windAX, windAY);
   }
 
   private updateBurstClock(dt: number, progressPercent: number): void {
@@ -296,9 +318,11 @@ export class ParticleSystem {
   private spawnOne(params: StageParams): void {
     const angle = Math.random() * params.angleSpread - params.angleSpread / 2 - Math.PI / 2;
     const speed = lerp(params.speedMin, params.speedMax, Math.random());
+    const x = this.originX();
+    const y = this.originY();
     this.particles.push({
-      x: this.originX(),
-      y: this.originY(),
+      x,
+      y,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       age: 0,
@@ -307,10 +331,33 @@ export class ParticleSystem {
       colorStart: params.colorStart,
       colorEnd: params.colorEnd,
       size: lerp(1.1, 2.4, Math.random()),
+      path: [{ x, y }],
+      jitterPhase: Math.random() * Math.PI * 2,
+      jitterFreq: lerp(14, 26, Math.random()),
     });
   }
 
-  private integrateParticles(dt: number, progressPercent: number): void {
+  /** Appends a render-only jittered trail point derived from the particle's true position. */
+  private pushTrailPoint(particle: Particle): void {
+    const speed = Math.hypot(particle.vx, particle.vy) || 1;
+    const perpX = -particle.vy / speed;
+    const perpY = particle.vx / speed;
+    const wobble = Math.sin(particle.age * particle.jitterFreq + particle.jitterPhase);
+    const jitterMag = wobble * (particle.size * 1.6 + 0.5);
+    particle.path.push({
+      x: particle.x + perpX * jitterMag,
+      y: particle.y + perpY * jitterMag,
+    });
+    if (particle.path.length > MAX_TRAIL_POINTS) particle.path.shift();
+  }
+
+  /**
+   * Advances the physics for one step. `windAX`/`windAY` are an optional
+   * external acceleration (px/s²) — used to visibly blow lit sparks sideways
+   * during a wind gust so the disturbance mechanic reads in the burst itself,
+   * not just in the stability meter.
+   */
+  private integrateParticles(dt: number, progressPercent: number, windAX = 0, windAY = 0): void {
     const params = interpolateStageParams(progressPercent);
     const branchChance = getStageWeights(progressPercent).matsuba * branchProbabilityForMatsuba(progressPercent);
     const gravity = 260 * params.gravityScale;
@@ -318,12 +365,15 @@ export class ParticleSystem {
 
     for (const particle of this.particles) {
       particle.vy += gravity * dt;
+      particle.vx += windAX * dt;
+      particle.vy += windAY * dt;
       const dragFactor = Math.max(0, 1 - params.dragCoefficient * dt);
       particle.vx *= dragFactor;
       particle.vy *= dragFactor;
       particle.x += particle.vx * dt;
       particle.y += particle.vy * dt;
       particle.age += dt;
+      this.pushTrailPoint(particle);
 
       if (particle.age >= particle.lifespan) continue;
 
@@ -347,6 +397,9 @@ export class ParticleSystem {
             colorStart: particle.colorStart,
             colorEnd: particle.colorEnd,
             size: particle.size * 0.85,
+            path: [{ x: particle.x, y: particle.y }],
+            jitterPhase: Math.random() * Math.PI * 2,
+            jitterFreq: lerp(14, 26, Math.random()),
           });
         }
       }
@@ -367,9 +420,11 @@ export class ParticleSystem {
     for (let i = 0; i < count; i++) {
       const angle = Math.PI / 2 + (Math.random() - 0.5) * (Math.PI * 0.9);
       const speed = lerp(60, 160, Math.random());
+      const x = this.originX();
+      const y = this.originY();
       this.particles.push({
-        x: this.originX(),
-        y: this.originY(),
+        x,
+        y,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         age: 0,
@@ -378,6 +433,9 @@ export class ParticleSystem {
         colorStart: COLOR.orange,
         colorEnd: COLOR.emberDark,
         size: lerp(1.2, 2.2, Math.random()),
+        path: [{ x, y }],
+        jitterPhase: Math.random() * Math.PI * 2,
+        jitterFreq: lerp(14, 26, Math.random()),
       });
     }
   }
@@ -387,9 +445,11 @@ export class ParticleSystem {
     for (let i = 0; i < count; i++) {
       const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
       const speed = lerp(20, 60, Math.random());
+      const x = this.originX();
+      const y = this.originY();
       this.particles.push({
-        x: this.originX(),
-        y: this.originY(),
+        x,
+        y,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         age: 0,
@@ -398,6 +458,9 @@ export class ParticleSystem {
         colorStart: COLOR.red,
         colorEnd: COLOR.emberDark,
         size: lerp(1, 1.8, Math.random()),
+        path: [{ x, y }],
+        jitterPhase: Math.random() * Math.PI * 2,
+        jitterFreq: lerp(14, 26, Math.random()),
       });
     }
   }

@@ -10,6 +10,9 @@ export interface AppElements {
   intro: HTMLElement;
   stageIndicator: HTMLElement;
   stageDots: HTMLElement[];
+  windHud: HTMLElement;
+  windArrow: HTMLElement;
+  stabilityFill: HTMLElement;
   pressZone: HTMLElement;
   pressAffordance: HTMLElement;
   resultOverlay: HTMLElement;
@@ -28,7 +31,14 @@ export function mountApp(root: HTMLElement): AppElements {
 
     <div class="intro" id="intro">
       <p>そっと長く、触れ続けてください。</p>
-      <p>離すと、消えます。</p>
+      <p>離すと、消えます。風が吹いたら、そっと押し返して。</p>
+    </div>
+
+    <div class="wind-hud" id="wind-hud" aria-hidden="true">
+      <span class="wind-arrow" id="wind-arrow"></span>
+      <span class="stability-track">
+        <span class="stability-fill" id="stability-fill"></span>
+      </span>
     </div>
 
     <div class="stage-indicator" id="stage-indicator" aria-hidden="true">
@@ -77,6 +87,9 @@ export function mountApp(root: HTMLElement): AppElements {
     intro: byId('intro'),
     stageIndicator: byId('stage-indicator'),
     stageDots: Array.from(root.querySelectorAll<HTMLElement>('.stage-dot')),
+    windHud: byId('wind-hud'),
+    windArrow: byId('wind-arrow'),
+    stabilityFill: byId('stability-fill'),
     pressZone: byId('press-zone'),
     pressAffordance: byId('press-affordance'),
     resultOverlay: byId('result-overlay'),
@@ -112,6 +125,34 @@ export function updateStageIndicator(dots: HTMLElement[], progressPercent: numbe
     const [start] = STAGE_RANGES[stage];
     dot.classList.toggle('is-active', progressPercent >= start && progressPercent > 0);
   });
+}
+
+const STABILITY_WARNING_THRESHOLD = 45;
+const STABILITY_DANGER_THRESHOLD = 78;
+
+/**
+ * Updates the wind-direction arrow (rotation + opacity from strength) and
+ * the stability hairline (fill width from instability, with a warning/danger
+ * class swap instead of continuous color interpolation — kept as a two-step
+ * palette shift so it stays within the piece's existing token set).
+ */
+export function updateWindHud(
+  el: { windArrow: HTMLElement; stabilityFill: HTMLElement },
+  gustAngleRadians: number,
+  gustStrength: number,
+  instability: number,
+): void {
+  const degrees = (gustAngleRadians * 180) / Math.PI + 90;
+  el.windArrow.style.transform = `rotate(${degrees}deg)`;
+  el.windArrow.style.opacity = String(Math.min(0.9, gustStrength * 1.1));
+
+  const remaining = Math.max(0, 100 - instability);
+  el.stabilityFill.style.width = `${remaining}%`;
+  el.stabilityFill.classList.toggle(
+    'is-warning',
+    instability >= STABILITY_WARNING_THRESHOLD && instability < STABILITY_DANGER_THRESHOLD,
+  );
+  el.stabilityFill.classList.toggle('is-danger', instability >= STABILITY_DANGER_THRESHOLD);
 }
 
 export function positionPressZone(el: HTMLElement, handX: number, handY: number): void {
