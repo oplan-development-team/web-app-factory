@@ -1,0 +1,318 @@
+:root {
+  --bg-void: #0a0806;
+  --bg-void-deep: #050403;
+  --gold: #c9a86a;
+  --gold-bright: #e8cd94;
+  --gold-dim: #6b5a3e;
+  --ink: #f2ece0;
+  --ink-dim: #b8ada0;
+
+  --font-serif: 'Noto Serif JP', 'Hiragino Mincho ProN', serif;
+
+  --space-1: 0.5rem;
+  --space-2: 0.75rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2rem;
+  --space-6: 3rem;
+
+  --duration-fast: 220ms;
+  --duration-normal: 480ms;
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overscroll-behavior: none;
+}
+
+body {
+  background: radial-gradient(120% 90% at 50% 38%, var(--bg-void) 0%, var(--bg-void-deep) 100%);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  touch-action: none;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+}
+
+.scene-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* Faint film-grain atmosphere — a static SVG noise texture, not an animated one. */
+.grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.intro {
+  position: absolute;
+  top: 9vh;
+  left: 50%;
+  transform: translate(-50%, -6px);
+  width: min(22rem, 84vw);
+  text-align: center;
+  font-weight: 300;
+  font-size: 1rem;
+  line-height: 1.9;
+  color: var(--ink-dim);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out-soft),
+    transform var(--duration-normal) var(--ease-out-soft);
+  pointer-events: none;
+}
+
+.intro p {
+  margin: 0 0 0.35em;
+}
+
+.intro.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.stage-indicator {
+  position: absolute;
+  left: 50%;
+  bottom: max(7vh, calc(env(safe-area-inset-bottom) + 2.5rem));
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--space-2);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out-soft);
+}
+
+.stage-indicator.is-visible {
+  opacity: 1;
+}
+
+.stage-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid var(--gold-dim);
+  background: transparent;
+  transition: background var(--duration-normal) var(--ease-out-soft),
+    box-shadow var(--duration-normal) var(--ease-out-soft),
+    border-color var(--duration-normal) var(--ease-out-soft);
+}
+
+.stage-dot.is-active {
+  background: var(--gold);
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 6px 1px rgba(232, 205, 148, 0.55);
+}
+
+.press-zone {
+  position: absolute;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.press-zone:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: 6px;
+  border-radius: 999px;
+}
+
+.press-affordance {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  margin-left: -32px;
+  margin-top: -32px;
+  border-radius: 50%;
+  border: 1px solid var(--gold-dim);
+  opacity: 0;
+  pointer-events: none;
+  animation: affordance-pulse 2.6s ease-in-out infinite;
+  transition: opacity var(--duration-normal) var(--ease-out-soft);
+}
+
+.press-affordance.is-visible {
+  opacity: 0.5;
+}
+
+@keyframes affordance-pulse {
+  0%, 100% {
+    transform: scale(0.92);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.65;
+  }
+}
+
+.result-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5);
+  padding: var(--space-4);
+  background: rgba(5, 4, 3, 0.94);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out-soft);
+}
+
+.result-overlay.is-visible {
+  opacity: 1;
+}
+
+/*
+ * `.result-overlay` unconditionally sets display:flex, which ties in
+ * specificity with the UA stylesheet's `[hidden] { display: none }` — author
+ * rules win cascade ties regardless of source order, so without this
+ * override the overlay stays in the layout (and keeps intercepting pointer
+ * events) even while `hidden` is set. Bumping specificity here fixes it.
+ */
+.result-overlay[hidden] {
+  display: none;
+}
+
+.result-caption {
+  margin: 0;
+  font-weight: 300;
+  font-size: 1.0625rem;
+  line-height: 2;
+  color: var(--ink-dim);
+  text-align: center;
+}
+
+.photo-frame {
+  margin: 0;
+  padding: var(--space-3);
+  background: var(--bg-void-deep);
+  border: 1px solid var(--gold-dim);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.photo-frame img {
+  display: block;
+  max-width: min(78vw, 380px);
+  max-height: 46vh;
+  width: auto;
+  height: auto;
+}
+
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.btn {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+  background: transparent;
+  border: 1px solid var(--gold);
+  padding: 0.85rem 2rem;
+  min-width: 14rem;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out-soft),
+    color var(--duration-fast) var(--ease-out-soft),
+    border-color var(--duration-fast) var(--ease-out-soft);
+}
+
+.btn:hover {
+  background: var(--gold);
+  color: var(--bg-void-deep);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+}
+
+.btn-ghost {
+  color: var(--ink-dim);
+  border-color: var(--gold-dim);
+}
+
+.btn-ghost:hover {
+  background: var(--gold-dim);
+  color: var(--ink);
+}
+
+.ios-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: rgba(5, 4, 3, 0.98);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out-soft);
+}
+
+.ios-fallback.is-visible {
+  opacity: 1;
+}
+
+/* Same specificity fix as .result-overlay[hidden] above. */
+.ios-fallback[hidden] {
+  display: none;
+}
+
+.ios-fallback p {
+  margin: 0;
+  max-width: 20rem;
+  text-align: center;
+  font-weight: 300;
+  line-height: 1.9;
+  color: var(--ink-dim);
+}
+
+.ios-fallback img {
+  max-width: min(88vw, 420px);
+  max-height: 58vh;
+  border: 1px solid var(--gold-dim);
+  padding: var(--space-2);
+  background: var(--bg-void-deep);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .press-affordance {
+    animation: none;
+  }
+  .intro,
+  .stage-indicator,
+  .result-overlay,
+  .ios-fallback,
+  .btn,
+  .stage-dot {
+    transition: none;
+  }
+}
