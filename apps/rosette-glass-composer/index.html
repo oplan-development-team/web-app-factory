@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rosette Glass Composer — ステンドグラス・コンポーザー</title>
+    <meta
+      name="description"
+      content="尖頭アーチ窓／バラ窓の輪郭に宝石色の点を打ち、距離場ベースの鉛線分割で1枚のステンドグラスを自動生成するコンポーザー。バックライト演出付きでPNG書き出しできる。"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <div class="stone-texture" aria-hidden="true"></div>
+
+      <header class="masthead">
+        <p class="masthead__eyebrow">Atelier de Vitrail — 硝子工房</p>
+        <h1 class="masthead__title">Rosette Glass Composer</h1>
+        <p class="masthead__subtitle">
+          尖頭アーチとバラ窓に、宝石色の光を注ぎ込む硝子細工の工房
+        </p>
+      </header>
+
+      <main class="workshop">
+        <section class="stage" aria-label="ステンドグラス作業台">
+          <div class="stage__frame-outer">
+            <div class="stage__frame-inner" id="window-frame" data-mode="backlight">
+              <canvas id="glass-canvas" aria-label="ステンドグラス制作キャンバス"></canvas>
+              <div class="empty-state" id="empty-state">
+                <p class="empty-state__glyph">✚</p>
+                <p class="empty-state__title">窓の輪郭に、最初の一点を</p>
+                <p class="empty-state__body">
+                  右手のパレットから宝石色をひとつ選び、窓の中をクリックして硝子片を配置してください。
+                </p>
+              </div>
+              <div class="rivet rivet--tl" aria-hidden="true"></div>
+              <div class="rivet rivet--tr" aria-hidden="true"></div>
+              <div class="rivet rivet--bl" aria-hidden="true"></div>
+              <div class="rivet rivet--br" aria-hidden="true"></div>
+            </div>
+          </div>
+
+          <div class="stage__toolbar" role="group" aria-label="表示モード">
+            <button type="button" class="mode-btn" data-mode="backlight" id="mode-backlight" aria-pressed="true">
+              <span class="mode-btn__icon">◈</span> バックライト
+            </button>
+            <button type="button" class="mode-btn" data-mode="natural" id="mode-natural" aria-pressed="false">
+              <span class="mode-btn__icon">○</span> 自然光
+            </button>
+          </div>
+        </section>
+
+        <aside class="control-panel" aria-label="制作パネル">
+          <section class="panel-section" aria-labelledby="tpl-heading">
+            <h2 class="panel-section__heading" id="tpl-heading">窓の様式</h2>
+            <div class="template-choices">
+              <button type="button" class="template-card" data-template="arch" id="tpl-arch">
+                <span class="template-card__glyph">⛪</span>
+                <span class="template-card__label">尖頭アーチ窓</span>
+                <span class="template-card__sub">Lancet Window</span>
+              </button>
+              <button type="button" class="template-card" data-template="rose" id="tpl-rose">
+                <span class="template-card__glyph">✺</span>
+                <span class="template-card__label">バラ窓</span>
+                <span class="template-card__sub">Rose Window</span>
+              </button>
+            </div>
+            <div class="rose-segments" id="rose-segments" hidden>
+              <span class="rose-segments__label">石造マリオンの分割数</span>
+              <div class="segment-choices" role="group" aria-label="バラ窓の分割数">
+                <button type="button" class="segment-btn" data-segments="6">6分割</button>
+                <button type="button" class="segment-btn" data-segments="8">8分割</button>
+                <button type="button" class="segment-btn" data-segments="12">12分割</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-section" aria-labelledby="palette-heading">
+            <h2 class="panel-section__heading" id="palette-heading">宝石色パレット</h2>
+            <div class="palette-grid" id="palette-grid" role="listbox" aria-label="ガラスの色"></div>
+
+            <div class="photo-drop" id="photo-drop" tabindex="0" role="button" aria-label="写真から色を抽出">
+              <span class="photo-drop__icon">📷</span>
+              <span class="photo-drop__text">写真をドロップ、または選択して<br />色を抽出</span>
+              <input type="file" id="photo-input" accept="image/*" hidden />
+            </div>
+            <div class="palette-grid palette-grid--extracted" id="extracted-grid" aria-label="写真から抽出した色"></div>
+          </section>
+
+          <section class="panel-section" aria-labelledby="sliders-heading">
+            <h2 class="panel-section__heading" id="sliders-heading">硝子の調律</h2>
+
+            <label class="dial">
+              <span class="dial__label">不規則さ<span class="dial__value" id="val-irregularity">40%</span></span>
+              <input type="range" id="slider-irregularity" min="0" max="100" value="40" />
+            </label>
+
+            <label class="dial">
+              <span class="dial__label">鉛線の太さ<span class="dial__value" id="val-lead">4</span></span>
+              <input type="range" id="slider-lead" min="1" max="9" value="4" step="1" />
+            </label>
+
+            <label class="dial">
+              <span class="dial__label">硝子の質感<span class="dial__value" id="val-noise">35%</span></span>
+              <input type="range" id="slider-noise" min="0" max="100" value="35" />
+            </label>
+
+            <label class="dial">
+              <span class="dial__label">発光の強さ<span class="dial__value" id="val-backlight">70%</span></span>
+              <input type="range" id="slider-backlight" min="0" max="100" value="70" />
+            </label>
+          </section>
+
+          <section class="panel-section panel-section--actions" aria-labelledby="actions-heading">
+            <h2 class="panel-section__heading" id="actions-heading">工房の作業</h2>
+            <div class="action-row">
+              <button type="button" class="btn btn--ghost" id="btn-undo" disabled>↺ 元に戻す</button>
+              <button type="button" class="btn btn--ghost btn--danger" id="btn-clear" disabled>✕ 全消去</button>
+            </div>
+            <div class="action-row action-row--stack">
+              <button type="button" class="btn btn--brass" id="btn-export-backlight" disabled>
+                ⇩ バックライト状態を書き出す
+              </button>
+              <button type="button" class="btn btn--brass-outline" id="btn-export-natural" disabled>
+                ⇩ 自然光状態を書き出す
+              </button>
+            </div>
+            <p class="hint" id="point-count">配置された硝子片: 0</p>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="colophon">
+        <p>app-factory パイプラインによる自律生成プロトタイプ — Rosette Glass Composer</p>
+      </footer>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

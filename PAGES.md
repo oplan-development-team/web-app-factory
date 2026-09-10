@@ -47,5 +47,6 @@
 | タイピング心電図 | 打鍵のkeydown間隔だけを計測し、病院の心電図モニター風UIでリアルタイムに波形と診断結果を描くネタツール | — （Pages未対応、下記参照） | 保留 | 2026-08-24 |
 | 指先の集会 — コイン・セアンス | 複数人が同じ画面に指を置き、多点タッチの重心を「玉」として追跡・自律ドリフトさせる疑似こっくりさんボード | [Pages](https://oplan-development-team.github.io/web-app-factory/coin-seance/) | プロトタイプ（採否待ち） | 2026-09-07 |
 | 浮遊光庭（Ambient Tab Garden） | このアプリを複数タブで開くと、タブごとに光のパーティクル群が育つ観賞用アンビエント・ジェネレーティブアート。放置時間で貯まる「きらめき」でアップグレードしていく | [Pages](https://oplan-development-team.github.io/web-app-factory/ambient-tab-garden/) | 完成 | 2026-09-08 |
+| ステンドグラス・コンポーザー（Rosette Glass Composer） | ゴシック窓の輪郭内に宝石色の点を打つと、距離場ベースの鉛線分割で1枚のステンドグラスが自動生成され、バックライト/自然光の2状態でPNG書き出しできる | [Pages](https://oplan-development-team.github.io/web-app-factory/rosette-glass-composer/) | プロトタイプ（採否待ち） | 2026-09-09 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
