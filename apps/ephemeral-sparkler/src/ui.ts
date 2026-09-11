@@ -10,8 +10,9 @@ export interface AppElements {
   intro: HTMLElement;
   stageIndicator: HTMLElement;
   stageDots: HTMLElement[];
-  windHud: HTMLElement;
+  gripRing: HTMLElement;
   windArrow: HTMLElement;
+  stabilityHud: HTMLElement;
   stabilityFill: HTMLElement;
   pressZone: HTMLElement;
   pressAffordance: HTMLElement;
@@ -34,8 +35,7 @@ export function mountApp(root: HTMLElement): AppElements {
       <p>離すと、消えます。風が吹いたら、そっと押し返して。</p>
     </div>
 
-    <div class="wind-hud" id="wind-hud" aria-hidden="true">
-      <span class="wind-arrow" id="wind-arrow"></span>
+    <div class="stability-hud" id="stability-hud" aria-hidden="true">
       <span class="stability-track">
         <span class="stability-fill" id="stability-fill"></span>
       </span>
@@ -49,6 +49,9 @@ export function mountApp(root: HTMLElement): AppElements {
     </div>
 
     <div class="press-affordance" id="press-affordance" aria-hidden="true"></div>
+    <div class="grip-ring" id="grip-ring" aria-hidden="true">
+      <span class="wind-arrow" id="wind-arrow"></span>
+    </div>
     <div
       class="press-zone"
       id="press-zone"
@@ -87,8 +90,9 @@ export function mountApp(root: HTMLElement): AppElements {
     intro: byId('intro'),
     stageIndicator: byId('stage-indicator'),
     stageDots: Array.from(root.querySelectorAll<HTMLElement>('.stage-dot')),
-    windHud: byId('wind-hud'),
+    gripRing: byId('grip-ring'),
     windArrow: byId('wind-arrow'),
+    stabilityHud: byId('stability-hud'),
     stabilityFill: byId('stability-fill'),
     pressZone: byId('press-zone'),
     pressAffordance: byId('press-affordance'),
@@ -134,7 +138,10 @@ const STABILITY_DANGER_THRESHOLD = 78;
  * Updates the wind-direction arrow (rotation + opacity from strength) and
  * the stability hairline (fill width from instability, with a warning/danger
  * class swap instead of continuous color interpolation — kept as a two-step
- * palette shift so it stays within the piece's existing token set).
+ * palette shift so it stays within the piece's existing token set). The
+ * arrow itself now lives inside `.grip-ring` (see positionGripRing) rather
+ * than a separate floating HUD, so this function's job is unchanged — only
+ * where its target element sits in the DOM/viewport has moved.
  */
 export function updateWindHud(
   el: { windArrow: HTMLElement; stabilityFill: HTMLElement },
@@ -165,6 +172,18 @@ export function positionPressZone(el: HTMLElement, handX: number, handY: number)
 }
 
 export function positionAffordance(el: HTMLElement, handX: number, handY: number): void {
+  el.style.left = `${handX}px`;
+  el.style.top = `${handY}px`;
+}
+
+/**
+ * Centers the grip-ring (and, inside it, the wind-direction arrow — see
+ * updateWindHud) on the same grip point as the press-affordance circle. The
+ * two occupy the same screen position but never show at once: the
+ * affordance invites the first press, the ring takes over once burning
+ * starts (see main.ts show/hideAffordance and the is-visible toggles).
+ */
+export function positionGripRing(el: HTMLElement, handX: number, handY: number): void {
   el.style.left = `${handX}px`;
   el.style.top = `${handY}px`;
 }

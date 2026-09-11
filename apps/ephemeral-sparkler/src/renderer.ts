@@ -1,4 +1,5 @@
 import { alphaAt, colorAt, type Particle } from './sparkler-physics.ts';
+import type { WindState } from './wind.ts';
 
 export interface Geometry {
   width: number;
@@ -28,6 +29,21 @@ const EMBER_Y_RATIO = 0.46;
 
 /** Short rolling "shutter" window for the afterglow export — see resetAfterglow/fadeAfterglow. */
 const AFTERGLOW_WINDOW_SECONDS = 1.5;
+
+// Wind sway on the stick itself (see drawStick): about 6x the hand-drawn
+// wiggle's own amplitude (~±4.8px, from buildStickWiggle below) so a
+// full-strength gust reads unmistakably as wind, not the baseline jitter.
+const MAX_STICK_SWAY_PX = 30;
+// Eases displacement from ~0 at the grip (t=0, held fixed) to the full sway
+// at the ember end (t=1, the free/hanging end) — >1 concentrates the bend
+// toward the tip rather than tilting the whole stick like a rigid rod.
+const STICK_SWAY_EASE_POWER = 1.6;
+// A taut hanging thread mainly swings side-to-side; a gust pushing straight
+// along the thread's length would otherwise read as the stick
+// stretching/compressing rather than bending, so the along-thread component
+// (dy, since the stick runs roughly vertical) is heavily damped relative to
+// the across-thread component (dx).
+const STICK_SWAY_VERTICAL_DAMPING = 0.3;
 
 /** Fixed, seeded wiggle points so the twisted-paper stick reads as hand-made, not jittery. */
 function buildStickWiggle(): StickWiggle[] {
@@ -124,7 +140,7 @@ export class SparklerRenderer {
     };
   }
 
-  private drawStick(ctx: CanvasRenderingContext2D, geo: Geometry): void {
+  private drawStick(ctx: CanvasRenderingContext2D, geo: Geometry, gust: WindState): void {
     ctx.save();
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -132,8 +148,14 @@ export class SparklerRenderer {
     ctx.lineWidth = 3;
     ctx.beginPath();
     this.stickWiggle.forEach((point, i) => {
-      const y = geo.handY + (geo.emberY - geo.handY) * point.t;
-      const wobbleX = geo.handX + point.offset;
+      // gust.dx/dy are already scaled by 0..1 strength (see wind.ts), so no
+      // extra strength multiplication is needed here — only the per-point
+      // grip-to-ember easing.
+      const easedT = Math.pow(point.t, STICK_SWAY_EASE_POWER);
+      const swayX = gust.dx * MAX_STICK_SWAY_PX * easedT;
+      const swayY = gust.dy * MAX_STICK_SWAY_PX * STICK_SWAY_VERTICAL_DAMPING * easedT;
+      const y = geo.handY + (geo.emberY - geo.handY) * point.t + swayY;
+      const wobbleX = geo.handX + point.offset + swayX;
       if (i === 0) ctx.moveTo(wobbleX, y);
       else ctx.lineTo(wobbleX, y);
     });
@@ -238,11 +260,12 @@ export class SparklerRenderer {
     emberBrightness: number,
     pulseStrength: number,
     showStick: boolean,
+    gust: WindState,
   ): void {
     const geo = this.geometry;
 
     this.sceneCtx.clearRect(0, 0, this.cssWidth, this.cssHeight);
-    if (showStick) this.drawStick(this.sceneCtx, geo);
+    if (showStick) this.drawStick(this.sceneCtx, geo, gust);
 
     const pulse = pulseStrength * ((Math.sin(performance.now() / 260) + 1) / 2);
     this.drawEmber(this.sceneCtx, geo, emberBrightness, pulse);

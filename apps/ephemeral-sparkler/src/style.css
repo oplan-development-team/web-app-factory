@@ -129,26 +129,53 @@ body {
 }
 
 /*
- * A wordless instrument, not a game HUD: a bare hairline arrow + bare
- * hairline meter, no panel/border/backdrop — floating on the void the same
- * way the stage-dots do. Sits above the grip (see renderer.ts GRIP_Y_RATIO)
- * and is only shown while actually burning.
+ * A wordless instrument, not a game HUD: a bare hairline meter, no
+ * panel/border/backdrop — floating on the void the same way the stage-dots
+ * do. Sits near the top of the screen and is only shown while actually
+ * burning. The wind-direction arrow used to live here too, but that split
+ * the player's attention between this hairline and the grip they're
+ * actually watching/touching — it now renders inside .grip-ring instead
+ * (see below), directly over the grip.
  */
-.wind-hud {
+.stability-hud {
   position: absolute;
   top: max(2.4vh, env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
   opacity: 0;
   transition: opacity var(--duration-normal) var(--ease-out-soft);
   pointer-events: none;
 }
 
-.wind-hud.is-visible {
+.stability-hud.is-visible {
+  opacity: 1;
+}
+
+/*
+ * Takes over the grip point from .press-affordance once burning starts
+ * (same 64px hairline-circle language, just static instead of pulsing —
+ * the circle stops inviting a press and starts reporting wind instead of
+ * disappearing outright). Houses the wind-direction arrow so the player's
+ * one point of visual attention — the spot they're already pressing and
+ * watching the ember from — is also where the wind reads from.
+ */
+.grip-ring {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  margin-left: -32px;
+  margin-top: -32px;
+  border-radius: 50%;
+  border: 1px solid var(--gold-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-normal) var(--ease-out-soft);
+}
+
+.grip-ring.is-visible {
   opacity: 1;
 }
 
@@ -156,9 +183,9 @@ body {
   display: block;
   width: 0;
   height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-bottom: 8px solid var(--gold);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 12px solid var(--gold);
   opacity: 0;
   transform-origin: 50% 65%;
   transition: opacity var(--duration-fast) linear;
@@ -383,7 +410,8 @@ body {
   .ios-fallback,
   .btn,
   .stage-dot,
-  .wind-hud,
+  .stability-hud,
+  .grip-ring,
   .wind-arrow,
   .stability-fill {
     transition: none;

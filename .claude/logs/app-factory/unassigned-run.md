@@ -9,3 +9,9 @@
 - afterglow: renderer.tsに指数減衰のfadeAfterglow(dt)を追加し、AFTERGLOW_WINDOW_SECONDS=1.5の時定数で毎フレーム減衰させてから加算するローリング露光方式に変更。実際に燃焼後のエクスポート画像を確認し、白飛びした塊ではなく個々の光跡が判別できる短時間露光写真になっていることを確認。
 - frontend-designスキルで新規HUD(風向き矢印+安定度ゲージ)の配色・配置方針を事前確認(既存トークンのみ使用、危険色も既存の散り際の赤を流用)。visual-qaスキルの手順でstability-trackのコントラスト比が1.39と閾値未満だったため、alpha 0.4→0.65に上げて1.90に改善。
 - npm run build / docker build ともに再確認済み(確認後にDockerイメージは削除)。README.mdの遊び方・技術構成セクションを新しい向き・風メカニクス・火花描画・露光窓の説明に更新。
+
+### [11:30:22] prototype-builder（修正パスr2） — 風向き矢印をグリップ円内へ再配置、風で竿がたわむ視覚効果を追加
+- 指摘1: 風向き矢印(.wind-arrow)が持ち手から離れた場所(.wind-hud)に浮いていて視線が分散する → press-affordanceと同じ64pxヘアラインサークル(.grip-ring、新規)を持ち手位置に常設し、その中心に矢印を移設。不安定度メーター(.stability-hud)は別インストゥルメントとして画面上部に残置(判断: 2つを同じ円に詰めると焦点がぼやけるため分離を維持)。
+- 指摘2: 竿(糸)が風の影響を受けず視覚的に無反応だった → main.tsのcurrentGust(wind.tsのWindStateをそのまま再利用、独立した第2の風源は作らず)をrenderer.tsのdrawStickに渡し、t^1.6イージングで持ち手側ほぼ0px→燃え玉側最大30px(既存の手描きウィグル振幅±4.8pxの約6倍)の横方向たわみを追加。垂直成分(gust.dy)は0.3倍に減衰(糸が軸方向に伸縮して見えるのを避けるための判断)。
+- 検証: Playwrightで実際にpress-zoneを長押しし、(a)矢印が.grip-ring内で回転・強度連動フェードすることをスクリーンショット+getComputedStyleで確認、(b)ライブループを一時停止しSparklerRendererに合成の全強度水平ガストを直接描画させ、t=0で delta=0px、t=1で delta=30pxとなることをピクセル計測で数値確認(ランダムなガスト角度に依存しない裏取り)。npm run build・docker buildも再実行して成功を確認(image/containerは削除済み)。README.mdの遊び方説明も矢印の新しい位置に合わせて更新。
+

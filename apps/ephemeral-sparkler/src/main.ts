@@ -12,6 +12,7 @@ import {
   updateWindHud,
   positionPressZone,
   positionAffordance,
+  positionGripRing,
 } from './ui.ts';
 import { bindHoldInput } from './input.ts';
 import { SparklerRenderer } from './renderer.ts';
@@ -21,7 +22,7 @@ import {
   getStageWeights,
   TOTAL_BURN_SECONDS,
 } from './sparkler-physics.ts';
-import { WindSystem, StabilityMeter } from './wind.ts';
+import { WindSystem, StabilityMeter, type WindState } from './wind.ts';
 import { buildFileName, downloadPng, isIOS } from './afterglowExport.ts';
 
 type Phase = 'idle' | 'burning' | 'misfiring' | 'naturalEnding' | 'result';
@@ -33,6 +34,8 @@ const IDLE_EMBER_BRIGHTNESS = 0.06;
 const INTRO_AUTO_HIDE_MS = 6000;
 /** px/s² applied to lit sparks at full gust strength — visibly blows them sideways. */
 const WIND_PARTICLE_FORCE = 220;
+/** Gust state used to draw the stick sway when not actively burning (no wind at all). */
+const CALM_GUST: WindState = { dx: 0, dy: 0, strength: 0, angle: 0 };
 
 function init(): void {
   const root = document.getElementById('app');
@@ -56,12 +59,18 @@ function init(): void {
   let pointerOffsetX = 0;
   let pointerOffsetY = 0;
   let hasPointerControl = false;
+  // Drives the stick's visual sway (see renderer.ts drawStick). Mirrors the
+  // gust already driving the stability meter and particle drift — not a
+  // second wind source — and is reset to calm whenever burning stops so the
+  // stick doesn't hang mid-sway during a misfire/ending transition.
+  let currentGust: WindState = CALM_GUST;
 
   function syncGeometry(): void {
     renderer.resize();
     const geo = renderer.geometry;
     positionPressZone(el.pressZone, geo.handX, geo.handY);
     positionAffordance(el.pressAffordance, geo.handX, geo.handY);
+    positionGripRing(el.gripRing, geo.handX, geo.handY);
   }
 
   function showIntroIfFirstVisit(): void {
@@ -84,7 +93,8 @@ function init(): void {
     el.intro.classList.remove('is-visible');
     hideAffordance();
     el.stageIndicator.classList.add('is-visible');
-    el.windHud.classList.add('is-visible');
+    el.gripRing.classList.add('is-visible');
+    el.stabilityHud.classList.add('is-visible');
     phase = 'burning';
     progress = 0;
     particles.clear();
@@ -103,7 +113,9 @@ function init(): void {
     transitionTimer = 0;
     particles.emitMisfireBurst();
     phase = 'misfiring';
-    el.windHud.classList.remove('is-visible');
+    el.gripRing.classList.remove('is-visible');
+    el.stabilityHud.classList.remove('is-visible');
+    currentGust = CALM_GUST;
   }
 
   function finishNaturally(currentBrightness: number): void {
@@ -111,7 +123,9 @@ function init(): void {
     transitionTimer = 0;
     particles.emitFinalEmbers();
     phase = 'naturalEnding';
-    el.windHud.classList.remove('is-visible');
+    el.gripRing.classList.remove('is-visible');
+    el.stabilityHud.classList.remove('is-visible');
+    currentGust = CALM_GUST;
   }
 
   function enterResult(): void {
@@ -133,7 +147,9 @@ function init(): void {
     el.resultOverlay.hidden = true;
     el.iosFallback.classList.remove('is-visible');
     el.iosFallback.hidden = true;
-    el.windHud.classList.remove('is-visible');
+    el.gripRing.classList.remove('is-visible');
+    el.stabilityHud.classList.remove('is-visible');
+    currentGust = CALM_GUST;
     stability.reset();
     updateStageIndicator(el.stageDots, 0);
     showAffordance();
@@ -171,6 +187,7 @@ function init(): void {
       // genuinely tense 散り際. See wind.ts for the gust timeline itself.
       const difficultyScale = 0.35 + 0.65 * (progress / 100);
       const gust = wind.update(dt, difficultyScale);
+      currentGust = gust;
       const windAX = gust.dx * WIND_PARTICLE_FORCE;
       const windAY = gust.dy * WIND_PARTICLE_FORCE;
       particles.update(dt, progress, windAX, windAY);
@@ -204,7 +221,14 @@ function init(): void {
       showStick = false;
     }
 
-    renderer.renderFrame(dt, particles.particles, emberBrightness, pulseStrength, showStick);
+    renderer.renderFrame(
+      dt,
+      particles.particles,
+      emberBrightness,
+      pulseStrength,
+      showStick,
+      currentGust,
+    );
     requestAnimationFrame(frame);
   }
 
