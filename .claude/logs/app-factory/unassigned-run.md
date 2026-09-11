@@ -15,3 +15,8 @@
 - 指摘2: 竿(糸)が風の影響を受けず視覚的に無反応だった → main.tsのcurrentGust(wind.tsのWindStateをそのまま再利用、独立した第2の風源は作らず)をrenderer.tsのdrawStickに渡し、t^1.6イージングで持ち手側ほぼ0px→燃え玉側最大30px(既存の手描きウィグル振幅±4.8pxの約6倍)の横方向たわみを追加。垂直成分(gust.dy)は0.3倍に減衰(糸が軸方向に伸縮して見えるのを避けるための判断)。
 - 検証: Playwrightで実際にpress-zoneを長押しし、(a)矢印が.grip-ring内で回転・強度連動フェードすることをスクリーンショット+getComputedStyleで確認、(b)ライブループを一時停止しSparklerRendererに合成の全強度水平ガストを直接描画させ、t=0で delta=0px、t=1で delta=30pxとなることをピクセル計測で数値確認(ランダムなガスト角度に依存しない裏取り)。npm run build・docker buildも再実行して成功を確認(image/containerは削除済み)。README.mdの遊び方説明も矢印の新しい位置に合わせて更新。
 
+
+### [18:02:40] prototype-builder（修正パスr3） — ember/spark burst anchored to swayed stick tip
+- 結果: renderer.tsに単一の`stickSwayAt(t, gust)` / `emberAnchorSway(gust)`ヘルパーを追加し、drawStick・drawEmber・renderFrameの3箇所すべてで同じ計算を共有するよう統一。main.tsのParticleSystem生成元（originX/originY）も静的なgeo.emberX/emberYではなくswayを反映した`emberAnchor()`ヘルパーを使うよう変更し、ember/burst描画元とスティック描画側のsway計算が二重管理にならないようにした。
+- 検証: Playwrightでpointerdown+pointermoveの合成ホールド（setPointerCapture/releasePointerCaptureを一時的にno-op化）を実装し、Math.randomを固定してgust方向・タイミングを決定的にした上で、複数の強度段階（strength≈0.05/0.3/0.5/0.7/0.8）でcanvasピクセルからember発光のbright centroidを測定。修正後は強度に比例してdx（期待値=strength*30px）が実測とほぼ一致（例: strength0.8でdx実測21px vs期待24.5px）。git stashで一時的に修正前コードに戻し同条件で再測定したところdxはほぼ0〜負値のまま推移せず、修正前は炙火・火花がスティック先端の揺れに追従していないことを再現確認した（before/afterのスクリーンショットも撮影・目視比較）。
+- ビルド確認: `npm run build`（tsc --noEmit && vite build）成功、`docker build`成功（検証後にイメージ削除済み）。READMEはこのレベルの実装詳細に言及していなかったため変更なし。

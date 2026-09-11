@@ -45,6 +45,35 @@ const STICK_SWAY_EASE_POWER = 1.6;
 // the across-thread component (dx).
 const STICK_SWAY_VERTICAL_DAMPING = 0.3;
 
+/**
+ * Wind-sway displacement (px) at eased stick position `t` (0 = grip, held
+ * fixed; 1 = ember end, full sway) — the single source of truth for both
+ * the stick's own per-point bend (drawStick) and the ember/particle burst's
+ * anchor (emberAnchorSway). Previously this easing math lived only inline
+ * inside drawStick's per-point loop, so the ember and its spark burst kept
+ * rendering at the static, unswayed geo.emberX/emberY point and visibly
+ * separated from the stick's bent tip during a gust — computing it here
+ * once and reusing it everywhere keeps them from drifting apart again.
+ */
+function stickSwayAt(t: number, gust: WindState): { x: number; y: number } {
+  const easedT = Math.pow(t, STICK_SWAY_EASE_POWER);
+  return {
+    x: gust.dx * MAX_STICK_SWAY_PX * easedT,
+    y: gust.dy * MAX_STICK_SWAY_PX * STICK_SWAY_VERTICAL_DAMPING * easedT,
+  };
+}
+
+/**
+ * The wind-sway offset at the stick's ember end (t=1) — how far the
+ * ember glow and particle-burst anchor must be displaced from the static
+ * geo.emberX/emberY to stay attached to the stick's actual swayed tip.
+ * Exported so main.ts can apply the identical offset to the particle
+ * system's spawn/simulation origin, not just to the renderer's own drawing.
+ */
+export function emberAnchorSway(gust: WindState): { x: number; y: number } {
+  return stickSwayAt(1, gust);
+}
+
 /** Fixed, seeded wiggle points so the twisted-paper stick reads as hand-made, not jittery. */
 function buildStickWiggle(): StickWiggle[] {
   const points: StickWiggle[] = [];
@@ -129,6 +158,12 @@ export class SparklerRenderer {
     this.afterglowCtx.restore();
   }
 
+  /**
+   * `emberX`/`emberY` here are the static, un-swayed tip position — callers
+   * that need the ember/burst's true current position under wind must add
+   * emberAnchorSway(gust) themselves (see renderFrame and main.ts's
+   * emberAnchor helper).
+   */
   get geometry(): Geometry {
     return {
       width: this.cssWidth,
@@ -148,14 +183,12 @@ export class SparklerRenderer {
     ctx.lineWidth = 3;
     ctx.beginPath();
     this.stickWiggle.forEach((point, i) => {
-      // gust.dx/dy are already scaled by 0..1 strength (see wind.ts), so no
-      // extra strength multiplication is needed here — only the per-point
-      // grip-to-ember easing.
-      const easedT = Math.pow(point.t, STICK_SWAY_EASE_POWER);
-      const swayX = gust.dx * MAX_STICK_SWAY_PX * easedT;
-      const swayY = gust.dy * MAX_STICK_SWAY_PX * STICK_SWAY_VERTICAL_DAMPING * easedT;
-      const y = geo.handY + (geo.emberY - geo.handY) * point.t + swayY;
-      const wobbleX = geo.handX + point.offset + swayX;
+      // gust.dx/dy are already scaled by 0..1 strength (see wind.ts); the
+      // per-point grip-to-ember easing lives in stickSwayAt (see above) so
+      // this stays in sync with the ember/particle anchor's own offset.
+      const sway = stickSwayAt(point.t, gust);
+      const y = geo.handY + (geo.emberY - geo.handY) * point.t + sway.y;
+      const wobbleX = geo.handX + point.offset + sway.x;
       if (i === 0) ctx.moveTo(wobbleX, y);
       else ctx.lineTo(wobbleX, y);
     });
@@ -168,9 +201,15 @@ export class SparklerRenderer {
     ctx.restore();
   }
 
+  /**
+   * `anchorX`/`anchorY` is the stick tip's actual, already-swayed position
+   * for this frame (see emberAnchorSway) — not the static geo.emberX/emberY
+   * — so the glow stays visually attached to the stick's bent tip.
+   */
   private drawEmber(
     ctx: CanvasRenderingContext2D,
-    geo: Geometry,
+    anchorX: number,
+    anchorY: number,
     brightness: number,
     pulse: number,
   ): void {
@@ -181,26 +220,19 @@ export class SparklerRenderer {
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
 
-    const gradient = ctx.createRadialGradient(
-      geo.emberX,
-      geo.emberY,
-      0,
-      geo.emberX,
-      geo.emberY,
-      glowRadius,
-    );
+    const gradient = ctx.createRadialGradient(anchorX, anchorY, 0, anchorX, anchorY, glowRadius);
     const coreAlpha = 0.85 * brightness;
     gradient.addColorStop(0, `rgba(255, 244, 214, ${coreAlpha})`);
     gradient.addColorStop(0.35, `rgba(255, 190, 110, ${coreAlpha * 0.6})`);
     gradient.addColorStop(1, 'rgba(255, 140, 66, 0)');
     ctx.fillStyle = gradient;
     ctx.beginPath();
-    ctx.arc(geo.emberX, geo.emberY, glowRadius, 0, Math.PI * 2);
+    ctx.arc(anchorX, anchorY, glowRadius, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.fillStyle = `rgba(255, 250, 235, ${Math.min(1, brightness + 0.2)})`;
     ctx.beginPath();
-    ctx.arc(geo.emberX, geo.emberY, radius, 0, Math.PI * 2);
+    ctx.arc(anchorX, anchorY, radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
@@ -263,12 +295,18 @@ export class SparklerRenderer {
     gust: WindState,
   ): void {
     const geo = this.geometry;
+    // Same offset the particle system's origin uses (see main.ts's
+    // emberAnchor helper, built on this module's exported emberAnchorSway)
+    // so the glow and the burst never disagree about where the tip is.
+    const sway = emberAnchorSway(gust);
+    const emberAnchorX = geo.emberX + sway.x;
+    const emberAnchorY = geo.emberY + sway.y;
 
     this.sceneCtx.clearRect(0, 0, this.cssWidth, this.cssHeight);
     if (showStick) this.drawStick(this.sceneCtx, geo, gust);
 
     const pulse = pulseStrength * ((Math.sin(performance.now() / 260) + 1) / 2);
-    this.drawEmber(this.sceneCtx, geo, emberBrightness, pulse);
+    this.drawEmber(this.sceneCtx, emberAnchorX, emberAnchorY, emberBrightness, pulse);
     this.drawParticles(this.sceneCtx, particles);
 
     // Afterglow: a bounded rolling exposure (see fadeAfterglow), not

@@ -15,7 +15,7 @@ import {
   positionGripRing,
 } from './ui.ts';
 import { bindHoldInput } from './input.ts';
-import { SparklerRenderer } from './renderer.ts';
+import { SparklerRenderer, emberAnchorSway } from './renderer.ts';
 import {
   ParticleSystem,
   emberBrightnessForProgress,
@@ -43,10 +43,6 @@ function init(): void {
 
   const el = mountApp(root);
   const renderer = new SparklerRenderer(el.sceneCanvas);
-  const particles = new ParticleSystem(
-    () => renderer.geometry.emberX,
-    () => renderer.geometry.emberY,
-  );
 
   let phase: Phase = 'idle';
   let progress = 0;
@@ -59,11 +55,33 @@ function init(): void {
   let pointerOffsetX = 0;
   let pointerOffsetY = 0;
   let hasPointerControl = false;
-  // Drives the stick's visual sway (see renderer.ts drawStick). Mirrors the
-  // gust already driving the stability meter and particle drift — not a
-  // second wind source — and is reset to calm whenever burning stops so the
-  // stick doesn't hang mid-sway during a misfire/ending transition.
+  // Drives the stick's visual sway (see renderer.ts drawStick) and, via
+  // emberAnchor() below, the particle system's spawn origin too — both must
+  // read the same gust so the stick's rendered tip and the ember/spark burst
+  // never visually drift apart under wind (previously the burst stayed at
+  // the static, unswayed point while the stick visibly bent away from it).
+  // Mirrors the gust already driving the stability meter and particle
+  // drift — not a second wind source — and is reset to calm whenever
+  // burning stops so the stick doesn't hang mid-sway during a
+  // misfire/ending transition.
   let currentGust: WindState = CALM_GUST;
+
+  /**
+   * The stick tip's actual on-screen position this frame, including wind
+   * sway — the single source of truth for where the ember/spark burst
+   * should originate, built on renderer.ts's emberAnchorSway (the same
+   * offset drawStick applies to the stick's rendered tip).
+   */
+  function emberAnchor(): { x: number; y: number } {
+    const geo = renderer.geometry;
+    const sway = emberAnchorSway(currentGust);
+    return { x: geo.emberX + sway.x, y: geo.emberY + sway.y };
+  }
+
+  const particles = new ParticleSystem(
+    () => emberAnchor().x,
+    () => emberAnchor().y,
+  );
 
   function syncGeometry(): void {
     renderer.resize();
