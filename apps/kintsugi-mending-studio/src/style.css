@@ -1,0 +1,637 @@
+:root {
+  --bg-void: #100e0c;
+  --bg-panel: #17130f;
+  --bg-panel-raised: #1e1811;
+  --bg-panel-inset: #0c0a08;
+
+  --gold-1: #f4e5a1;
+  --gold-2: #d4af37;
+  --gold-3: #9c7a24;
+  --gold-hairline: rgba(212, 175, 55, 0.32);
+  --gold-hairline-strong: rgba(212, 175, 55, 0.62);
+  --gold-glow: rgba(244, 229, 161, 0.35);
+
+  --ink-paper: #e9e2d2;
+  --ink-muted: #a99d87;
+  --ink-faint: #6c6252;
+
+  --serif: 'Shippori Mincho', 'Hiragino Mincho ProN', serif;
+  --sans: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', sans-serif;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg-void);
+  color: var(--ink-paper);
+}
+
+body {
+  font-family: var(--sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+button {
+  font-family: inherit;
+  line-height: 1.2;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------------------------------------------------------- masthead */
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.6rem clamp(1.25rem, 4vw, 3rem) 1.1rem;
+  border-bottom: 1px solid var(--gold-hairline);
+}
+
+.masthead__title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(1.25rem, 1.6vw + 0.9rem, 1.75rem);
+  letter-spacing: 0.04em;
+  color: var(--ink-paper);
+  margin: 0;
+}
+
+.masthead__sub {
+  font-family: var(--sans);
+  font-size: 0.62rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold-3);
+  margin: 0.3rem 0 0;
+}
+
+.masthead__tagline {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  text-align: right;
+  max-width: 22ch;
+}
+
+@media (max-width: 640px) {
+  .masthead {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .masthead__tagline {
+    text-align: left;
+    max-width: none;
+  }
+}
+
+/* ---------------------------------------------------------------- layout */
+
+.studio {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.62fr) minmax(320px, 1fr);
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .studio {
+    grid-template-columns: 1fr;
+  }
+}
+
+.canvas-zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  min-height: 0;
+}
+
+.canvas-frame {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#stage-canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  touch-action: manipulation;
+  border-radius: 2px;
+  cursor: crosshair;
+}
+
+#stage-canvas.is-locked-full {
+  cursor: not-allowed;
+}
+
+#stage-canvas.is-static {
+  cursor: default;
+}
+
+.canvas-hint {
+  margin-top: 1rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-muted);
+  text-align: center;
+  min-height: 1.4em;
+  transition: color 0.25s ease;
+}
+
+.canvas-hint.is-warning {
+  color: var(--gold-1);
+}
+
+@keyframes hint-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+.canvas-hint.shake {
+  animation: hint-shake 0.4s ease;
+}
+
+.origin-ticks {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+/* A class selector setting `display` has the same specificity as the UA
+   stylesheet's `[hidden] { display: none }` rule, so without this override
+   the `hidden` attribute would silently lose the cascade tie and the ticks
+   would stay visible outside the breaking/mending stages. */
+.origin-ticks[hidden] {
+  display: none;
+}
+
+.origin-tick {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--gold-hairline-strong);
+  background: transparent;
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.origin-tick.is-used {
+  background: var(--gold-2);
+  box-shadow: 0 0 6px var(--gold-glow);
+}
+
+/* ---------------------------------------------------------------- rail */
+
+.control-rail {
+  border-left: 1px solid var(--gold-hairline);
+  background: linear-gradient(180deg, var(--bg-panel) 0%, var(--bg-void) 120%);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+@media (max-width: 900px) {
+  .control-rail {
+    border-left: none;
+    border-top: 1px solid var(--gold-hairline);
+  }
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  padding: 1.4rem clamp(1.25rem, 3vw, 2rem) 1.1rem;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.stepper__item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.stepper__item.is-current {
+  color: var(--gold-1);
+}
+
+.stepper__item.is-done {
+  color: var(--gold-3);
+}
+
+.stepper__num {
+  font-family: var(--serif);
+  font-size: 0.72rem;
+}
+
+.stepper__rule {
+  flex: 1 0 0.75rem;
+  min-width: 0.75rem;
+  height: 1px;
+  background: var(--gold-hairline);
+}
+
+.panel {
+  padding: 0.6rem clamp(1.25rem, 3vw, 2rem) 1.6rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+.section-label {
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold-3);
+  margin: 0 0 0.7rem;
+}
+
+.vessel-picker,
+.glaze-picker {
+  display: flex;
+  gap: 0.7rem;
+}
+
+.picker-btn {
+  background: transparent;
+  border: 1px solid var(--gold-hairline);
+  color: var(--ink-muted);
+  padding: 0.55rem 0.5rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  flex: 1;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.picker-btn canvas {
+  width: 44px;
+  height: 44px;
+}
+
+.picker-btn__label {
+  font-family: var(--serif);
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+}
+
+.picker-btn:hover:not(:disabled) {
+  border-color: var(--gold-hairline-strong);
+  color: var(--ink-paper);
+}
+
+.picker-btn:focus-visible {
+  outline: 1px solid var(--gold-1);
+  outline-offset: 2px;
+}
+
+.picker-btn.is-selected {
+  border-color: var(--gold-2);
+  color: var(--gold-1);
+  box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.25);
+}
+
+.picker-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.glaze-btn {
+  background: transparent;
+  border: 1px solid var(--gold-hairline);
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  flex: 1;
+  color: var(--ink-muted);
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.glaze-btn:hover:not(:disabled) {
+  border-color: var(--gold-hairline-strong);
+  color: var(--ink-paper);
+}
+
+.glaze-btn:focus-visible {
+  outline: 1px solid var(--gold-1);
+  outline-offset: 2px;
+}
+
+.glaze-btn.is-selected {
+  border-color: var(--gold-2);
+  color: var(--gold-1);
+}
+
+.glaze-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.glaze-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    inset 0 0 6px rgba(0, 0, 0, 0.4);
+}
+
+.glaze-btn__label {
+  font-size: 0.62rem;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.locked-summary {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.02em;
+}
+
+.locked-summary b {
+  color: var(--ink-paper);
+  font-weight: 500;
+}
+
+/* buttons ---------------------------------------------------------- */
+
+.btn {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.85rem 1.2rem;
+  border: 1px solid var(--gold-hairline-strong);
+  background: transparent;
+  color: var(--ink-paper);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    letter-spacing 0.2s ease,
+    transform 0.15s ease;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--gold-1);
+  color: var(--gold-1);
+  letter-spacing: 0.18em;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.99);
+}
+
+.btn:focus-visible {
+  outline: 1px solid var(--gold-1);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+  letter-spacing: 0.14em;
+}
+
+.btn--primary {
+  background: linear-gradient(160deg, var(--gold-1), var(--gold-2) 60%, var(--gold-3));
+  color: #1a1408;
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.btn--primary:hover:not(:disabled) {
+  color: #1a1408;
+  letter-spacing: 0.16em;
+  box-shadow: 0 0 18px var(--gold-glow);
+}
+
+.btn--primary:disabled {
+  background: var(--bg-panel-raised);
+  color: var(--ink-faint);
+  opacity: 1;
+}
+
+.btn-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.text-link {
+  background: none;
+  border: none;
+  color: var(--ink-faint);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  padding: 0;
+  align-self: flex-start;
+  transition: color 0.2s ease;
+}
+
+.text-link:hover {
+  color: var(--ink-muted);
+}
+
+/* mending status ----------------------------------------------------- */
+
+.mending-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.mending-status__text {
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: var(--gold-1);
+  letter-spacing: 0.02em;
+}
+
+.mending-progress {
+  height: 1px;
+  background: var(--gold-hairline);
+  position: relative;
+  overflow: visible;
+}
+
+.mending-progress__fill {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold-3), var(--gold-1));
+  box-shadow: 0 0 8px var(--gold-glow);
+  width: 0%;
+  transition: width 0.08s linear;
+}
+
+/* caption plate -------------------------------------------------------- */
+
+.caption-plate {
+  margin-top: auto;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--gold-hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.caption-plate__quote {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  line-height: 1.9;
+  color: var(--ink-paper);
+  margin: 0;
+  min-height: 3.8em;
+}
+
+.caption-plate__quote.is-placeholder {
+  color: var(--ink-faint);
+  font-style: normal;
+  font-size: 0.85rem;
+  line-height: 1.9;
+}
+
+.caption-plate__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-muted);
+}
+
+.caption-plate__meta span b {
+  color: var(--gold-1);
+  font-weight: 500;
+  font-family: var(--serif);
+  margin-left: 0.3rem;
+}
+
+.caption-plate__actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* toast ------------------------------------------------------------ */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.6rem;
+  transform: translate(-50%, 0);
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--gold-hairline-strong);
+  color: var(--ink-paper);
+  padding: 0.8rem 1.2rem;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+  z-index: 20;
+  animation: toast-in 0.25s ease;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.toast button {
+  background: none;
+  border: none;
+  color: var(--gold-1);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.78rem;
+  padding: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .picker-btn,
+  .glaze-btn,
+  .origin-tick,
+  .mending-progress__fill {
+    transition: none;
+  }
+}
