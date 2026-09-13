@@ -50,5 +50,6 @@
 | 浮遊光庭（Ambient Tab Garden） | このアプリを複数タブで開くと、タブごとに光のパーティクル群が育つ観賞用アンビエント・ジェネレーティブアート。放置時間で貯まる「きらめき」でアップグレードしていく | [Pages](https://oplan-development-team.github.io/web-app-factory/ambient-tab-garden/) | 完成 | 2026-09-08 |
 | ステンドグラス・コンポーザー（Rosette Glass Composer） | ゴシック窓の輪郭内に宝石色の点を打つと、距離場ベースの鉛線分割で1枚のステンドグラスが自動生成され、バックライト/自然光の2状態でPNG書き出しできる | [Pages](https://oplan-development-team.github.io/web-app-factory/rosette-glass-composer/) | プロトタイプ（採否待ち） | 2026-09-09 |
 | 線香花火シミュレーター（Ephemeral Sparkler） | 花火の先端を長押しすると蕾→牡丹→松葉→散り際の4段階で燃え、消えた瞬間までの光跡を長時間露光風の記念写真として持ち帰れる一期一会の体験アプリ | [Pages](https://oplan-development-team.github.io/web-app-factory/ephemeral-sparkler/) | プロトタイプ（採否待ち） | 2026-09-10 |
+| 砂文字ポスター（Sand Typography Studio） | 単語・フレーズの型に砂粒がセルオートマトン物理で積もり輪郭を描き出し、ドラッグで傾けて崩せるヴィンテージ砂時計ポスター風アート系トイ | [Pages](https://oplan-development-team.github.io/web-app-factory/sand-typography-poster/) | プロトタイプ（採否待ち） | 2026-09-13 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。

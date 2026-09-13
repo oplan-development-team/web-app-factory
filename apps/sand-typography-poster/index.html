@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Sand Typography Studio — 砂文字ポスター</title>
+    <meta
+      name="description"
+      content="短いフレーズに砂が降り積もり、文字の輪郭を描き出すヴィンテージ砂時計ポスター風のアート系トイ。"
+    />
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <div class="stage">
+      <main class="poster" aria-label="砂文字ポスター">
+        <div class="poster__frame">
+          <span class="corner corner--tl" aria-hidden="true"></span>
+          <span class="corner corner--tr" aria-hidden="true"></span>
+          <span class="corner corner--bl" aria-hidden="true"></span>
+          <span class="corner corner--br" aria-hidden="true"></span>
+
+          <header class="poster__monogram">
+            <svg
+              class="poster__hourglass"
+              viewBox="0 0 32 40"
+              width="26"
+              height="32"
+              aria-hidden="true"
+            >
+              <path
+                d="M6 2 H26 M6 38 H26 M7 2 C7 12 15 15 16 18 C17 15 25 12 25 2 M7 38 C7 28 15 25 16 22 C17 25 25 28 25 38"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span class="poster__eyebrow">Sand&nbsp;Typography&nbsp;Studio</span>
+          </header>
+
+          <div class="poster__stage">
+            <canvas id="sandCanvas" aria-label="砂のシミュレーション表示"></canvas>
+            <p class="poster__placeholder" id="placeholder">
+              単語を入力して「注ぐ」を押してください
+            </p>
+          </div>
+
+          <footer class="poster__plate">
+            <p class="poster__phrase" id="phraseLabel">&nbsp;</p>
+            <div class="poster__stampRow">
+              <span class="poster__stamp" id="stampNo">No. 000</span>
+              <span class="poster__stamp poster__stamp--divider" aria-hidden="true">·</span>
+              <span class="poster__stamp" id="stampEst">EST. MMXXVI</span>
+            </div>
+          </footer>
+        </div>
+      </main>
+
+      <aside class="control-panel" aria-label="操作パネル">
+        <p class="control-panel__title">specimen&nbsp;controls</p>
+
+        <div class="control-panel__section">
+          <label class="control-panel__label" for="textInput">phrase</label>
+          <input
+            id="textInput"
+            class="control-panel__input"
+            type="text"
+            maxlength="15"
+            placeholder="dune"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+
+        <div class="control-panel__section">
+          <span class="control-panel__label">grain colour</span>
+          <div class="swatches" id="colorSwatches">
+            <button
+              type="button"
+              class="swatch swatch--amber is-active"
+              data-color="amber"
+              aria-pressed="true"
+              aria-label="アンバー（琥珀色の砂）"
+            ></button>
+            <button
+              type="button"
+              class="swatch swatch--terracotta"
+              data-color="terracotta"
+              aria-pressed="false"
+              aria-label="テラコッタ（赤茶の砂）"
+            ></button>
+            <button
+              type="button"
+              class="swatch swatch--indigo"
+              data-color="indigo"
+              aria-pressed="false"
+              aria-label="インディゴスレート（藍鼠の砂）"
+            ></button>
+          </div>
+        </div>
+
+        <div class="control-panel__section">
+          <span class="control-panel__label">typeface</span>
+          <div class="typefaces" id="fontButtons">
+            <button
+              type="button"
+              class="type-btn type-btn--serif is-active"
+              data-font="serif"
+              aria-pressed="true"
+            >
+              Serif
+            </button>
+            <button
+              type="button"
+              class="type-btn type-btn--slab"
+              data-font="slab"
+              aria-pressed="false"
+            >
+              Slab
+            </button>
+          </div>
+        </div>
+
+        <p class="control-panel__hint">
+          色・書体・文字の変更は、次回の「注ぐ」から反映されます。
+        </p>
+
+        <div class="control-panel__actions">
+          <button type="button" id="pourBtn" class="btn btn--primary">注ぐ ＿ Pour</button>
+          <button type="button" id="exportBtn" class="btn" disabled>書き出し ＿ Export</button>
+        </div>
+
+        <p class="control-panel__status" id="statusMsg" role="status" aria-live="polite">
+          &nbsp;
+        </p>
+
+        <p class="control-panel__footnote">
+          ドラッグでキャンバスを傾けると、積もった砂が重力に沿って崩れます。
+        </p>
+      </aside>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
