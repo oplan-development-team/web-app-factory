@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MOIRÉ OP ART STUDIO — Kinetic Pattern Layering</title>
+    <meta
+      name="description"
+      content="線・ドット・同心円のパターンレイヤーを重ね合わせ、回転・間隔・合成モードの操作でモアレの揺らぎをリアルタイム観察し、ポスターとして書き出すキネティック・オプアートスタジオ。"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <header class="masthead">
+        <div class="masthead__mark" aria-hidden="true">MO</div>
+        <div class="masthead__title">
+          <h1>MOIRÉ&nbsp;OP&nbsp;ART&nbsp;STUDIO</h1>
+          <p class="masthead__sub">CATALOGUE No.&nbsp;OP&#8209;01 &mdash; KINETIC PATTERN LAYERING</p>
+        </div>
+        <div class="masthead__meta" id="statusReadout">
+          <span class="status-led" id="statusLed" aria-hidden="true"></span>
+          <span id="statusText">READY</span>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="stage" aria-label="プレビュー">
+          <div class="stage__frame">
+            <canvas id="artCanvas" width="1000" height="1000" aria-label="モアレパターンのプレビュー"></canvas>
+            <div class="stage__loading" id="loadingOverlay" hidden>
+              <span>RENDERING&hellip;</span>
+            </div>
+          </div>
+          <div class="stage__transport">
+            <button type="button" id="kineticToggleBtn" class="btn btn--transport" aria-pressed="false">
+              <span class="btn__glyph" aria-hidden="true">&#9654;</span>
+              <span class="btn__label">KINETIC MODE</span>
+            </button>
+            <div class="transport__speed">
+              <label for="kineticSpeed">SPEED</label>
+              <input type="range" id="kineticSpeed" min="1" max="40" step="1" value="12" aria-label="キネティック回転速度" />
+              <span class="readout" id="kineticSpeedValue">12&deg;/s</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-label="コントロールパネル">
+          <div class="panel__scroll">
+            <div class="panel__block" id="presetBlock">
+              <div class="block-head">
+                <span class="block-head__num">00</span>
+                <span class="block-head__label">PRESETS</span>
+              </div>
+              <div class="preset-grid" id="presetGrid"></div>
+            </div>
+
+            <div class="panel__block" id="globalBlock">
+              <div class="block-head">
+                <span class="block-head__num">01</span>
+                <span class="block-head__label">COMPOSITE</span>
+              </div>
+              <div class="field">
+                <label for="globalBlendSelect">GLOBAL BLEND MODE</label>
+                <select id="globalBlendSelect">
+                  <option value="source-over">NORMAL</option>
+                  <option value="multiply">MULTIPLY</option>
+                  <option value="difference">DIFFERENCE</option>
+                  <option value="exclusion">EXCLUSION</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="panel__block" id="layersBlock">
+              <div class="block-head">
+                <span class="block-head__num">02</span>
+                <span class="block-head__label">LAYERS</span>
+              </div>
+              <div id="layerList" class="layer-list"></div>
+              <div class="layer-actions">
+                <button type="button" id="addLayerBtn" class="btn">+ ADD LAYER</button>
+                <button type="button" id="removeLayerBtn" class="btn">&minus; REMOVE LAYER</button>
+              </div>
+            </div>
+
+            <div class="panel__block" id="actionsBlock">
+              <div class="block-head">
+                <span class="block-head__num">03</span>
+                <span class="block-head__label">ACTIONS</span>
+              </div>
+              <div class="actions-row">
+                <button type="button" id="randomizeBtn" class="btn">RANDOMIZE</button>
+                <button type="button" id="undoBtn" class="btn" disabled>UNDO</button>
+                <button type="button" id="resetBtn" class="btn">RESET</button>
+              </div>
+            </div>
+
+            <div class="panel__block" id="exportBlock">
+              <div class="block-head">
+                <span class="block-head__num">04</span>
+                <span class="block-head__label">EXPORT</span>
+              </div>
+              <div class="field">
+                <label for="exportScale">PNG RESOLUTION</label>
+                <select id="exportScale">
+                  <option value="2">2&times; &mdash; 2000&times;2600px</option>
+                  <option value="3">3&times; &mdash; 3000&times;3900px</option>
+                  <option value="4">4&times; &mdash; 4000&times;5200px</option>
+                </select>
+              </div>
+              <div class="actions-row">
+                <button type="button" id="exportPngBtn" class="btn btn--accent">DOWNLOAD PNG POSTER</button>
+                <button type="button" id="exportSvgBtn" class="btn">DOWNLOAD SVG</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

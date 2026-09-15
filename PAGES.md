@@ -51,5 +51,6 @@
 | ステンドグラス・コンポーザー（Rosette Glass Composer） | ゴシック窓の輪郭内に宝石色の点を打つと、距離場ベースの鉛線分割で1枚のステンドグラスが自動生成され、バックライト/自然光の2状態でPNG書き出しできる | [Pages](https://oplan-development-team.github.io/web-app-factory/rosette-glass-composer/) | プロトタイプ（採否待ち） | 2026-09-09 |
 | 線香花火シミュレーター（Ephemeral Sparkler） | 花火の先端を長押しすると蕾→牡丹→松葉→散り際の4段階で燃え、消えた瞬間までの光跡を長時間露光風の記念写真として持ち帰れる一期一会の体験アプリ | [Pages](https://oplan-development-team.github.io/web-app-factory/ephemeral-sparkler/) | プロトタイプ（採否待ち） | 2026-09-10 |
 | クイックドロー・デュエル（Quick Draw Duel） | 1台の端末を挟んだ対面2人対戦。ランダム遅延後の「DRAW!」サインに先に反応した方が勝ち、フライングは即BANGで敗北する早撃ちリアクションゲーム | [Pages](https://oplan-development-team.github.io/web-app-factory/quick-draw-duel/) | プロトタイプ（採否待ち） | 2026-09-10 |
+| モアレ・オプアート・スタジオ（Moiré Op Art Studio） | 線・ドット・同心円のレイヤーを重ねて生まれるモアレをリアルタイム操作し、Kineticモードの自動回転やPNG/SVG書き出しができるオプアート・スタジオ（既知のCSSバグ未修正、PROJECTS.md参照） | [Pages](https://oplan-development-team.github.io/web-app-factory/moire-op-art-studio/) | プロトタイプ（採否待ち・要修正） | 2026-09-15 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
