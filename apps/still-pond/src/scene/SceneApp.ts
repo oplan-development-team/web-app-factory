@@ -9,7 +9,7 @@ import * as THREE from 'three';
 import { HORIZONTAL_TILT_STATE, type TiltState } from '../lib/tiltState';
 import { bakeEnvironmentMap, createSkyMesh, SUN_COLOR, SUN_DIRECTION } from './environment';
 import { createFloaters, type FloatersHandle } from './floaters';
-import { createComposer } from './postFX';
+import { createComposer, type ComposerHandle } from './postFX';
 import { createWater, type WaterHandle } from './water';
 
 const MAX_PIXEL_RATIO = 1.75;
@@ -20,7 +20,7 @@ export class SceneApp {
   private readonly renderer: THREE.WebGLRenderer;
   private readonly scene: THREE.Scene;
   private readonly camera: THREE.PerspectiveCamera;
-  private readonly composer: ReturnType<typeof createComposer>;
+  private readonly composer: ComposerHandle;
   private readonly water: WaterHandle;
   private readonly floaters: FloatersHandle;
   private readonly timer: THREE.Timer;
@@ -118,6 +118,7 @@ export class SceneApp {
     this.timer.dispose();
     this.water.dispose();
     this.floaters.dispose();
+    this.composer.dispose();
     this.envMap.dispose();
     this.renderer.dispose();
     this.renderer.domElement.remove();
