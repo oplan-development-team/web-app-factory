@@ -50,7 +50,9 @@ export class SceneApp {
     this.scene.environment = this.envMap;
     this.scene.add(createSkyMesh());
 
-    this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 200);
+    // far must exceed the sky dome radius (createSkyMesh default: 500) or the
+    // dome gets clipped and the sky renders as black emptiness (FR-3).
+    this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 600);
     this.camera.position.set(0, 4.6, 6.6);
     this.camera.lookAt(0, 0, 0);
 
