@@ -5,6 +5,8 @@ export interface OnboardingHandle {
   element: HTMLElement;
   /** Fades the onboarding screen out and removes it from the layout flow. */
   dismiss: () => void;
+  /** Disables/enables the "はじめる" button, e.g. while requestPermission() is in flight. */
+  setPending: (pending: boolean) => void;
 }
 
 /**
@@ -48,7 +50,12 @@ export function createOnboarding(
   cta.type = 'button';
   cta.className = 'onboarding__cta';
   cta.textContent = copy.cta;
-  cta.addEventListener('click', onStart);
+  cta.addEventListener('click', () => {
+    // Ignore extra clicks/taps while a start request (e.g. requestPermission())
+    // is already in flight, so it can't be triggered twice.
+    if (cta.disabled) return;
+    onStart();
+  });
 
   root.append(title, subtitle, divider, body, spacer, cta);
 
@@ -57,5 +64,9 @@ export function createOnboarding(
     window.setTimeout(() => root.remove(), 550);
   };
 
-  return { element: root, dismiss };
+  const setPending = (pending: boolean): void => {
+    cta.disabled = pending;
+  };
+
+  return { element: root, dismiss, setPending };
 }

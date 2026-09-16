@@ -170,6 +170,11 @@ canvas.scene-canvas {
   transform: scale(1.05);
 }
 
+.onboarding__cta:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* ---------- Transient overlay messages (post-load hint / fallback notice) ---------- */
 
 .overlay-message {
