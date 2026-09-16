@@ -52,5 +52,6 @@
 | 線香花火シミュレーター（Ephemeral Sparkler） | 花火の先端を長押しすると蕾→牡丹→松葉→散り際の4段階で燃え、消えた瞬間までの光跡を長時間露光風の記念写真として持ち帰れる一期一会の体験アプリ | [Pages](https://oplan-development-team.github.io/web-app-factory/ephemeral-sparkler/) | プロトタイプ（採否待ち） | 2026-09-10 |
 | クイックドロー・デュエル（Quick Draw Duel） | 1台の端末を挟んだ対面2人対戦。ランダム遅延後の「DRAW!」サインに先に反応した方が勝ち、フライングは即BANGで敗北する早撃ちリアクションゲーム | [Pages](https://oplan-development-team.github.io/web-app-factory/quick-draw-duel/) | プロトタイプ（採否待ち） | 2026-09-10 |
 | 凪の池（Still Pond） | スマホの傾き検知と連動する、フォトリアルな3D水面のヒーリング体験。禅の池に浮かぶ蓮の葉・丸石が端末の傾き（PCではマウスドラッグ）に応じて物理的に反応する | [Pages](https://oplan-development-team.github.io/web-app-factory/still-pond/) | 完成 | 2026-09-16 |
+| 溶岩ランプ・スタジオ（Retro Lava Lamp Studio） | 60〜70年代のラバランプを自前実装の温度場・浮力シミュレーションとmarching squaresメタボール描画で再現し、色相・粘度・加熱・液滴数を操作しながらループ動画/GIFとして書き出せるデスクトップ装飾スタジオ | [Pages](https://oplan-development-team.github.io/web-app-factory/lava-lamp-studio/) | プロトタイプ（採否待ち） | 2026-09-16 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。

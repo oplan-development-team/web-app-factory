@@ -1,0 +1,664 @@
+@import '@fontsource/bungee';
+@import '@fontsource/space-grotesk/400.css';
+@import '@fontsource/space-grotesk/600.css';
+@import '@fontsource/space-mono/400.css';
+@import '@fontsource/space-mono/700.css';
+
+/* ---------------------------------------------------------------------
+   Design tokens
+   Style direction: 60s/70s hi-fi retro-futurism. The whole viewport is the
+   "lamp object" — walnut console behind, chrome fittings, amber-to-psych
+   glass. Hue slider is the single source of truth for the lamp's accent
+   color; --lamp-hue drives both the fluid color and a faint console-glow
+   tint so the palette never collapses to "grey + one accent".
+--------------------------------------------------------------------- */
+:root {
+  --lamp-hue: 28; /* classic amber, matches default preset */
+  --lamp-sat: 88%;
+  --lamp-light: 52%;
+
+  --wood-950: #1c0f09;
+  --wood-900: #2a160d;
+  --wood-800: #3a1f12;
+  --wood-700: #4c2914;
+  --wood-600: #62371a;
+
+  --chrome-100: #f4f6f7;
+  --chrome-200: #d8dee2;
+  --chrome-300: #aab4ba;
+  --chrome-400: #7c868c;
+  --chrome-500: #4e565b;
+  --chrome-600: #2c3134;
+  --chrome-950: #101314;
+
+  --paper: #f2e6cf;
+  --ink: #1c0f09;
+
+  --led-amber: #ffb238;
+  --led-green: #5bffb0;
+
+  --font-display: 'Bungee', 'Segoe UI', sans-serif;
+  --font-ui: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --font-mono: 'Space Mono', 'Courier New', monospace;
+
+  --radius-console: 28px;
+  --shadow-deep: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-ui);
+  color: var(--chrome-100);
+  background: var(--wood-900);
+  min-height: 100vh;
+  overflow-x: hidden;
+  /* Vertical walnut grain: layered gradients at slightly different angles
+     and widths read as plank seams rather than a flat repeating stripe. */
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.22) 0px,
+      transparent 2px,
+      transparent 34px,
+      rgba(0, 0, 0, 0.12) 38px,
+      transparent 60px,
+      transparent 96px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 190, 130, 0.05) 0px,
+      transparent 6px,
+      transparent 40px
+    ),
+    radial-gradient(
+      ellipse 90% 60% at 50% 8%,
+      hsla(var(--lamp-hue), 60%, 30%, 0.16),
+      transparent 65%
+    ),
+    linear-gradient(180deg, var(--wood-800) 0%, var(--wood-900) 45%, var(--wood-950) 100%);
+}
+
+/* Subtle grain/noise overlay so the wood panel doesn't read as flat CSS
+   gradient. Generated once as an SVG fractal-noise data URI, tiled. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+#app {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px 64px;
+  gap: 8px;
+}
+
+/* ---------------------------------------------------------------------
+   Header / brand
+--------------------------------------------------------------------- */
+.brand {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.brand__title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 46px);
+  letter-spacing: 0.04em;
+  margin: 0;
+  color: var(--paper);
+  /* CRT-style double-glow: a tight bright core + a soft wide halo tinted
+     by the current lamp hue. */
+  text-shadow:
+    0 0 2px hsla(var(--lamp-hue), 90%, 80%, 0.9),
+    0 0 18px hsla(var(--lamp-hue), 95%, 60%, 0.55),
+    0 0 42px hsla(var(--lamp-hue), 95%, 50%, 0.35);
+  animation: flicker 5s ease-in-out infinite;
+}
+
+.brand__subtitle {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--chrome-300);
+  margin: 6px 0 0;
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  93% {
+    opacity: 0.82;
+  }
+  94% {
+    opacity: 1;
+  }
+  97% {
+    opacity: 0.9;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Layout: lamp + console side by side on desktop, stacked on mobile
+--------------------------------------------------------------------- */
+.studio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 4vw, 64px);
+  width: 100%;
+  max-width: 1180px;
+  flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------------------------
+   The lamp object itself
+--------------------------------------------------------------------- */
+.lamp {
+  position: relative;
+  width: min(300px, 78vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(var(--shadow-deep));
+}
+
+.lamp__cap,
+.lamp__base {
+  width: 100%;
+  display: block;
+  position: relative;
+  z-index: 2;
+}
+
+.lamp__cap {
+  margin-bottom: -2px;
+}
+
+.lamp__base {
+  margin-top: -2px;
+}
+
+.lamp__glass-wrap {
+  position: relative;
+  width: 86%;
+  aspect-ratio: 300 / 430;
+  /* Capsule / daruma silhouette: wide round belly, tapered neck. */
+  clip-path: path(
+    'M150,0 C230,0 246,34 246,78 C246,150 268,150 268,260 C268,372 214,430 150,430 C86,430 32,372 32,260 C32,150 54,150 54,78 C54,34 70,0 150,0 Z'
+  );
+  background: radial-gradient(
+    ellipse 70% 55% at 38% 18%,
+    hsla(var(--lamp-hue), 60%, 65%, 0.5),
+    transparent 60%
+  ),
+  linear-gradient(180deg, #0b0402 0%, #1a0b05 100%);
+  z-index: 1;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.lamp__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Static glass highlight: a soft diagonal streak suggesting a curved,
+   reflective surface. Layered above the canvas, clipped to same silhouette
+   by living inside .lamp__glass-wrap which already clips its children. */
+.lamp__glass-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  background: linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.16) 0%,
+      rgba(255, 255, 255, 0.05) 14%,
+      transparent 26%
+    ),
+    linear-gradient(200deg, transparent 60%, rgba(0, 0, 0, 0.35) 100%);
+}
+
+/* ---------------------------------------------------------------------
+   Control console
+--------------------------------------------------------------------- */
+.console {
+  background: linear-gradient(160deg, var(--wood-700), var(--wood-800) 60%, var(--wood-900));
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-console);
+  padding: 26px 24px 22px;
+  width: min(420px, 92vw);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 0 40px rgba(0, 0, 0, 0.45),
+    0 24px 48px -20px rgba(0, 0, 0, 0.65);
+  position: relative;
+}
+
+.console::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: calc(var(--radius-console) - 8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+.console__label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--chrome-400);
+  text-align: center;
+  margin: 0 0 18px;
+}
+
+.knob-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px 18px;
+  margin-bottom: 22px;
+}
+
+/* ---------------------------------------------------------------------
+   Chrome rotary knob
+--------------------------------------------------------------------- */
+.knob {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.knob__dial-wrap {
+  position: relative;
+  width: 84px;
+  height: 84px;
+}
+
+.knob__ticks {
+  position: absolute;
+  inset: 0;
+}
+
+.knob__tick {
+  position: absolute;
+  inset: 0;
+}
+
+.knob__tick::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  width: 2px;
+  height: 8px;
+  background: var(--chrome-400);
+  border-radius: 1px;
+  transform: translateX(-50%);
+}
+
+.knob__tick--major::before {
+  background: var(--chrome-200);
+  height: 11px;
+  width: 2.5px;
+  box-shadow: 0 0 4px hsla(var(--lamp-hue), 80%, 65%, 0.7);
+}
+
+.knob__dial {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  cursor: grab;
+  touch-action: none;
+  /* Chrome body: conic sweep for a brushed-metal ring, plus radial for the
+     domed face highlight. */
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.75), transparent 40%),
+    radial-gradient(circle at 65% 75%, rgba(0, 0, 0, 0.5), transparent 55%),
+    conic-gradient(
+      from 210deg,
+      var(--chrome-100),
+      var(--chrome-400) 25%,
+      var(--chrome-600) 50%,
+      var(--chrome-300) 75%,
+      var(--chrome-100) 100%
+    );
+  box-shadow:
+    0 3px 6px rgba(0, 0, 0, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.6),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.55);
+}
+
+.knob__dial:active {
+  cursor: grabbing;
+}
+
+.knob__dial:focus-visible {
+  outline: 2px solid hsl(var(--lamp-hue) 90% 65%);
+  outline-offset: 3px;
+}
+
+.knob__pointer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3px;
+  height: 30px;
+  background: linear-gradient(180deg, hsl(var(--lamp-hue) 90% 65%), var(--chrome-600) 90%);
+  border-radius: 2px;
+  transform-origin: 50% 0%;
+  transform: translate(-50%, 0) rotate(0deg);
+  box-shadow: 0 0 6px hsla(var(--lamp-hue), 90%, 65%, 0.8);
+}
+
+.knob__cap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--chrome-100), var(--chrome-500) 80%);
+  box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.knob__label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--chrome-300);
+}
+
+.knob__readout {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--led-amber);
+  background: var(--chrome-950);
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: 5px;
+  padding: 2px 10px;
+  min-width: 44px;
+  text-align: center;
+  text-shadow: 0 0 6px currentColor;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* ---------------------------------------------------------------------
+   Presets
+--------------------------------------------------------------------- */
+.presets {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.preset-btn {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--chrome-200);
+  background: linear-gradient(180deg, var(--chrome-500), var(--chrome-600));
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    background 0.12s ease;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.preset-btn__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.preset-btn:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.preset-btn:active {
+  transform: translateY(0);
+}
+
+.preset-btn[aria-pressed='true'] {
+  background: linear-gradient(180deg, hsl(var(--lamp-hue) 70% 45%), hsl(var(--lamp-hue) 70% 30%));
+  color: var(--paper);
+  box-shadow:
+    0 0 0 2px hsla(var(--lamp-hue), 90%, 65%, 0.6),
+    0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------------------------------------------------------------------
+   Export panel
+--------------------------------------------------------------------- */
+.export-panel {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 18px;
+}
+
+.export-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.export-row:last-child {
+  margin-bottom: 0;
+}
+
+.export-select {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--chrome-100);
+  background: var(--chrome-950);
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: 6px;
+  padding: 6px 8px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.export-btn {
+  flex: 1;
+  position: relative;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--paper);
+  background: linear-gradient(180deg, #55403a, #3a2621);
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: 10px;
+  padding: 11px 12px;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.export-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.export-btn:disabled {
+  cursor: not-allowed;
+}
+
+.export-btn .rec-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff4d4d;
+  box-shadow: 0 0 6px #ff4d4d;
+}
+
+.export-btn[data-state='idle'] .rec-dot {
+  animation: none;
+}
+
+.export-btn[data-state='working'] {
+  background: linear-gradient(180deg, #6b3a2c, #4a2318);
+}
+
+.export-btn[data-state='working'] .rec-dot {
+  animation: pulse-dot 1s ease-in-out infinite;
+}
+
+.export-btn[data-state='done'] {
+  background: linear-gradient(180deg, #2f6b4a, #1f4a33);
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+}
+
+.export-btn__progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  background: hsl(var(--lamp-hue) 85% 60%);
+  width: 0%;
+  transition: width 0.15s linear;
+}
+
+.export-status {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--chrome-300);
+  text-align: center;
+  min-height: 16px;
+  margin-top: 8px;
+  letter-spacing: 0.02em;
+}
+
+.export-status[data-tone='success'] {
+  color: var(--led-green);
+}
+
+.export-status[data-tone='error'] {
+  color: #ff8a7a;
+}
+
+.disclaimer {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--chrome-500);
+  max-width: 460px;
+  text-align: center;
+  margin-top: 28px;
+  letter-spacing: 0.02em;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 720px) {
+  .studio {
+    flex-direction: column;
+  }
+  .knob-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px 10px;
+  }
+  .knob__dial-wrap {
+    width: 60px;
+    height: 60px;
+  }
+  .knob__dial {
+    width: 52px;
+    height: 52px;
+    left: 4px;
+    top: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand__title {
+    animation: none;
+  }
+  .export-btn[data-state='working'] .rec-dot {
+    animation: none;
+    opacity: 0.85;
+  }
+  .preset-btn,
+  .export-btn {
+    transition: none;
+  }
+}
