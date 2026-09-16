@@ -44,3 +44,14 @@ export function readCapabilityEnv(): CapabilityEnv {
     hasOrientationEventProperty: 'ondeviceorientation' in window,
   };
 }
+
+/**
+ * Returns iOS's gated `DeviceOrientationEvent.requestPermission`, bound to
+ * its constructor, or null if unavailable. Thin DOM adapter, not unit-tested.
+ */
+export function getIosRequestPermission(): (() => Promise<string>) | null {
+  const ctor = (
+    window as unknown as { DeviceOrientationEvent?: { requestPermission?: () => Promise<string> } }
+  ).DeviceOrientationEvent;
+  return typeof ctor?.requestPermission === 'function' ? ctor.requestPermission.bind(ctor) : null;
+}
