@@ -23,7 +23,7 @@ export class SceneApp {
   private readonly composer: ReturnType<typeof createComposer>;
   private readonly water: WaterHandle;
   private readonly floaters: FloatersHandle;
-  private readonly clock: THREE.Clock;
+  private readonly timer: THREE.Timer;
   private readonly envMap: THREE.Texture;
 
   private tilt: TiltState = HORIZONTAL_TILT_STATE;
@@ -38,7 +38,7 @@ export class SceneApp {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
     this.renderer.setSize(width, height);
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.VSMShadowMap;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.05;
@@ -65,6 +65,10 @@ export class SceneApp {
     sunLight.shadow.camera.top = 8;
     sunLight.shadow.camera.bottom = -8;
     sunLight.shadow.radius = 3;
+    sunLight.shadow.blurSamples = 16;
+    // Avoids shadow acne (banding) on the large, mostly-flat water plane.
+    sunLight.shadow.bias = -0.0015;
+    sunLight.shadow.normalBias = 0.02;
     this.scene.add(sunLight);
     this.scene.add(new THREE.AmbientLight(0xdfe9e6, 0.4));
 
@@ -75,7 +79,8 @@ export class SceneApp {
     this.scene.add(this.floaters.group);
 
     this.composer = createComposer(this.renderer, this.scene, this.camera, width, height);
-    this.clock = new THREE.Clock();
+    this.timer = new THREE.Timer();
+    this.timer.connect(document);
 
     window.addEventListener('resize', this.handleResize);
   }
@@ -95,10 +100,10 @@ export class SceneApp {
   }
 
   start(): void {
-    this.clock.start();
-    const loop = (): void => {
-      const dt = Math.min(this.clock.getDelta(), MAX_DELTA_SECONDS);
-      const elapsed = this.clock.elapsedTime;
+    const loop = (timestamp: number): void => {
+      this.timer.update(timestamp);
+      const dt = Math.min(this.timer.getDelta(), MAX_DELTA_SECONDS);
+      const elapsed = this.timer.getElapsed();
       this.water.update(this.tilt, elapsed);
       this.floaters.update(this.tilt, dt);
       this.composer.render();
@@ -110,6 +115,7 @@ export class SceneApp {
   dispose(): void {
     if (this.frameId !== null) cancelAnimationFrame(this.frameId);
     window.removeEventListener('resize', this.handleResize);
+    this.timer.dispose();
     this.water.dispose();
     this.floaters.dispose();
     this.envMap.dispose();

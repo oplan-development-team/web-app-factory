@@ -6,21 +6,9 @@
  */
 import * as THREE from 'three';
 import { createFloaterState, nextFloaterState, type FloaterState } from '../lib/floaterMotion';
+import { buildRippleOctaves, sampleRippleHeight } from '../lib/rippleField';
 import type { TiltState } from '../lib/tiltState';
 import { WATER_RADIUS } from './water';
-
-/** Tiny seeded PRNG so pebble jitter is reproducible; not shared with src/lib
- * on purpose — this is presentation-only noise with no correctness contract
- * to unit test, unlike the ripple field. */
-function seededRandom(seed: number): () => number {
-  let a = seed >>> 0 || 1;
-  return () => {
-    a ^= a << 13;
-    a ^= a >>> 17;
-    a ^= a << 5;
-    return ((a >>> 0) % 1000) / 1000;
-  };
-}
 
 function createLeafGeometry(): THREE.ExtrudeGeometry {
   const shape = new THREE.Shape();
@@ -45,18 +33,34 @@ function createLeafGeometry(): THREE.ExtrudeGeometry {
   });
 }
 
+/**
+ * A river-pebble shape: an icosphere flattened vertically and displaced by
+ * the same smooth sine-octave field used for the water's ripple normal map
+ * (reused for the DRY win, not because pebbles ripple — the field is just a
+ * convenient smooth 2D noise function), so neighbouring vertices move
+ * together instead of creating a spiky, faceted "crumpled paper" look.
+ */
 function createStoneGeometry(seed: number): THREE.IcosahedronGeometry {
-  const geometry = new THREE.IcosahedronGeometry(1, 2);
+  const geometry = new THREE.IcosahedronGeometry(1, 3);
   const position = geometry.getAttribute('position');
   if (!position) throw new Error('IcosahedronGeometry has no position attribute');
-  const random = seededRandom(seed);
+  const octaves = buildRippleOctaves(seed, 3);
+
   for (let i = 0; i < position.count; i++) {
     const x = position.getX(i);
     const y = position.getY(i);
     const z = position.getZ(i);
     const length = Math.sqrt(x * x + y * y + z * z) || 1;
-    const jitter = 0.85 + random() * 0.3;
-    position.setXYZ(i, (x / length) * jitter, (y / length) * jitter * 0.7, (z / length) * jitter);
+    const nx = x / length;
+    const ny = y / length;
+    const nz = z / length;
+
+    const longitude = Math.atan2(nz, nx) / (Math.PI * 2) + 0.5;
+    const latitude = Math.acos(THREE.MathUtils.clamp(ny, -1, 1)) / Math.PI;
+    const bump = sampleRippleHeight(octaves, longitude, latitude) * 0.1;
+    const radius = 1 + bump;
+
+    position.setXYZ(i, nx * radius, ny * radius * 0.62, nz * radius);
   }
   geometry.computeVertexNormals();
   return geometry;

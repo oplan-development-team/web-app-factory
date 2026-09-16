@@ -10,6 +10,7 @@ export interface RippleOctave {
   freqX: number;
   freqY: number;
   phase: number;
+  phaseY: number;
   amplitude: number;
 }
 
@@ -26,18 +27,23 @@ function mulberry32(seed: number): () => number {
 }
 
 /**
- * Builds a handful of sine octaves with integer x/y frequencies (in cycles
- * per texture width) so the resulting field tiles seamlessly at the texture
- * edges, and decreasing amplitude per octave for a natural ripple look.
+ * Builds a handful of octaves with integer x/y frequencies (in cycles per
+ * texture width/height) so the resulting field tiles seamlessly at the
+ * texture edges, and decreasing amplitude per octave for a natural ripple
+ * look. Each octave is later evaluated as a *product* of an X-wave and a
+ * Y-wave (see sampleRippleHeight) rather than a sum, which avoids the
+ * single-direction "plane wave" look (visible as hard diagonal stripes)
+ * that a purely additive sin(fx·u + fy·v) term produces.
  */
 export function buildRippleOctaves(seed: number, count = 4): RippleOctave[] {
   const rand = mulberry32(seed);
   const octaves: RippleOctave[] = [];
   for (let i = 0; i < count; i++) {
     octaves.push({
-      freqX: 1 + Math.floor(rand() * 5),
-      freqY: 1 + Math.floor(rand() * 5),
+      freqX: 1 + Math.floor(rand() * 7),
+      freqY: 1 + Math.floor(rand() * 7),
       phase: rand() * Math.PI * 2,
+      phaseY: rand() * Math.PI * 2,
       amplitude: 1 / (i + 1),
     });
   }
@@ -48,15 +54,15 @@ export function buildRippleOctaves(seed: number, count = 4): RippleOctave[] {
 export function sampleRippleHeight(octaves: RippleOctave[], u: number, v: number): number {
   let height = 0;
   for (const octave of octaves) {
-    height +=
-      octave.amplitude *
-      Math.sin(2 * Math.PI * (octave.freqX * u + octave.freqY * v) + octave.phase);
+    const waveX = Math.sin(2 * Math.PI * octave.freqX * u + octave.phase);
+    const waveY = Math.sin(2 * Math.PI * octave.freqY * v + octave.phaseY);
+    height += octave.amplitude * waveX * waveY;
   }
   return height;
 }
 
 /** Rasterizes the ripple octaves into a `size`x`size` height field. */
-export function computeHeightField(size: number, seed = 1, octaveCount = 4): Float64Array {
+export function computeHeightField(size: number, seed = 1, octaveCount = 10): Float64Array {
   const octaves = buildRippleOctaves(seed, octaveCount);
   const field = new Float64Array(size * size);
   for (let y = 0; y < size; y++) {

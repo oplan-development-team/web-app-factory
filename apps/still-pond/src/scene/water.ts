@@ -14,7 +14,7 @@ const NORMAL_MAP_SIZE = 256;
 const TILT_VISUAL_FACTOR = 0.35;
 
 function createRippleNormalTexture(): THREE.DataTexture {
-  const height = computeHeightField(NORMAL_MAP_SIZE, 11, 5);
+  const height = computeHeightField(NORMAL_MAP_SIZE, 11, 12);
   const rgba = heightFieldToNormalRGBA(height, NORMAL_MAP_SIZE, 3.2);
   const texture = new THREE.DataTexture(rgba, NORMAL_MAP_SIZE, NORMAL_MAP_SIZE, THREE.RGBAFormat);
   texture.wrapS = THREE.RepeatWrapping;
