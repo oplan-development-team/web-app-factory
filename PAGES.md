@@ -52,5 +52,6 @@
 | 線香花火シミュレーター（Ephemeral Sparkler） | 花火の先端を長押しすると蕾→牡丹→松葉→散り際の4段階で燃え、消えた瞬間までの光跡を長時間露光風の記念写真として持ち帰れる一期一会の体験アプリ | [Pages](https://oplan-development-team.github.io/web-app-factory/ephemeral-sparkler/) | プロトタイプ（採否待ち） | 2026-09-10 |
 | クイックドロー・デュエル（Quick Draw Duel） | 1台の端末を挟んだ対面2人対戦。ランダム遅延後の「DRAW!」サインに先に反応した方が勝ち、フライングは即BANGで敗北する早撃ちリアクションゲーム | [Pages](https://oplan-development-team.github.io/web-app-factory/quick-draw-duel/) | プロトタイプ（採否待ち） | 2026-09-10 |
 | 凪の池（Still Pond） | スマホの傾き検知と連動する、フォトリアルな3D水面のヒーリング体験。禅の池に浮かぶ蓮の葉・丸石が端末の傾き（PCではマウスドラッグ）に応じて物理的に反応する | [Pages](https://oplan-development-team.github.io/web-app-factory/still-pond/) | 完成 | 2026-09-16 |
+| ブラックライト便箋（Invisible Ink Letter） | 暗室の便箋に打った秘密のメッセージを、カーソル＝懐中電灯でなぞるとネオン色に発光して浮かび上がり、やがてまた闇に溶けて消える一期一会の手紙アプリ | [Pages](https://oplan-development-team.github.io/web-app-factory/invisible-ink-letter/) | プロトタイプ（採否待ち） | 2026-09-22 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
