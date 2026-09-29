@@ -629,6 +629,14 @@ select:focus-visible {
   color: #fff;
 }
 
+/* Keep the red "running" state while hovering the active transport button;
+   .btn:hover:not(:disabled) above outranks .btn--transport.is-active. */
+.btn--transport.is-active:hover:not(:disabled) {
+  background: var(--red);
+  border-color: var(--ink);
+  color: #fff;
+}
+
 .btn:focus-visible {
   outline: 2px solid var(--red);
   outline-offset: 2px;
