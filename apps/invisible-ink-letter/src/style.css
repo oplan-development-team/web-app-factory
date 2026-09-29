@@ -1,0 +1,722 @@
+/* ==========================================================================
+   ブラックライト便箋 — 暗室の書き物机
+   デザイン方針:
+   - 背景はほぼ黒のチャコール。粒状ノイズとビネットで「暗室の机」の質感。
+   - UIクロム(枠線・ラベル・ボタン)は真鍮/ブロンズのみ。ネオン4色は
+     インクとスウォッチにしか使わない(UI全体の差し色にはしない)。
+   - 見出し・UI文字はCormorant Garamond(セリフ)。本文インクだけYomogi(手書き)。
+   - 書く/読む画面ともに同じ暗室トーン・同じコーナーフラッシュで地続きにする。
+   ========================================================================== */
+
+:root {
+  --bg-deep: #050403;
+  --bg-mid: #100d0a;
+  --bg-panel: #120f0b;
+
+  --brass: #c9a24b;
+  --brass-dim: #8a6d3b;
+  --brass-bright: #ecd9a0;
+  --brass-ink: #1c1409;
+
+  --ink-violet: #b24bf3;
+  --ink-cyan: #34f5e0;
+  --ink-magenta: #ff3fa4;
+  --ink-acid: #b6ff3f;
+
+  --text-primary: #efe4cf;
+  --text-muted: #b6a284;
+  --text-faint: #7c6c53;
+
+  --serif: 'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Georgia, 'Hiragino Mincho ProN',
+    'Yu Mincho', 'Noto Serif JP', serif;
+  --hand: 'Yomogi', 'Klee One', 'Yuji Syuku', 'Hiragino Maru Gothic ProN', cursive;
+
+  --radius-sm: 3px;
+  --shadow-panel: 0 30px 80px -30px rgba(0, 0, 0, 0.8), 0 2px 0 rgba(201, 162, 75, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--serif);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body.no-scroll {
+  overflow: hidden;
+}
+
+/* -- 暗室の質感: 放射グラデーション + ビネット ------------------------- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 8%, rgba(70, 54, 32, 0.35), transparent 60%),
+    radial-gradient(ellipse 120% 90% at 50% 50%, var(--bg-mid) 0%, var(--bg-deep) 55%, #020201 100%);
+}
+
+/* -- フィルムグレイン(粒状ノイズ) --------------------------------------- */
+body::after {
+  content: '';
+  position: fixed;
+  inset: -10%;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+h1,
+h2,
+h3,
+p,
+label {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* ==========================================================================
+   ページ / ブランドヘッダー
+   ========================================================================== */
+
+.page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(20px, 5vw, 56px) clamp(16px, 5vw, 40px) 40px;
+}
+
+.page--read {
+  padding-bottom: 0;
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.brand {
+  width: min(100%, 880px);
+  text-align: left;
+  margin-bottom: clamp(20px, 4vw, 36px);
+  animation: fade-down 700ms ease both;
+}
+
+.brand--read {
+  margin-bottom: clamp(10px, 2vw, 18px);
+  flex: 0 0 auto;
+}
+
+.brand__mark {
+  font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+  letter-spacing: 0.16em;
+  color: var(--brass-bright);
+  font-weight: 500;
+}
+
+.brand__sub {
+  margin-top: 4px;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--text-faint);
+  letter-spacing: 0.02em;
+}
+
+/* ==========================================================================
+   レター・パネル(非対称のレイアウト: 左に細い真鍮レール、右に本体)
+   ========================================================================== */
+
+.letter-panel {
+  position: relative;
+  width: min(100%, 880px);
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  background: linear-gradient(160deg, var(--bg-panel), #0a0806 70%);
+  border-top: 1px solid rgba(201, 162, 75, 0.35);
+  box-shadow: var(--shadow-panel);
+  border-radius: var(--radius-sm);
+  animation: rise-in 620ms 120ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.letter-panel::before,
+.letter-panel::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.letter-panel::before {
+  top: -1px;
+  left: -1px;
+  border-top: 1.5px solid var(--brass);
+  border-left: 1.5px solid var(--brass);
+}
+
+.letter-panel::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 1.5px solid var(--brass);
+  border-right: 1.5px solid var(--brass);
+}
+
+.letter-panel__rail {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: var(--text-faint);
+  border-right: 1px solid rgba(201, 162, 75, 0.18);
+  padding: 20px 0;
+}
+
+.letter-panel__body {
+  padding: clamp(24px, 4vw, 44px) clamp(20px, 4vw, 48px);
+  min-width: 0;
+}
+
+.letter-panel__title {
+  font-size: clamp(1.5rem, 3.6vw, 2.1rem);
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.letter-panel__lede {
+  margin-top: 10px;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 46ch;
+}
+
+.letter-panel--error .letter-panel__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+/* ==========================================================================
+   フォーム
+   ========================================================================== */
+
+.letter-form {
+  margin-top: clamp(24px, 4vw, 36px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(20px, 3vw, 28px);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field__label {
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  color: var(--brass-dim);
+  text-transform: uppercase;
+}
+
+.letter-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 120px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(201, 162, 75, 0.28);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  padding: 14px 16px;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.letter-textarea::placeholder {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.letter-textarea:focus-visible {
+  outline: none;
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px rgba(201, 162, 75, 0.14);
+}
+
+.field__counter {
+  align-self: flex-end;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+  transition: color 180ms ease;
+}
+
+.field__counter.is-low {
+  color: var(--ink-magenta);
+}
+
+.field__validation {
+  min-height: 1.4em;
+  color: var(--ink-magenta);
+  font-size: 0.9rem;
+}
+
+/* -- 色スウォッチ ------------------------------------------------------- */
+
+.swatch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.swatch {
+  --swatch-color: var(--brass);
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--swatch-color) 88%, white 12%), var(--swatch-color) 65%);
+  cursor: pointer;
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.3, 1), box-shadow 200ms ease;
+}
+
+.swatch:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+.swatch:focus-visible {
+  outline: 2px solid var(--brass-bright);
+  outline-offset: 3px;
+}
+
+.swatch.is-selected {
+  transform: scale(1.12);
+  box-shadow:
+    0 0 0 2px var(--bg-panel),
+    0 0 0 3.5px var(--swatch-color),
+    0 0 18px 2px color-mix(in srgb, var(--swatch-color) 55%, transparent);
+  animation: swatch-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes swatch-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px var(--bg-panel),
+      0 0 0 3.5px var(--swatch-color),
+      0 0 14px 1px color-mix(in srgb, var(--swatch-color) 45%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px var(--bg-panel),
+      0 0 0 3.5px var(--swatch-color),
+      0 0 22px 4px color-mix(in srgb, var(--swatch-color) 65%, transparent);
+  }
+}
+
+/* ==========================================================================
+   ボタン
+   ========================================================================== */
+
+.letter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: -6px;
+}
+
+.btn {
+  font-family: var(--serif);
+  font-size: 0.98rem;
+  letter-spacing: 0.08em;
+  padding: 12px 26px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 200ms ease, background 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--brass-bright);
+  outline-offset: 2px;
+}
+
+.btn--primary {
+  background: linear-gradient(160deg, var(--brass-bright), var(--brass) 60%, var(--brass-dim));
+  color: var(--brass-ink);
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.btn--primary:hover:not(:disabled) {
+  box-shadow: 0 6px 22px -6px rgba(201, 162, 75, 0.55);
+  filter: brightness(1.06);
+}
+
+.btn--primary:disabled {
+  background: rgba(201, 162, 75, 0.15);
+  color: var(--text-faint);
+  cursor: not-allowed;
+  border-color: rgba(201, 162, 75, 0.12);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--brass-bright);
+  border: 1px solid rgba(201, 162, 75, 0.4);
+}
+
+.btn--ghost:hover {
+  background: rgba(201, 162, 75, 0.08);
+  border-color: var(--brass);
+}
+
+.btn--small {
+  padding: 9px 18px;
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.btn--primary.is-success {
+  background: linear-gradient(160deg, var(--ink-acid), #8fce1c);
+  color: #10210a;
+}
+
+.link-quiet {
+  background: none;
+  border: none;
+  padding: 6px 0;
+  color: var(--text-faint);
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(180, 158, 120, 0.35);
+  text-underline-offset: 4px;
+  transition: color 180ms ease;
+}
+
+.link-quiet:hover {
+  color: var(--brass-bright);
+}
+
+/* ==========================================================================
+   結果パネル(封をした後)
+   ========================================================================== */
+
+/* [hidden]属性はUAスタイルシートのdisplay:noneで隠れるが、同specificityの
+   クラスセレクタでdisplay:flexを常時指定すると作者スタイルがUAを上書きして
+   しまい、hidden=trueでも常に表示され続ける。:not([hidden])に限定して
+   display:flexを適用し、hidden時は確実に隠す。 */
+.result-panel:not([hidden]) {
+  margin-top: 4px;
+  padding: 20px clamp(18px, 3vw, 26px);
+  border: 1px solid rgba(182, 255, 63, 0.22);
+  background: rgba(182, 255, 63, 0.04);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: rise-in 420ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.result-panel__title {
+  font-size: 1.2rem;
+  color: var(--ink-acid);
+  font-weight: 500;
+}
+
+.result-panel__lede {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.result-panel__link-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.result-panel__link {
+  flex: 1 1 240px;
+  min-width: 0;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(201, 162, 75, 0.25);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'Courier New', monospace;
+  font-size: 0.82rem;
+  padding: 10px 12px;
+}
+
+.result-panel__link:focus-visible {
+  outline: none;
+  border-color: var(--brass);
+}
+
+/* ==========================================================================
+   フラッシュライト・ステージ(共有コンポーネント: 読む画面 / プレビュー)
+   ========================================================================== */
+
+.flashlight-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: none;
+  background: radial-gradient(ellipse 90% 70% at 50% 45%, #0e0b08 0%, #050403 75%);
+}
+
+.flashlight-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.flashlight-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 190px;
+  height: 190px;
+  margin-left: -95px;
+  margin-top: -95px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.16) 0%, rgba(210, 190, 150, 0.07) 45%, transparent 72%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  will-change: transform;
+}
+
+.flashlight-cursor.is-visible {
+  opacity: 1;
+}
+
+.flashlight-hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-faint);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  font-style: italic;
+  pointer-events: none;
+  text-align: center;
+  width: 80%;
+  animation: hint-breathe 2.6s ease-in-out infinite;
+  transition: opacity 500ms ease;
+}
+
+.flashlight-hint.is-dismissed {
+  opacity: 0;
+}
+
+@keyframes hint-breathe {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* ==========================================================================
+   読む画面
+   ========================================================================== */
+
+.letter-panel--read {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  width: min(100%, 980px);
+  margin: 0 auto;
+}
+
+.read-stage-host {
+  position: relative;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 280px;
+}
+
+.read-footer {
+  flex: 0 0 auto;
+  padding: 14px 0 4px;
+  width: min(100%, 980px);
+  text-align: center;
+}
+
+/* ==========================================================================
+   プレビュー・オーバーレイ(書く画面: 懐中電灯でテスト)
+   ========================================================================== */
+
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg-deep);
+  animation: fade-in 220ms ease both;
+}
+
+.preview-stage-host {
+  position: absolute;
+  inset: 0;
+}
+
+.preview-close {
+  position: absolute;
+  top: clamp(14px, 3vw, 24px);
+  right: clamp(14px, 3vw, 24px);
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(5, 4, 3, 0.75);
+  border: 1px solid rgba(201, 162, 75, 0.4);
+  color: var(--brass-bright);
+  font-family: var(--serif);
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  padding: 9px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.preview-close span[aria-hidden] {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.preview-close:hover {
+  background: rgba(201, 162, 75, 0.12);
+  border-color: var(--brass);
+}
+
+.preview-close:focus-visible {
+  outline: 2px solid var(--brass-bright);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   アニメーション
+   ========================================================================== */
+
+@keyframes fade-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ==========================================================================
+   レスポンシブ(375px幅目安)
+   ========================================================================== */
+
+@media (max-width: 560px) {
+  .letter-panel {
+    grid-template-columns: 22px 1fr;
+  }
+
+  .letter-panel__rail {
+    font-size: 0.6rem;
+    letter-spacing: 0.22em;
+  }
+
+  .letter-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .result-panel__link-row {
+    flex-direction: column;
+  }
+
+  .flashlight-cursor {
+    width: 130px;
+    height: 130px;
+    margin-left: -65px;
+    margin-top: -65px;
+  }
+}

@@ -52,5 +52,17 @@
 | 線香花火シミュレーター（Ephemeral Sparkler） | 花火の先端を長押しすると蕾→牡丹→松葉→散り際の4段階で燃え、消えた瞬間までの光跡を長時間露光風の記念写真として持ち帰れる一期一会の体験アプリ | [Pages](https://oplan-development-team.github.io/web-app-factory/ephemeral-sparkler/) | プロトタイプ（採否待ち） | 2026-09-10 |
 | クイックドロー・デュエル（Quick Draw Duel） | 1台の端末を挟んだ対面2人対戦。ランダム遅延後の「DRAW!」サインに先に反応した方が勝ち、フライングは即BANGで敗北する早撃ちリアクションゲーム | [Pages](https://oplan-development-team.github.io/web-app-factory/quick-draw-duel/) | プロトタイプ（採否待ち） | 2026-09-10 |
 | 凪の池（Still Pond） | スマホの傾き検知と連動する、フォトリアルな3D水面のヒーリング体験。禅の池に浮かぶ蓮の葉・丸石が端末の傾き（PCではマウスドラッグ）に応じて物理的に反応する | [Pages](https://oplan-development-team.github.io/web-app-factory/still-pond/) | 完成 | 2026-09-16 |
+| 金継ぎスタジオ（Kintsugi Mending Studio） | 器を割ると亀裂が枝分かれしながら走り、金の漆で継ぐアニメーションを経て、金線の輝きで仕上げたポスターとして書き出せる金継ぎの美意識を体験するツール | [Pages](https://oplan-development-team.github.io/web-app-factory/kintsugi-mending-studio/) | プロトタイプ（採否待ち） | 2026-09-11 |
+| グリッチ写真ラボ（Glitch Print Lab） | 写真のJPEGバイト列破壊・行ピクセルシフト・RGB色収差などのデータベンディングを重ねがけし、グリッチアートとしてPNG書き出しできる実験ラボ | [Pages](https://oplan-development-team.github.io/web-app-factory/glitch-print-lab/) | プロトタイプ（採否待ち） | 2026-09-12 |
+| 文章クセのカルテ（Prose Habit X-ray） | 貼り付けた日本語文章を、「が」連続・同語尾連続・文長ばらつき等6項目でルールベース診断し、健康診断風のカルテとして原文ハイライト連携で見せるツール | [Pages](https://oplan-development-team.github.io/web-app-factory/prose-habit-xray/) | プロトタイプ（PR未マージのためプレビュー未反映） | 2026-09-14 |
+| モアレ・オプアート・スタジオ（Moiré Op Art Studio） | 線・ドット・同心円のレイヤーを重ねて生まれるモアレをリアルタイム操作し、Kineticモードの自動回転やPNG/SVG書き出しができるオプアート・スタジオ（既知のCSSバグ未修正、PROJECTS.md参照） | [Pages](https://oplan-development-team.github.io/web-app-factory/moire-op-art-studio/) | プロトタイプ（採否待ち・要修正） | 2026-09-15 |
+| 溶岩ランプ・スタジオ（Retro Lava Lamp Studio） | 60〜70年代のラバランプを自前実装の温度場・浮力シミュレーションとmarching squaresメタボール描画で再現し、色相・粘度・加熱・液滴数を操作しながらループ動画/GIFとして書き出せるデスクトップ装飾スタジオ | [Pages](https://oplan-development-team.github.io/web-app-factory/lava-lamp-studio/) | プロトタイプ（採否待ち） | 2026-09-16 |
+| キー配列脱出ゲーム（QWERTY Escape） | 物理キーボードの配列上の「空間的な形」を読み解いて南京錠を開錠していく9問構成のブラウザ脱出ゲーム | [Pages](https://oplan-development-team.github.io/web-app-factory/qwerty-escape/) | プロトタイプ（採否待ち） | 2026-09-17 |
+| 図形楽譜ジェネレーター（Graphic Score Studio） | 自由に描いた線や写真を前衛音楽の「図形楽譜」風ポスターに変換し、左から右へ自動でなぞりながらWeb Audioのオシレーター合成でアンビエントに鳴らすツール | [Pages](https://oplan-development-team.github.io/web-app-factory/graphic-score-studio/) | プロトタイプ（採否待ち） | 2026-09-18 |
+| ふーっと消して、願いごと（Blow Out & Wish） | マイクに息を吹きかけてロウソクの炎を消す誕生日ミニゲーム。全本消灯すると一言の願いごとをダークラグジュアリーな演出でリビールする | [Pages](https://oplan-development-team.github.io/web-app-factory/blow-out-wish/) | プロトタイプ（採否待ち） | 2026-09-19 |
+| ブラックライト便箋（Invisible Ink Letter） | 暗室の便箋に打った秘密のメッセージを、カーソル＝懐中電灯でなぞるとネオン色に発光して浮かび上がり、やがてまた闇に溶けて消える一期一会の手紙アプリ | [Pages](https://oplan-development-team.github.io/web-app-factory/invisible-ink-letter/) | プロトタイプ（採否待ち） | 2026-09-22 |
+| オシロスコープ・サウンドアート（XYシンセ描画） | 円形スコープに描いた軌跡の座標をそのままステレオ波形としてリアルタイム合成・再生し、鳴っている音と同期したフォスファーグリーンの光跡を描き戻すオシロスコープ・ミュージック制作ツール | [Pages](https://oplan-development-team.github.io/web-app-factory/oscilloscope-synth/) | プロトタイプ（採否待ち） | 2026-09-24 |
+| 空気読みトレーニング（KY Trainer） | 日本語特有の「空気を読む」社会的シチュエーションをマンガのコマ形式で提示し、12秒以内に最も場が丸く収まる返答を4択から選ぶコメディクイズ | [Pages](https://oplan-development-team.github.io/web-app-factory/ky-trainer/) | プロトタイプ（採否待ち） | 2026-09-26 |
+| スリットスキャン・カメラ（Time Smear Camera） | ウェブカメラの1pxスリットを時間方向に並べ、動きが流れ背景が縞になる「時間を引き伸ばした写真」をライブ撮影してPNG保存する | [Pages](https://oplan-development-team.github.io/web-app-factory/slit-scan-camera/) | プロトタイプ（採否待ち） | 2026-09-28 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
