@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#F1EBDD" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2714%27 fill=%27%23F1EBDD%27 stroke=%27%231C1A17%27/%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%278%27 fill=%27none%27 stroke=%27%23B23A2B%27 stroke-width=%273%27/%3E%3C/svg%3E" />
+  <title>ペーパークロマトグラフィ・ラボ</title>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="mast">
+    <span class="mono mast-l">Laboratory Notebook · Fig. 01</span>
+    <h1>ペーパー<em>クロマトグラフィ</em>・ラボ</h1>
+  </header>
+
+  <main class="layout">
+    <section class="stage" aria-label="濾紙">
+      <p class="mono caption"><span class="acc">Fig. 1</span> 円形濾紙 φ90 mm — 水による展開</p>
+      <div class="plate" id="plateWrap">
+        <canvas id="plate" width="800" height="800" tabindex="0"
+          aria-label="濾紙。クリックまたはタップ、あるいは矢印キーで位置を選び Enter で滴を落とします"></canvas>
+        <div class="guide" id="guide" aria-hidden="true">
+          <span class="mono">DROP INK HERE</span>
+          <strong>ここに滴を落としてください</strong>
+          <i></i>
+        </div>
+      </div>
+      <div class="readout">
+        <div class="ro-row mono">
+          <span>経過 <b id="elapsed">0.0</b> s</span>
+          <span>前線 <b id="frontPct">0</b>% <small>(縁まで)</small></span>
+          <span class="stage-tag" id="stageTag">EMPTY</span>
+        </div>
+        <div class="rule"><i id="frontBar"></i></div>
+        <p class="status" id="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <aside class="panel" id="panel" aria-label="実験手順">
+      <ol class="steps">
+        <li class="step" data-step="1">
+          <h2><span class="num">1</span>試料 <small class="mono">Sample</small></h2>
+          <fieldset class="dropctl" id="fs1">
+            <legend class="sr">インクの選択</legend>
+            <div id="chips" class="chips" role="radiogroup" aria-label="インクの種類"></div>
+          </fieldset>
+          <div id="blendGroup" class="grp blend" hidden>
+            <div class="grp-h mono"><span>自作ブレンド CMY</span></div>
+            <label class="sl"><span class="mono">C</span><input type="range" id="blC" min="0" max="100" value="50" aria-label="シアン" /><output id="blCv" class="mono">50</output></label>
+            <label class="sl"><span class="mono">M</span><input type="range" id="blM" min="0" max="100" value="40" aria-label="マゼンタ" /><output id="blMv" class="mono">40</output></label>
+            <label class="sl"><span class="mono">Y</span><input type="range" id="blY" min="0" max="100" value="60" aria-label="イエロー" /><output id="blYv" class="mono">60</output></label>
+          </div>
+        </li>
+        <li class="step" data-step="2">
+          <h2><span class="num">2</span>滴下 <small class="mono">Drop</small></h2>
+          <p class="hint">濾紙をクリック／タップ。押している間は位置がリングで示され、離すと確定します。キーボードは矢印キーで移動、Enter／Space で滴下。</p>
+          <div id="volGroup" class="grp">
+            <label class="sl wide"><span class="mono">滴量</span><input type="range" id="vol" min="1" max="5" step="0.5" value="3" aria-label="滴量" /><output id="volv" class="mono">3.0 µL</output></label>
+          </div>
+        </li>
+        <li class="step" data-step="3">
+          <h2><span class="num">3</span>展開 <small class="mono">Develop</small></h2>
+          <div id="timeGroup" class="grp">
+            <div class="btnrow" role="group" aria-label="時間操作">
+              <button type="button" class="btn" id="btnPause">一時停止</button>
+              <button type="button" class="btn spd" data-speed="1" aria-pressed="true">1x</button>
+              <button type="button" class="btn spd" data-speed="4" aria-pressed="false">4x</button>
+              <button type="button" class="btn spd" data-speed="16" aria-pressed="false">16x</button>
+            </div>
+          </div>
+        </li>
+        <li class="step" data-step="4">
+          <h2><span class="num">4</span>乾燥 <small class="mono">Dry</small></h2>
+          <button type="button" class="btn cta" id="btnDry">乾燥させる</button>
+          <p class="reason mono" id="dryReason"></p>
+        </li>
+        <li class="step" data-step="5">
+          <h2><span class="num">5</span>標本ラベル・書き出し <small class="mono">Label</small></h2>
+          <div id="exportBlock" class="exp">
+            <fieldset id="fs5" class="labels" disabled>
+              <legend class="sr">標本ラベル</legend>
+              <div class="mono spec-no">SPECIMEN No. <b id="specNo">PC-----</b></div>
+              <label class="fld"><span class="mono">試料名</span><input type="text" id="inSample" maxlength="40" autocomplete="off" spellcheck="false" /></label>
+              <label class="fld"><span class="mono">標本タイトル</span><input type="text" id="inTitle" maxlength="44" autocomplete="off" spellcheck="false" value="Study of Ink Separation" /></label>
+            </fieldset>
+            <div class="pv">
+              <div class="pv-frame"><img id="pvImg" alt="標本カードのプレビュー" hidden /><span class="mono pv-empty" id="pvEmpty">乾燥後にプレビュー</span></div>
+              <p class="hint touch-only">プレビュー画像を長押しして保存することもできます。</p>
+            </div>
+            <div class="btnrow col">
+              <button type="button" class="btn cta" id="btnExport" disabled>PNGを書き出す</button>
+              <button type="button" class="btn" id="btnShare" hidden>共有…</button>
+            </div>
+            <p class="reason mono" id="exportReason">乾燥させると書き出せます</p>
+            <div class="newrow">
+              <button type="button" class="btn" id="btnNew" hidden>新しい濾紙</button>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </aside>
+  </main>
+</div>
+
+<!-- モバイル: 固定操作バー -->
+<nav class="dock" id="dock" aria-label="主要操作">
+  <div class="dock-chips" id="dockChips"></div>
+  <div class="dock-row">
+    <button type="button" class="btn" id="btnAdjust" aria-expanded="false" aria-controls="adjustSheet">調整</button>
+    <button type="button" class="btn cta" id="dockCta">乾燥させる</button>
+  </div>
+  <p class="reason mono" id="dockReason"></p>
+</nav>
+<section class="sheet" id="adjustSheet" aria-label="調整">
+  <div class="sheet-body" id="sheetBody"></div>
+</section>
+<section class="xsheet" id="exportSheet" aria-label="標本ラベル・書き出し" aria-hidden="true">
+  <div class="xsheet-h"><h2><span class="num">5</span>標本ラベル・書き出し</h2><button type="button" class="btn" id="btnCloseX">閉じる</button></div>
+  <div class="xsheet-body" id="exportSheetBody"></div>
+</section>
+
+<dialog id="confirm" aria-labelledby="confirmT">
+  <form method="dialog">
+    <h3 id="confirmT" class="mono">CONFIRM</h3>
+    <p>書き出していない標本は失われます。続けますか？</p>
+    <div class="dlg-btns">
+      <button type="button" class="btn cta" id="dlgExport">書き出してから戻る</button>
+      <button type="button" class="btn" id="dlgDiscard">破棄して新しい濾紙</button>
+      <button type="button" class="btn ghost" id="dlgCancel">キャンセル</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast mono" id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
