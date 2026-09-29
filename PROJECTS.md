@@ -16,6 +16,8 @@ app-factoryパイプラインが自律生成したプロトタイプ（GitHub Ac
 
 Design QA: 1ラウンド目で合格。Verify: `npm run build`成功、フェイクカメラでのヘッドレスChromium操作、375/768/1440幅、`docker build`成功（image削除済み）、`deploy.json`（`pages: true`）・`base: './'`確認済み。メインセッションの独立検証は未実施。
 
+**対話セッションでの独立検証（2026-09-29）**: `npm ci && npm run build`再現成功、`docker build`〜コンテナ起動〜index/JSアセットHTTP 200確認（image/container削除済み）、`deploy.json`（`pages: true`）と`base: './'`を確認し、`/web-app-factory/<slug>/`サブパス配信のローカル再現でアセット404・pageerrorなし（1440/390幅）。
+
 **採否待ち**: 採用するかどうかはユーザー判断待ち。
 
 ### 空気読みトレーニング（KY Trainer）（`apps/ky-trainer/`）
@@ -32,6 +34,8 @@ app-factoryパイプラインが自律生成したプロトタイプ（GitHub Ac
 
 無人実行（GitHub Actionsジョブ）のため、`.claude/CLAUDE.md`の運用方針に従いmainには直接マージせず、`app-factory/auto-ky-trainer`ブランチにpushし`gh pr create`でmain宛てPRを作成した（未マージ、レビュー待ち）。
 
+**対話セッションでの独立検証（2026-09-29）**: `npm ci && npm run build`再現成功、`docker build`〜コンテナ起動〜index/JSアセットHTTP 200確認（image/container削除済み）、`deploy.json`（`pages: true`）と`base: './'`を確認し、`/web-app-factory/<slug>/`サブパス配信のローカル再現でアセット404・pageerrorなし（1440/390幅）。
+
 **採否待ち**: 機能・デザイン・Dockerビルドまで一通り動作確認済み。採用するかどうかはユーザー判断待ち。採用する場合は`.claude/CLAUDE.md`の「プロトタイプ採用後の引き継ぎ」に従ってsdd-managerに本実装を依頼する。
 
 ### オシロスコープ・サウンドアート（XYシンセ描画）（`apps/oscilloscope-synth/`）
@@ -46,6 +50,8 @@ Concept段階で`ux-flow-reviewer`が、描画データが空の初期状態で�
 
 既知の制約: `AudioBufferSourceNode`のバッファ内容をライブ書き換え（`copyToChannel`）する設計は、主要ブラウザ（Chromiumで動作確認済み）では機能するがWeb Audio仕様上の厳密な保証ではない。ヘッドレスChromium環境（CJKフォント未インストール）でフッター文言が文字化けして見えたが、実機の標準的なOSフォント環境では問題ない見込み（テスト環境起因、未検証）。`npm audit`でesbuild/vite由来のmoderate/high脆弱性2件が出るが開発サーバー限定でnginx配信の本番ビルドには影響しないためプロトタイプとして許容。
 
+**対話セッションでの独立検証（2026-09-29）**: `npm ci && npm run build`再現成功、`docker build`〜コンテナ起動〜index/JSアセットHTTP 200確認（image/container削除済み）、`deploy.json`（`pages: true`）と`base: './'`を確認し、`/web-app-factory/<slug>/`サブパス配信のローカル再現でアセット404・pageerrorなし（1440/390幅）。
+
 **採否待ち**: 機能・デザイン・Dockerビルドまで一通り動作確認済み。採用するかどうかはユーザー判断待ち。採用する場合は`.claude/CLAUDE.md`の「プロトタイプ採用後の引き継ぎ」に従ってsdd-managerに本実装を依頼する。
 
 ### ブラックライト便箋（Invisible Ink Letter）（`apps/invisible-ink-letter/`）
@@ -59,6 +65,8 @@ Concept段階で`ux-flow-reviewer`が、共有リンク生成時に誤って自�
 **メインセッションによる独立検証**: `npm run build`を再現（成功）。`docker build`・`docker run`でHTTP 200応答とdist内アセット配信を独立に確認し、確認後はimage/containerとも削除済み。`deploy.json`は`{"pages": true}`、`vite.config.ts`の`base: './'`設定も確認済み。
 
 既知の制約: QA用のheadless ChromiumサンドボックスにCJKフォントが入っておらず初回検証時にUI文字が表示されない問題が起きたが、`fonts-noto-cjk`導入後に正常表示を確認済み（通常のデスクトップ/モバイルOSでは発生しない環境固有の制約）。また、ux-flow-reviewerがこの実行ではBashツールを持たず、規定の`pipeline-log`記録コマンドを自分では実行できなかった（メインセッションが確認・代替記録）。
+
+**対話セッションでの独立検証（2026-09-29）**: `npm ci && npm run build`再現成功、`docker build`〜コンテナ起動〜index/JSアセットHTTP 200確認（image/container削除済み）、`deploy.json`（`pages: true`）と`base: './'`を確認し、`/web-app-factory/<slug>/`サブパス配信のローカル再現でアセット404・pageerrorなし（1440/390幅）。 誤ってコミットされていた`tsconfig.tsbuildinfo`を削除し`.gitignore`を追加した。
 
 **採否待ち**: 機能・デザイン・Dockerビルドまで一通り動作確認済み。採用するかどうかはユーザー判断待ち。採用する場合は`.claude/CLAUDE.md`の「プロトタイプ採用後の引き継ぎ」に従ってsdd-managerに本実装を依頼する。
 
@@ -76,6 +84,8 @@ visual-qaの過程でPlaywrightによる実操作検証中に実バグを2件発
 
 既知の制約: 見出し書体（Playfair Display）はLatin/数字のみ対応のため、日本語本文はシステムフォールバック（通常のゴシック体）で表示され、セリフの意匠は英数字部分にしか及ばない。連続チャレンジモードの難度・時間バランス（初期20秒、+5秒/+1本）は暫定値で、実マイク・実際の息によるプレイでの体感調整は未実施（自動化QAは`?simulate=1`のシミュレート入力のみで検証）。吹き消し閾値算出（キャリブレーション由来のnoiseFloor+3.2*stddev、下限0.03/上限0.4）は簡易な統計モデルで、極端に静か/うるさい環境での妥当性は未検証。
 
+**対話セッションでの独立検証（2026-09-29）**: `npm ci && npm run build`再現成功、`docker build`〜コンテナ起動〜index/JSアセットHTTP 200確認（image/container削除済み）、`deploy.json`（`pages: true`）と`base: './'`を確認し、`/web-app-factory/<slug>/`サブパス配信のローカル再現でアセット404・pageerrorなし（1440/390幅）。
+
 **採否待ち**: 機能・デザイン・Dockerビルドまで一通り動作確認済み。採用するかどうかはユーザー判断待ち。採用する場合は`.claude/CLAUDE.md`の「プロトタイプ採用後の引き継ぎ」に従ってsdd-managerに本実装を依頼する。
 
 ### 図形楽譜ジェネレーター（Graphic Score Studio）（`apps/graphic-score-studio/`）
@@ -89,6 +99,8 @@ concept-developer直後にux-flow-reviewerがレビューし、「クリア」�
 **メインセッション独立検証**: `apps/graphic-score-studio/`の実在・`package.json`/`Dockerfile`/`deploy.json`（`{"pages": true}`）/`vite.config.ts`の`base: './'`設定をファイルベースで確認済み。ただしこのジョブはGitHub Actions無人実行のため、ワークフロー内`prototype-verifier`による検証（`npm run build`・Playwright実機操作・375/768/1440幅でのレイアウト確認・コンソールエラー0件・`docker build`〜`docker run`〜HTTP 200確認後にimage/container削除・Pagesサブパス配信のローカルシミュレーション、いずれも成功）を超えるブラウザでの直接操作・Docker再現は未実施。
 
 既知の制約: このサンドボックス環境にCJKフォントが未インストールのため確認ダイアログ等の日本語テキストがtofu表示になることをPlaywrightで確認したが、フォントスタックにCJKフォールバック（Hiragino Sans/Yu Gothic/Noto Sans JP等）は追加済みで実際のユーザー環境では正しく表示される見込み（念のため実機確認推奨）。モバイル（390px）ではコントロールパネル高さが46vhに制限され一部ボタンが折り返し/スクロール必須（PCファースト方針通りの最低限対応）。
+
+**対話セッションでの独立検証（2026-09-29）**: `npm ci && npm run build`再現成功、`docker build`〜コンテナ起動〜index/JSアセットHTTP 200確認（image/container削除済み）、`deploy.json`（`pages: true`）と`base: './'`を確認し、`/web-app-factory/<slug>/`サブパス配信のローカル再現でアセット404・pageerrorなし（1440/390幅）。
 
 **採否待ち**: 機能・デザイン・Dockerビルドまで一通り動作確認済み。採用するかどうかはユーザー判断待ち。採用する場合は`.claude/CLAUDE.md`の「プロトタイプ採用後の引き継ぎ」に従ってsdd-managerに本実装を依頼する。
 
@@ -108,6 +120,8 @@ Concept段階で`ux-flow-reviewer`が「同時押し(コード型)パズルは�
 
 無人実行（GitHub Actionsジョブ）のため、`.claude/CLAUDE.md`の運用方針に従いmainには直接マージせず、`app-factory/auto-qwerty-escape`ブランチにpushしPull Requestを作成した。
 
+**対話セッションでの独立検証（2026-09-29）**: `npm ci && npm run build`再現成功、`docker build`〜コンテナ起動〜index/JSアセットHTTP 200確認（image/container削除済み）、`deploy.json`（`pages: true`）と`base: './'`を確認し、`/web-app-factory/<slug>/`サブパス配信のローカル再現でアセット404・pageerrorなし（1440/390幅）。
+
 **採否待ち**: 機能・デザイン・Dockerビルドまで一通り動作確認済み。採用するかどうかはユーザー判断待ち。採用する場合は`.claude/CLAUDE.md`の「プロトタイプ採用後の引き継ぎ」に従ってsdd-managerに本実装を依頼する。
 
 ### 溶岩ランプ・スタジオ（Retro Lava Lamp Studio）（`apps/lava-lamp-studio/`）
@@ -121,6 +135,8 @@ Concept段階で`ux-flow-reviewer`が、書き出しボタンの多重起動防�
 **メインセッションによる独立検証**: `npm install && npm run build`成功（tsc + vite build、dist/にフォント・JS 31.45kB・CSS 15.36kB出力）、`npm test`（Vitest 17件）全通過。`docker build`（`node:22-alpine`ビルド→`nginx:alpine`配信のマルチステージ）を独立に確認して成功、コンテナ起動後のHTTP 200応答を確認後にimage/containerとも削除。`deploy.json`は`{"pages": true}`、`vite.config.ts`の`base: './'`設定・ビルド後アセットの相対パスも確認済み。node_modules/distは`.gitignore`で正しく除外されている。
 
 既知の制約: デフォルトパラメータでは対流が始まるまで8〜10秒程度のウォームアップがあり、動きは穏やか寄り（激しく動き回る演出ではない。HEATノブを上げることで活発化は可能）。marching squaresはセル単位でポリゴンをfillする方式で単一の連結輪郭ポリゴンへのスティッチングは行っていない（視覚結果は同一だが、将来的に輪郭線ストローク装飾を追加する場合は注意が必要）。
+
+**対話セッションでの独立検証（2026-09-29）**: `npm ci && npm run build`再現成功、`docker build`〜コンテナ起動〜index/JSアセットHTTP 200確認（image/container削除済み）、`deploy.json`（`pages: true`）と`base: './'`を確認し、`/web-app-factory/<slug>/`サブパス配信のローカル再現でアセット404・pageerrorなし（1440/390幅）。 `npm test`（17件）も成功。ガラス部分の`clip-path: path()`が300×430px固定座標のままレスポンシブな要素（実寸約258×370px）に適用され、右側と底がはみ出して要素境界で切られ左右非対称・底が水平カットの歪んだ形になっていた不具合を発見し、`clipPathUnits="objectBoundingBox"`のSVG clipPathに置き換えて修正した。
 
 **採否待ち**: 機能・デザイン・Dockerビルドまで一通り動作確認済み。採用するかどうかはユーザー判断待ち。採用する場合は`.claude/CLAUDE.md`の「プロトタイプ採用後の引き継ぎ」に従ってsdd-managerに本実装を依頼する。
 
@@ -138,7 +154,9 @@ Design QA/Verifyは2ラウンド実施したが、**最終ラウンドでも設�
 
 このジョブはGitHub Actions夜間無人実行のため、ジョブの指示によりmainへの直接マージは行わず、`app-factory/auto-moire-op-art-studio`ブランチをpushしたうえでmain宛てのPull Requestのみ作成している（PR自体は未マージ）。
 
-**採否待ち（要修正あり）**: 機能・Dockerビルドは動作確認済みだが、上記のCSS詳細度バグ（キネティックモード稼働中のホバー時に稼働中表示が消える）が未修正のまま残っている。採用する場合はこの点をsdd-managerへの発注時に申し送ること。
+**対話セッションでの独立検証（2026-09-29）**: `npm ci && npm run build`再現成功、`docker build`〜コンテナ起動〜index/JSアセットHTTP 200確認（image/container削除済み）、`deploy.json`（`pages: true`）と`base: './'`を確認し、`/web-app-factory/<slug>/`サブパス配信のローカル再現でアセット404・pageerrorなし（1440/390幅）。 上記のCSS詳細度バグ（稼働中のホバーで赤表示が消える）を実ブラウザで再現し、`.btn--transport.is-active:hover:not(:disabled)`を追加して修正、稼働中ホバー時も赤（#e10600）が維持されることを確認した。
+
+**採否待ち**: 機能・デザイン・Dockerビルドまで一通り動作確認済み（Review & Fixで残っていたCSS詳細度バグは2026-09-29に修正済み）。採用するかどうかはユーザー判断待ち。
 
 ### 文章クセのカルテ（Prose Habit X-ray）（`apps/prose-habit-xray/`）
 
@@ -154,6 +172,8 @@ Verify: `npm run build`（フレッシュインストールから）成功、Pla
 
 このジョブはGitHub Actions無人実行のため、`.claude/CLAUDE.md`の運用方針に従いmainには直接マージせず`app-factory/auto-prose-habit-xray`ブランチにpushし、`gh pr create`でmain宛てのPRを作成済み（PR自体はマージ未実施）。
 
+**対話セッションでの独立検証（2026-09-29）**: `npm ci && npm run build`再現成功、`docker build`〜コンテナ起動〜index/JSアセットHTTP 200確認（image/container削除済み）、`deploy.json`（`pages: true`）と`base: './'`を確認し、`/web-app-factory/<slug>/`サブパス配信のローカル再現でアセット404・pageerrorなし（1440/390幅）。
+
 **採否待ち**: 機能・デザイン・Dockerビルドまで一通り動作確認済み。採用するかどうかはユーザー判断待ち。採用する場合は`.claude/CLAUDE.md`の「プロトタイプ採用後の引き継ぎ」に従ってsdd-managerに本実装を依頼する。
 
 ### グリッチ写真ラボ（Glitch Print Lab）（`apps/glitch-print-lab/`）
@@ -165,6 +185,8 @@ app-factoryパイプラインが自律生成したプロトタイプ（GitHub Ac
 Concept段階で`ux-flow-reviewer`が「REROLLの非可逆性による喪失体験」を指摘したが、要件が意図的にUndoスコープ外とする非決定性の真正さを損なわないため、EXPORTボタンを常設固定位置に置く設計で補う形にとどめた（要件に明記済み）。Design QA 2体・Verifyともに1ラウンド目で合格（差し戻しなし）。実装中の自己検証でCORRUPTION BLOCK SIZEが小さいと再デコード失敗率が非常に高いことを実測し、プリセット・デフォルト値の見直しと解像度比に応じたスケーリング、初回読込/プリセット適用時のリトライ機構を追加済み（詳細はapps/glitch-print-lab/README.md参照）。
 
 **メインセッションによる独立検証待ち**: Workflow内のprototype-verifierによるnpm run build・Playwright実機操作（スライダー/REROLL/プリセット/EXPORT/Before-After切替）・`docker build --no-cache`〜起動〜HTTP 200・GitHub Pagesサブパス配信シミュレーションはいずれも合格報告済みだが、メインセッションでの再現確認はこの記載時点でまだ実施していない。`.gitignore`がprototype-builderの実装から漏れていたため、PROJECTS.md更新時に追加している。
+
+**対話セッションでの独立検証（2026-09-29）**: `npm ci && npm run build`再現成功、`docker build`〜コンテナ起動〜index/JSアセットHTTP 200確認（image/container削除済み）、`deploy.json`（`pages: true`）と`base: './'`を確認し、`/web-app-factory/<slug>/`サブパス配信のローカル再現でアセット404・pageerrorなし（1440/390幅）。 PAGES.mdへのプレビュー行の追記が漏れていたため追加した。
 
 **採否待ち**: 採用するかどうかはユーザー判断待ち。採用する場合は`.claude/CLAUDE.md`の「プロトタイプ採用後の引き継ぎ」に従ってsdd-managerに本実装を依頼する。
 
@@ -179,6 +201,8 @@ visual-qaの過程で実バグ2件を発見・修正済み: (1) 碗のベジェ�
 Verify: `npm run build`（tsc --noEmit + vite build）・devサーバー・dist配信いずれも成功、Playwright実機操作（器選択→割る→金継ぎ→ポスター→PNG書き出しの一連のフロー、375/768/1440幅）でレイアウト崩れ・コンソールエラーなし（favicon 404のみ、機能に無関係）。Dockerビルド〜起動〜HTTP 200確認後にimage/containerとも削除。deploy.jsonは`{"pages": true}`、vite.config.tsは`base: './'`設定済みで、GitHub Pagesサブパス配信のローカルシミュレーションも合格。
 
 design-qa-criticからの申し送り: 完成(poster)ステージでキャンバスが5:4の縦長になりページ高さが900px超に伸びるため、900px程度の低いビューポートだと「PNGとして書き出す」ボタンがファーストビュー外に出る（スクロールで到達可能、機能バグではない）。また罅を3回クリックしただけでメタ情報の「亀裂◯条」表示が28〜37条相当まで跳ね上がる見え方の粗さがある。いずれも本実装移行時に確認する価値あり。
+
+**対話セッションでの独立検証（2026-09-29）**: `npm ci && npm run build`再現成功、`docker build`〜コンテナ起動〜index/JSアセットHTTP 200確認（image/container削除済み）、`deploy.json`（`pages: true`）と`base: './'`を確認し、`/web-app-factory/<slug>/`サブパス配信のローカル再現でアセット404・pageerrorなし（1440/390幅）。
 
 **採否待ち**: 機能・デザイン・Dockerビルドまで一通り動作確認済み。採用するかどうかはユーザー判断待ち。採用する場合は`.claude/CLAUDE.md`の「プロトタイプ採用後の引き継ぎ」に従ってsdd-managerに本実装を依頼する。
 
