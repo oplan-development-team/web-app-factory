@@ -56,5 +56,6 @@
 | 文章クセのカルテ（Prose Habit X-ray） | 貼り付けた日本語文章を、「が」連続・同語尾連続・文長ばらつき等6項目でルールベース診断し、健康診断風のカルテとして原文ハイライト連携で見せるツール | [Pages](https://oplan-development-team.github.io/web-app-factory/prose-habit-xray/) | プロトタイプ（PR未マージのためプレビュー未反映） | 2026-09-14 |
 | モアレ・オプアート・スタジオ（Moiré Op Art Studio） | 線・ドット・同心円のレイヤーを重ねて生まれるモアレをリアルタイム操作し、Kineticモードの自動回転やPNG/SVG書き出しができるオプアート・スタジオ（既知のCSSバグ未修正、PROJECTS.md参照） | [Pages](https://oplan-development-team.github.io/web-app-factory/moire-op-art-studio/) | プロトタイプ（採否待ち・要修正） | 2026-09-15 |
 | 溶岩ランプ・スタジオ（Retro Lava Lamp Studio） | 60〜70年代のラバランプを自前実装の温度場・浮力シミュレーションとmarching squaresメタボール描画で再現し、色相・粘度・加熱・液滴数を操作しながらループ動画/GIFとして書き出せるデスクトップ装飾スタジオ | [Pages](https://oplan-development-team.github.io/web-app-factory/lava-lamp-studio/) | プロトタイプ（採否待ち） | 2026-09-16 |
+| キー配列脱出ゲーム（QWERTY Escape） | 物理キーボードの配列上の「空間的な形」を読み解いて南京錠を開錠していく9問構成のブラウザ脱出ゲーム | [Pages](https://oplan-development-team.github.io/web-app-factory/qwerty-escape/) | プロトタイプ（採否待ち） | 2026-09-17 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。

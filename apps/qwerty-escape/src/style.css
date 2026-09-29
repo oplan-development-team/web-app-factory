@@ -1,0 +1,919 @@
+/* =========================================================================
+   QWERTY ESCAPE — design tokens
+   Neo-brutalism / industrial-safe & blueprint motif.
+
+   Composition: the outer page is the "dark desk" (void black + faint
+   blueprint grid). The app shell is a paper/concrete document laid on top
+   of it — that's where the strong black-on-paper structural contrast
+   lives. Amber is the ONLY accent color, reserved for interactive /
+   success states; hazard red is reserved for errors only.
+   ========================================================================= */
+:root {
+  --c-void: #101010;
+  --c-void-raised: #17171650;
+  --c-paper: #ede9e2;
+  --c-paper-dim: #dcd5c8;
+  --c-paper-deep: #c7bfae;
+  --c-ink: #111111;
+  --c-amber: #ffb800;
+  --c-amber-deep: #b37f00;
+  --c-hazard: #ff3b30;
+  --c-graphite: #3a3a3a;
+  --c-graphite-soft: #6b6b6b;
+
+  /* Neither Space Grotesk nor IBM Plex Mono cover Japanese glyphs, so
+     every stack falls back to Zen Kaku Gothic New for CJK text (flavor
+     text, puzzle titles, status messages, etc.) rather than showing
+     tofu boxes. Browsers resolve the fallback per-character, so mixed
+     Latin+JP strings still render correctly. */
+  --font-display: 'Space Grotesk', 'Zen Kaku Gothic New', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Zen Kaku Gothic New', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+
+  --bw-1: 3px;
+  --bw-2: 4px;
+
+  --shadow-sm: 3px 3px 0 var(--c-ink);
+  --shadow-md: 6px 6px 0 var(--c-ink);
+  --shadow-lg: 10px 10px 0 var(--c-ink);
+  --shadow-void-md: 6px 6px 0 var(--c-graphite);
+  --shadow-void-lg: 12px 12px 0 var(--c-graphite);
+
+  --ease-spring: cubic-bezier(0.34, 1.76, 0.64, 1);
+
+  --key-unit: 54px;
+  --key-row: 56px;
+}
+
+@media (max-width: 980px) {
+  :root {
+    --key-unit: 44px;
+    --key-row: 48px;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --key-unit: 38px;
+    --key-row: 42px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--c-void);
+  background-image:
+    linear-gradient(var(--c-void-raised) 1px, transparent 1px),
+    linear-gradient(90deg, var(--c-void-raised) 1px, transparent 1px);
+  background-size: 32px 32px;
+  color: var(--c-paper);
+  font-family: var(--font-mono);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+button {
+  font-family: inherit;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* =========================================================================
+   App shell — the paper "document" laid on the dark desk
+   ========================================================================= */
+.app-shell {
+  margin: clamp(10px, 3vw, 28px);
+  background: var(--c-paper);
+  border: var(--bw-2) solid var(--c-ink);
+  box-shadow: var(--shadow-void-lg);
+  min-height: calc(100vh - clamp(20px, 6vw, 56px));
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* =========================================================================
+   Header — instrument panel (value-inverted: ink bg on the paper shell)
+   ========================================================================= */
+.app-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+  background: var(--c-ink);
+  color: var(--c-paper);
+  padding: var(--sp-3) var(--sp-5);
+  border-bottom: 2px solid var(--c-amber);
+}
+.app-header.is-visible {
+  display: flex;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.brand-mark-accent {
+  color: var(--c-amber);
+  margin-left: 0.35em;
+}
+
+.lock-dial {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.timer {
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  color: var(--c-paper);
+  min-width: 4.5ch;
+}
+
+.ctrl-btn {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--c-ink);
+  background: var(--c-paper);
+  border: 2px solid var(--c-paper);
+  padding: var(--sp-2) var(--sp-3);
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.08s ease, background-color 0.15s ease, color 0.15s ease;
+}
+.ctrl-btn:hover {
+  background: var(--c-amber);
+}
+.ctrl-btn:active {
+  transform: translate(2px, 2px);
+}
+.ctrl-btn:focus-visible {
+  outline: 3px solid var(--c-amber);
+  outline-offset: 2px;
+}
+.ctrl-btn.is-muted {
+  background: var(--c-graphite-soft);
+  color: var(--c-paper);
+  border-color: var(--c-graphite-soft);
+}
+.ctrl-btn-hazard {
+  color: var(--c-paper);
+  background: transparent;
+  border-color: var(--c-hazard);
+}
+.ctrl-btn-hazard:hover {
+  background: var(--c-hazard);
+  color: var(--c-paper);
+}
+
+/* =========================================================================
+   Screens
+   ========================================================================= */
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.screen[hidden] {
+  display: none;
+}
+
+/* ---- Title screen -------------------------------------------------- */
+.screen-title {
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-7) var(--sp-5);
+  text-align: left;
+}
+
+.title-inner {
+  max-width: 640px;
+}
+
+.title-eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  color: var(--c-graphite);
+  margin: 0 0 var(--sp-3);
+}
+
+.title-headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: clamp(2.8rem, 9vw, 5.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  transform: scaleX(0.94);
+  transform-origin: left;
+  margin: 0 0 var(--sp-5);
+  color: var(--c-ink);
+}
+.title-headline br {
+  display: block;
+}
+
+.title-copy {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--c-ink);
+  max-width: 46ch;
+  margin: 0 0 var(--sp-5);
+}
+
+.title-note {
+  border-left: var(--bw-1) solid var(--c-ink);
+  padding-left: var(--sp-4);
+  margin: 0 0 var(--sp-5);
+  font-size: 0.85rem;
+  line-height: 1.9;
+  color: var(--c-graphite);
+}
+.title-note p {
+  margin: 0;
+}
+
+.touch-banner {
+  background: var(--c-paper-dim);
+  border: var(--bw-1) solid var(--c-amber-deep);
+  box-shadow: var(--shadow-sm);
+  padding: var(--sp-4);
+  margin: 0 0 var(--sp-5);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--c-ink);
+}
+.touch-banner[hidden] {
+  display: none;
+}
+
+/* ---- Buttons --------------------------------------------------------- */
+.btn {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border: var(--bw-1) solid var(--c-ink);
+  background: var(--c-paper);
+  color: var(--c-ink);
+  padding: var(--sp-3) var(--sp-5);
+  line-height: 1;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+}
+.btn:hover {
+  background: var(--c-paper-dim);
+}
+.btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--c-ink);
+}
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-sm), 0 0 0 3px var(--c-amber);
+}
+.btn[hidden] {
+  display: none;
+}
+.btn-lg {
+  font-size: 1.05rem;
+  padding: var(--sp-4) var(--sp-6);
+}
+.btn-amber {
+  background: var(--c-amber);
+  border-color: var(--c-ink);
+}
+.btn-amber:hover {
+  background: #ffc633;
+}
+.btn-ghost {
+  background: transparent;
+}
+.btn-hazard {
+  background: var(--c-hazard);
+  color: var(--c-paper);
+  border-color: var(--c-ink);
+}
+.btn-hazard:hover {
+  background: #ff574d;
+}
+
+/* =========================================================================
+   Game screen layout
+   ========================================================================= */
+.screen-game {
+  padding: var(--sp-5);
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) 1fr;
+  gap: var(--sp-6);
+  align-items: start;
+  flex: 1;
+}
+
+@media (max-width: 900px) {
+  .game-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Puzzle card (pinned index card) --------------------------------- */
+.puzzle-card {
+  position: relative;
+  background: var(--c-paper);
+  border: var(--bw-1) solid var(--c-ink);
+  box-shadow: var(--shadow-md);
+  padding: var(--sp-6) var(--sp-5) var(--sp-5);
+  transform: rotate(-0.6deg);
+}
+
+.puzzle-card-bolt {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--c-graphite);
+  box-shadow: inset 0 0 0 2px var(--c-ink);
+}
+.bolt-tl {
+  top: 10px;
+  left: 10px;
+}
+.bolt-br {
+  bottom: 10px;
+  right: 10px;
+}
+
+.puzzle-eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--c-paper);
+  background: var(--c-ink);
+  display: inline-block;
+  padding: 2px var(--sp-2);
+  margin: 0 0 var(--sp-4);
+}
+
+.puzzle-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 1.6rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--sp-2);
+  color: var(--c-ink);
+}
+
+.puzzle-mode {
+  font-size: 0.72rem;
+  color: var(--c-graphite);
+  letter-spacing: 0.04em;
+  margin: 0 0 var(--sp-4);
+}
+
+.puzzle-flavor {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--c-ink);
+  margin: 0 0 var(--sp-5);
+}
+
+.puzzle-status {
+  min-height: 1.4em;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  margin: 0 0 var(--sp-3);
+}
+.puzzle-status.status-error {
+  color: var(--c-hazard);
+  font-weight: 600;
+}
+.puzzle-status.status-success {
+  color: var(--c-amber-deep);
+  font-weight: 600;
+}
+
+.puzzle-actions {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.puzzle-solved-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  background: var(--c-paper-dim);
+  border: var(--bw-1) solid var(--c-ink);
+  padding: var(--sp-4);
+  margin: 0 0 var(--sp-4);
+}
+.puzzle-solved-badge[hidden] {
+  display: none;
+}
+.big-lock-slot {
+  flex: none;
+}
+.solved-shape {
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  color: var(--c-ink);
+  font-weight: 600;
+}
+
+/* ---- Keyboard tray ----------------------------------------------------- */
+.keyboard-tray-wrap {
+  min-width: 0;
+}
+
+.tray-scroll-hint {
+  font-size: 0.7rem;
+  color: var(--c-graphite-soft);
+  margin: 0 0 var(--sp-2);
+  text-align: center;
+}
+@media (min-width: 981px) {
+  .tray-scroll-hint {
+    display: none;
+  }
+}
+
+.keyboard-tray {
+  overflow-x: auto;
+  padding: var(--sp-2);
+  background: var(--c-paper-dim);
+  border: var(--bw-1) solid var(--c-ink);
+  box-shadow: inset 0 0 0 2px var(--c-paper-deep);
+}
+
+.keyboard-grid {
+  display: grid;
+  grid-template-columns: repeat(60, calc(var(--key-unit) * 0.25));
+  grid-auto-rows: var(--key-row);
+  /* No `gap` here: with a fine quarter-unit grid, `gap` would add up at
+     every internal quarter-column boundary a multi-column key spans,
+     inflating wide keys (Space, Enter, Shift...) far past their real
+     width. Spacing between keys instead comes from a uniform margin on
+     .keycap, which is span-count independent. */
+  padding: var(--sp-4);
+  background: var(--c-paper-deep);
+  width: max-content;
+}
+
+/* ---- Keycaps ------------------------------------------------------------ */
+.keycap {
+  appearance: none;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 2px;
+  margin: 2px;
+  padding: 6px 8px;
+  background: var(--c-paper);
+  border: var(--bw-1) solid var(--c-ink);
+  box-shadow: var(--shadow-sm);
+  color: var(--c-ink);
+  font-family: var(--font-mono);
+  line-height: 1;
+  cursor: pointer;
+  position: relative;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.05s ease, box-shadow 0.05s ease, background-color 0.12s ease;
+}
+.keycap-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+}
+.keycap-sublabel {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 0.55rem;
+  color: var(--c-graphite-soft);
+  line-height: 1;
+}
+
+.keycap-structural {
+  background: var(--c-paper-dim);
+  color: var(--c-graphite);
+}
+.keycap-structural .keycap-label {
+  font-weight: 500;
+}
+
+.keycap:hover {
+  filter: brightness(1.04);
+}
+.keycap:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-sm), 0 0 0 3px var(--c-amber);
+}
+
+.keycap.is-pressed {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--c-ink);
+}
+
+.keycap.is-engaged {
+  background: var(--c-amber);
+  color: var(--c-ink);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--c-ink);
+}
+
+.keycap.is-correct-step {
+  background: var(--c-amber);
+}
+.keycap.is-correct-step::after {
+  content: attr(data-step-order);
+  position: absolute;
+  bottom: 3px;
+  right: 5px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--c-ink);
+}
+
+.keycap.is-hint {
+  animation: hint-pulse 1.4s ease-in-out infinite;
+}
+.keycap.is-hint[data-hint-order]::before {
+  content: attr(data-hint-order);
+  position: absolute;
+  top: 3px;
+  left: 5px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--c-amber-deep);
+}
+
+.keycap.is-error {
+  animation: key-error 0.4s ease;
+}
+
+.keycap.is-solved-flash {
+  animation: solved-flash 0.5s ease;
+}
+
+@keyframes key-error {
+  0% {
+    transform: translate(0, 0);
+    background: var(--c-hazard);
+    color: var(--c-paper);
+  }
+  20% {
+    transform: translate(-4px, 0);
+  }
+  40% {
+    transform: translate(4px, 0);
+  }
+  60% {
+    transform: translate(-3px, 0);
+  }
+  80% {
+    transform: translate(3px, 0);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes hint-pulse {
+  0%,
+  100% {
+    box-shadow: var(--shadow-sm), 0 0 0 3px var(--c-amber), 0 0 8px 2px rgba(255, 184, 0, 0.4);
+  }
+  50% {
+    box-shadow: var(--shadow-sm), 0 0 0 3px var(--c-amber), 0 0 22px 6px rgba(255, 184, 0, 0.75);
+  }
+}
+
+@keyframes solved-flash {
+  0% {
+    background: var(--c-amber);
+    box-shadow: var(--shadow-sm), 0 0 24px 6px rgba(255, 184, 0, 0.7);
+  }
+  100% {
+    background: var(--c-paper);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* =========================================================================
+   Lock icons — CSS-drawn (no images), reused small (dial) & large (badge)
+   ========================================================================= */
+.lock-pip {
+  position: relative;
+  width: 24px;
+  height: 28px;
+}
+.lock-pip .shackle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 14px;
+  height: 12px;
+  margin-left: -7px;
+  border: 3px solid var(--c-paper);
+  border-bottom: none;
+  border-radius: 7px 7px 0 0;
+  transform-origin: 3px 12px;
+  transition: transform 0.4s var(--ease-spring), border-color 0.2s ease;
+}
+.lock-pip .body {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 20px;
+  height: 15px;
+  margin-left: -10px;
+  border: 3px solid var(--c-paper);
+  background: transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.lock-pip.current .shackle,
+.lock-pip.current .body {
+  border-color: var(--c-amber);
+}
+.lock-pip.current .body {
+  animation: pip-current-pulse 1.6s ease-in-out infinite;
+}
+.lock-pip.open .shackle {
+  border-color: var(--c-amber);
+  transform: rotate(-35deg) translate(-4px, -1px);
+}
+.lock-pip.open .body {
+  border-color: var(--c-amber);
+  background: var(--c-amber);
+}
+
+@keyframes pip-current-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 184, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(255, 184, 0, 0.15);
+  }
+}
+
+.big-lock {
+  position: relative;
+  width: 64px;
+  height: 76px;
+}
+.big-lock .shackle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 36px;
+  height: 32px;
+  margin-left: -18px;
+  border: var(--bw-2) solid var(--c-ink);
+  border-bottom: none;
+  border-radius: 18px 18px 0 0;
+  transform-origin: 8px 32px;
+  transition: transform 0.55s var(--ease-spring), border-color 0.2s ease;
+}
+.big-lock .body {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 56px;
+  height: 40px;
+  margin-left: -28px;
+  border: var(--bw-2) solid var(--c-ink);
+  background: var(--c-paper);
+  box-shadow: var(--shadow-sm);
+}
+.big-lock.open .shackle {
+  border-color: var(--c-amber);
+  transform: rotate(-40deg) translate(-10px, -3px);
+}
+.big-lock.open .body {
+  border-color: var(--c-amber);
+  background: var(--c-amber);
+  box-shadow: var(--shadow-sm), 0 0 28px 6px rgba(255, 184, 0, 0.6);
+}
+
+/* =========================================================================
+   Confirm modal
+   ========================================================================= */
+.modal-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 16, 16, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-5);
+  z-index: 200;
+}
+.modal-panel {
+  background: var(--c-paper);
+  border: var(--bw-2) solid var(--c-ink);
+  box-shadow: var(--shadow-lg);
+  max-width: 420px;
+  width: 100%;
+  padding: var(--sp-6);
+}
+.modal-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 1.25rem;
+  margin: 0 0 var(--sp-3);
+  color: var(--c-ink);
+}
+.modal-message {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--c-graphite);
+  margin: 0 0 var(--sp-5);
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-3);
+}
+
+/* =========================================================================
+   Finale — vault door
+   ========================================================================= */
+.vault-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--c-void);
+  overflow: hidden;
+}
+.vault-overlay[hidden] {
+  display: none;
+}
+
+.vault-door {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: var(--c-paper);
+  border: var(--bw-2) solid var(--c-ink);
+  transition: transform 1.1s var(--ease-spring);
+  display: flex;
+  align-items: center;
+}
+.door-left {
+  left: 0;
+  transform-origin: left center;
+  justify-content: flex-end;
+  padding-right: var(--sp-5);
+}
+.door-right {
+  right: 0;
+  transform-origin: right center;
+  justify-content: flex-start;
+  padding-left: var(--sp-5);
+}
+.vault-rivet {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--c-graphite);
+  box-shadow: inset 0 0 0 2px var(--c-ink);
+}
+.door-left .vault-rivet {
+  right: var(--sp-4);
+}
+.door-right .vault-rivet {
+  left: var(--sp-4);
+}
+.r1 {
+  top: 15%;
+}
+.r2 {
+  top: 50%;
+  margin-top: -6px;
+}
+.r3 {
+  bottom: 15%;
+}
+
+.vault-overlay.is-open .door-left {
+  transform: perspective(1400px) rotateY(-108deg);
+}
+.vault-overlay.is-open .door-right {
+  transform: perspective(1400px) rotateY(108deg);
+}
+
+.vault-light {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 184, 0, 0.9) 0%, rgba(255, 184, 0, 0.25) 32%, transparent 62%);
+  opacity: 0;
+  transition: opacity 1s ease 0.5s;
+}
+.vault-overlay.is-open .vault-light {
+  opacity: 1;
+}
+
+.vault-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--sp-3);
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.6s ease 1s, transform 0.6s var(--ease-spring) 1s;
+}
+.vault-overlay.is-open .vault-content {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.vault-eyebrow {
+  color: var(--c-amber);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+}
+
+.vault-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: clamp(3rem, 14vw, 7rem);
+  letter-spacing: -0.02em;
+  color: var(--c-paper);
+  margin: 0;
+  transform: rotate(-3deg) scaleX(0.92);
+}
+
+.vault-time {
+  color: var(--c-paper-dim);
+  font-size: 0.95rem;
+  margin: 0 0 var(--sp-4);
+}
+
+/* =========================================================================
+   Reduced motion
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
