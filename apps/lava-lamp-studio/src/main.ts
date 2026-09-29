@@ -36,6 +36,14 @@ app.innerHTML = `
   <div class="studio">
     <div class="lamp">
       ${lampCapSvg()}
+      <!-- Glass silhouette in objectBoundingBox units (the original 300x430
+           design path divided through), so it scales with the responsive
+           glass-wrap instead of being cut off at the element's edges. -->
+      <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+        <clipPath id="glass-clip" clipPathUnits="objectBoundingBox">
+          <path d="M0.5,0 C0.7667,0 0.82,0.0791 0.82,0.1814 C0.82,0.3488 0.8933,0.3488 0.8933,0.6047 C0.8933,0.8651 0.7133,1 0.5,1 C0.2867,1 0.1067,0.8651 0.1067,0.6047 C0.1067,0.3488 0.18,0.3488 0.18,0.1814 C0.18,0.0791 0.2333,0 0.5,0 Z" />
+        </clipPath>
+      </svg>
       <div class="lamp__glass-wrap" id="glass-wrap">
         <canvas class="lamp__canvas" id="sim-canvas" aria-label="シミュレーションされたラバランプの液体。クリックで熱パルスを注入できます。"></canvas>
         <div class="lamp__glass-sheen"></div>

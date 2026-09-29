@@ -208,10 +208,10 @@ body::before {
   position: relative;
   width: 86%;
   aspect-ratio: 300 / 430;
-  /* Capsule / daruma silhouette: wide round belly, tapered neck. */
-  clip-path: path(
-    'M150,0 C230,0 246,34 246,78 C246,150 268,150 268,260 C268,372 214,430 150,430 C86,430 32,372 32,260 C32,150 54,150 54,78 C54,34 70,0 150,0 Z'
-  );
+  /* Capsule / daruma silhouette: wide round belly, tapered neck.
+     path() takes absolute px and would not scale with this responsive box,
+     so the shape lives in an objectBoundingBox <clipPath> (see main.ts). */
+  clip-path: url(#glass-clip);
   background: radial-gradient(
     ellipse 70% 55% at 38% 18%,
     hsla(var(--lamp-hue), 60%, 65%, 0.5),
