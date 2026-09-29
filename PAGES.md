@@ -54,5 +54,6 @@
 | 凪の池（Still Pond） | スマホの傾き検知と連動する、フォトリアルな3D水面のヒーリング体験。禅の池に浮かぶ蓮の葉・丸石が端末の傾き（PCではマウスドラッグ）に応じて物理的に反応する | [Pages](https://oplan-development-team.github.io/web-app-factory/still-pond/) | 完成 | 2026-09-16 |
 | 金継ぎスタジオ（Kintsugi Mending Studio） | 器を割ると亀裂が枝分かれしながら走り、金の漆で継ぐアニメーションを経て、金線の輝きで仕上げたポスターとして書き出せる金継ぎの美意識を体験するツール | [Pages](https://oplan-development-team.github.io/web-app-factory/kintsugi-mending-studio/) | プロトタイプ（採否待ち） | 2026-09-11 |
 | 文章クセのカルテ（Prose Habit X-ray） | 貼り付けた日本語文章を、「が」連続・同語尾連続・文長ばらつき等6項目でルールベース診断し、健康診断風のカルテとして原文ハイライト連携で見せるツール | [Pages](https://oplan-development-team.github.io/web-app-factory/prose-habit-xray/) | プロトタイプ（PR未マージのためプレビュー未反映） | 2026-09-14 |
+| モアレ・オプアート・スタジオ（Moiré Op Art Studio） | 線・ドット・同心円のレイヤーを重ねて生まれるモアレをリアルタイム操作し、Kineticモードの自動回転やPNG/SVG書き出しができるオプアート・スタジオ（既知のCSSバグ未修正、PROJECTS.md参照） | [Pages](https://oplan-development-team.github.io/web-app-factory/moire-op-art-studio/) | プロトタイプ（採否待ち・要修正） | 2026-09-15 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。

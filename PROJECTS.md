@@ -8,6 +8,22 @@
 
 ## プロトタイプ
 
+### モアレ・オプアート・スタジオ（Moiré Op Art Studio）（`apps/moire-op-art-studio/`）
+
+app-factoryパイプラインが自律生成したプロトタイプ（GitHub Actions夜間無人実行）。線・ドット・同心円から成る2〜3枚のパターンレイヤーを重ね、各レイヤーの回転角度・間隔・太さ・不透明度・合成モード（通常/乗算/差分/除外）をスライダーで操作すると、レイヤー間の干渉から生じるモアレがリアルタイムに変化する。いずれかのレイヤーを自動回転させ続ける「Kineticモード」で呼吸するように連続変化する様子を観察でき、気に入った瞬間を展示ラベル風のポスターフレーム付き高解像度PNG、またはCanvasと構造的に一致するSVGとして書き出せる。プリセット3〜5種・ランダム生成（1手Undo付き）にも対応。バックエンド不要、Vite + TypeScript + 素のCanvas 2D（外部描画/シミュレーションライブラリ不使用）で完結。
+
+スタイル方向はスイス（インターナショナル・タイポグラフィ・スタイル）。ベースは黒/白/グレーのみ、UIのアクセントは赤1色に限定（レイヤー自体の色は自由指定可）。コントロールパネルは「LAYER 01 / LINES」のような大見出し番号を振った展示ラベル/カタログカード調のグリッドで構成し、Inter（@fontsource同梱、外部CDN不使用）のウェイト差で階層をつけている。1960年代のOp Art（Bridget Riley等）と同時代のスイス派ポスターデザインの親和性に基づく選定で、既存の類似ジャンルアプリ（chladni-poster-lab=レトロフューチャー実験機材風、guilloche-currency-studio=紙幣装飾風）とは意匠系統が異なる。
+
+concept-developer直後にux-flow-reviewerがレビューし、レイヤー数上限/下限到達時のボタン活性状態表示・破壊的操作（リセット/レイヤー削除）への1手Undoの明示・合成モードの「グローバル/レイヤー個別」優先順位が一目でわかるUI・デスクトップ左右2カラム配置とモバイルでの操作導線を要件に反映済み。
+
+Design QA/Verifyは2ラウンド実施したが、**最終ラウンドでも設計QAが不合格のまま完了している（`reviewPassed: false`）**。1ラウンド目でCSS Gridの`1fr`列非収縮バグ（右パネルがビューポート外にはみ出す）を指摘され`prototype-builder`が修正、2ラウンド目のQAで新たに`.btn--transport.is-active`（詳細度0,2,0）と`.btn:hover:not(:disabled)`（詳細度0,3,0）が衝突し、キネティックモード稼働中にPAUSEボタンへマウスオーバーすると赤の"稼働中"表示が黒のhover色に上書きされて消えるCSS詳細度バグが新規に見つかったが、Review & Fixループの上限（2ラウンド）に達したため**このバグは未修正のまま**。メインセッションが`src/style.css`を直接読み実際に詳細度が衝突すること（`.btn--transport.is-active`の2クラス vs `.btn:hover:not(:disabled)`の3クラス相当）を独立確認済み。機械的に握りつぶさずここに記録する。
+
+**メインセッションによる独立検証**: `npm install && npm run build`成功。`docker build`〜`docker run`〜`curl`でHTTP 200・`<title>`応答を独立に確認後、image/containerとも削除。GitHub Pagesのサブパス配信（`/web-app-factory/moire-op-art-studio/`）をPythonの簡易サーバーでローカル再現しアセット読み込みを確認。`deploy.json`（`{"pages": true}`）と`vite.config.ts`の`base: './'`も確認済み。上記の未修正CSSバグ以外にビルド・Docker面での問題は見つかっていない。
+
+このジョブはGitHub Actions夜間無人実行のため、ジョブの指示によりmainへの直接マージは行わず、`app-factory/auto-moire-op-art-studio`ブランチをpushしたうえでmain宛てのPull Requestのみ作成している（PR自体は未マージ）。
+
+**採否待ち（要修正あり）**: 機能・Dockerビルドは動作確認済みだが、上記のCSS詳細度バグ（キネティックモード稼働中のホバー時に稼働中表示が消える）が未修正のまま残っている。採用する場合はこの点をsdd-managerへの発注時に申し送ること。
+
 ### 文章クセのカルテ（Prose Habit X-ray）（`apps/prose-habit-xray/`）
 
 app-factoryパイプラインが自律生成したプロトタイプ（GitHub Actions無人実行）。貼り付けた1本の日本語文章を、正規表現・文字列処理のみのルールベースで6項目（「が」の連続使用・同一語尾の連続・一文の長さのばらつき・受動態・体言止め・同一接続詞の多用）について診断し、健康診断風のA〜D総合判定と「診断タイプ」ラベルをカルテ形式で提示する。既存の`proofmark-diff`（2バージョン間のdiff可視化）とは異なり、単一テキストの文体診断に特化する点で差別化している。外部NLP API・サーバー送信は一切行わず、完全クライアントサイド完結（Vite + TypeScript、フレームワークレス）。
