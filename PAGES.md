@@ -66,3 +66,4 @@
 | スリットスキャン・カメラ（Time Smear Camera） | ウェブカメラの1pxスリットを時間方向に並べ、動きが流れ背景が縞になる「時間を引き伸ばした写真」をライブ撮影してPNG保存する | [Pages](https://oplan-development-team.github.io/web-app-factory/slit-scan-camera/) | プロトタイプ（採否待ち） | 2026-09-28 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
+| ペーパークロマトグラフィ・ラボ（Paper Chromatography Lab） | 濾紙にインク滴を落とすと顔料ごとの速度差で色が虹の帯に分離していく様子を観察し、乾燥させて標本ラベル付きPNGに書き出す | [Pages](https://oplan-development-team.github.io/web-app-factory/paper-chromatography-lab/) | プロトタイプ（採否待ち） | 2026-09-29 |
