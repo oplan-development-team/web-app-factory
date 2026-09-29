@@ -59,5 +59,6 @@
 | キー配列脱出ゲーム（QWERTY Escape） | 物理キーボードの配列上の「空間的な形」を読み解いて南京錠を開錠していく9問構成のブラウザ脱出ゲーム | [Pages](https://oplan-development-team.github.io/web-app-factory/qwerty-escape/) | プロトタイプ（採否待ち） | 2026-09-17 |
 | 図形楽譜ジェネレーター（Graphic Score Studio） | 自由に描いた線や写真を前衛音楽の「図形楽譜」風ポスターに変換し、左から右へ自動でなぞりながらWeb Audioのオシレーター合成でアンビエントに鳴らすツール | [Pages](https://oplan-development-team.github.io/web-app-factory/graphic-score-studio/) | プロトタイプ（採否待ち） | 2026-09-18 |
 | ふーっと消して、願いごと（Blow Out & Wish） | マイクに息を吹きかけてロウソクの炎を消す誕生日ミニゲーム。全本消灯すると一言の願いごとをダークラグジュアリーな演出でリビールする | [Pages](https://oplan-development-team.github.io/web-app-factory/blow-out-wish/) | プロトタイプ（採否待ち） | 2026-09-19 |
+| ブラックライト便箋（Invisible Ink Letter） | 暗室の便箋に打った秘密のメッセージを、カーソル＝懐中電灯でなぞるとネオン色に発光して浮かび上がり、やがてまた闇に溶けて消える一期一会の手紙アプリ | [Pages](https://oplan-development-team.github.io/web-app-factory/invisible-ink-letter/) | プロトタイプ（採否待ち） | 2026-09-22 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
