@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>ふーっと消して、願いごと | Blow Out &amp; Wish</title>
+    <meta
+      name="description"
+      content="マイクに息を吹きかけてロウソクを消す誕生日ミニゲーム。炎の揺らぎとろうの垂れ落ちを自前物理で再現し、消えた瞬間に願いごとをリビールする。"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d0b09'/%3E%3Cpath d='M16 8c2 3-2 4-2 7a2 2 0 0 0 4 0c1 2-.5 5-3 5a5 5 0 0 1-2-9.6C13.6 9 14.6 8.4 16 8z' fill='%23ffb454'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <div class="stage-vignette" aria-hidden="true"></div>
+      <div class="stage-grain" aria-hidden="true"></div>
+
+      <!-- ============ 1. Onboarding ============ -->
+      <section id="screen-onboarding" class="screen screen--onboarding" data-screen="onboarding">
+        <div class="onboarding-layout">
+          <p class="overline">A LITTLE BIRTHDAY RITUAL</p>
+          <h1 class="display-title">ふーっと消して、<br />願いごと。</h1>
+          <p class="lede">
+            マイクに息を吹きかけて、ロウソクの炎を消してください。全部消えたら、最後に一言だけ願いごとを。
+          </p>
+
+          <div class="mic-note">
+            <svg class="mic-note__icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.4"
+              />
+              <path
+                d="M6 11a6 6 0 0 0 12 0M12 19v3"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linecap="round"
+              />
+            </svg>
+            <p>
+              息の強さを測るためにマイクを使用します。音声はどこにも送信・保存されず、この端末の中だけで処理されます。
+            </p>
+          </div>
+
+          <button id="btn-request-mic" class="btn btn--primary" type="button">マイクを許可して始める</button>
+        </div>
+      </section>
+
+      <!-- ============ 2. Calibrating ============ -->
+      <section id="screen-calibrating" class="screen screen--calibrating" data-screen="calibrating" hidden>
+        <div class="calibrating-layout">
+          <div class="calibrating-ring" aria-hidden="true">
+            <svg viewBox="0 0 120 120">
+              <circle class="calibrating-ring__track" cx="60" cy="60" r="52" />
+              <circle id="calibrating-ring__fill" class="calibrating-ring__fill" cx="60" cy="60" r="52" />
+            </svg>
+            <svg class="calibrating-ring__icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.4"
+              />
+              <path
+                d="M6 11a6 6 0 0 0 12 0M12 19v3"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+          <p class="calibrating-label">周辺音を測定中<span class="calibrating-dots" aria-hidden="true">…</span></p>
+          <p class="calibrating-hint">数秒だけ、静かにお待ちください</p>
+        </div>
+      </section>
+
+      <!-- ============ 3. Mic error ============ -->
+      <section id="screen-mic-error" class="screen screen--mic-error" data-screen="mic-error" hidden>
+        <div class="error-layout">
+          <p class="overline overline--danger">マイクに接続できません</p>
+          <h2 id="mic-error-title" class="error-title">—</h2>
+          <p id="mic-error-body" class="error-body">—</p>
+
+          <ol id="mic-error-steps" class="error-steps"></ol>
+
+          <div class="error-actions">
+            <button id="btn-retry-mic" class="btn btn--primary" type="button">もう一度試す</button>
+            <button id="btn-reload" class="btn btn--ghost" type="button">ページを再読み込み</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 4. Mode select ============ -->
+      <section id="screen-mode-select" class="screen screen--mode-select" data-screen="mode-select" hidden>
+        <div class="mode-layout">
+          <p class="overline">CHOOSE YOUR CANDLES</p>
+          <h2 class="section-title">モードを選ぶ</h2>
+
+          <div class="mode-panels">
+            <div class="mode-panel mode-panel--solo">
+              <h3 class="mode-panel__title">ソロモード</h3>
+              <p class="mode-panel__desc">本数を選んで、落ち着いて全部吹き消しましょう。</p>
+              <div class="preset-row" role="group" aria-label="ロウソクの本数を選ぶ">
+                <button class="preset-pill" type="button" data-count="1">
+                  <span class="preset-pill__num">1</span><span class="preset-pill__unit">本</span>
+                </button>
+                <button class="preset-pill" type="button" data-count="3">
+                  <span class="preset-pill__num">3</span><span class="preset-pill__unit">本</span>
+                </button>
+                <button class="preset-pill" type="button" data-count="5">
+                  <span class="preset-pill__num">5</span><span class="preset-pill__unit">本</span>
+                </button>
+                <button class="preset-pill" type="button" data-count="8">
+                  <span class="preset-pill__num">8</span><span class="preset-pill__unit">本</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="mode-panel mode-panel--challenge">
+              <h3 class="mode-panel__title">連続チャレンジ</h3>
+              <p class="mode-panel__desc">
+                1本から開始。消すたびに+1本ずつ増え、制限時間が切れるまで続きます。
+              </p>
+              <button id="btn-start-challenge" class="btn btn--primary btn--block" type="button">
+                チャレンジを始める
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 5. Game ============ -->
+      <section id="screen-game" class="screen screen--game" data-screen="game" hidden>
+        <header class="game-header">
+          <button id="btn-back-to-modes" class="link-back" type="button">← モードを選び直す</button>
+          <div class="game-header__status">
+            <span id="game-mode-label" class="game-mode-label">—</span>
+            <span id="game-timer" class="game-timer" hidden>00:00</span>
+          </div>
+        </header>
+
+        <div class="scene-wrap">
+          <canvas id="scene-canvas" aria-label="ロウソクとその炎の様子"></canvas>
+
+          <div class="breath-hud" aria-live="polite">
+            <div class="breath-dial">
+              <svg viewBox="0 0 108 108" class="breath-dial__ring">
+                <circle class="breath-dial__track" cx="54" cy="54" r="46" />
+                <circle id="breath-dial__fill" class="breath-dial__fill" cx="54" cy="54" r="46" />
+              </svg>
+              <svg class="breath-dial__icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+                <path
+                  d="M6 11a6 6 0 0 0 12 0M12 19v3"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+            <p id="breath-hint" class="breath-hint">マイクに向かって、ふーっと吹いてください</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 6. Wish ============ -->
+      <section id="screen-wish" class="screen screen--wish" data-screen="wish" hidden data-phase="input">
+        <div class="wish-blackout" aria-hidden="true"></div>
+
+        <div class="wish-input-layout">
+          <p class="overline">ALL CANDLES OUT</p>
+          <h2 class="section-title">最後に、願いごとを一言</h2>
+          <form id="wish-form" class="wish-form">
+            <input
+              id="wish-text"
+              class="wish-input"
+              type="text"
+              maxlength="40"
+              placeholder="ここに願いごとを…"
+              autocomplete="off"
+            />
+            <button class="btn btn--primary" type="submit">願いを込める</button>
+          </form>
+          <p class="wish-note">この願いごとは保存されません。画面を閉じると静かに消えます。</p>
+        </div>
+
+        <div class="wish-reveal-layout">
+          <div class="wish-smoke" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <p class="overline overline--gold">YOUR WISH</p>
+          <p id="wish-reveal-text" class="wish-reveal-text">—</p>
+          <p class="wish-reveal-caption">Happy Birthday</p>
+
+          <div class="wish-actions">
+            <button id="btn-relight" class="btn btn--primary" type="button">もう一度火を灯す</button>
+            <button id="btn-wish-back-to-modes" class="link-back link-back--light" type="button">
+              モードを選び直す
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 7. Time up (challenge) ============ -->
+      <section id="screen-timeup" class="screen screen--timeup" data-screen="timeup" hidden>
+        <div class="timeup-layout">
+          <p class="overline overline--danger">TIME'S UP</p>
+          <h2 class="section-title">タイムアップ</h2>
+          <p class="timeup-result">
+            <span id="timeup-count" class="timeup-count">0</span><span class="timeup-count-unit">本</span>
+          </p>
+          <p class="timeup-caption">まで吹き消せました</p>
+
+          <div class="timeup-actions">
+            <button id="btn-retry-challenge" class="btn btn--primary" type="button">もう一度挑戦する</button>
+            <button id="btn-timeup-back-to-modes" class="link-back" type="button">モードを選び直す</button>
+          </div>
+        </div>
+      </section>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
