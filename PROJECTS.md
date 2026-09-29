@@ -8,6 +8,18 @@
 
 ## プロトタイプ
 
+### グリッチ写真ラボ（Glitch Print Lab）（`apps/glitch-print-lab/`）
+
+app-factoryパイプラインが自律生成したプロトタイプ（GitHub Actions無人実行）。アップロードした写真（または同梱の手続き生成サンプル画像）に対し、①`canvas.toBlob('image/jpeg')`で得たArrayBufferのSOSマーカー(0xFFDA)以降のスキャンデータ領域を実際にバイト単位で改変し`createImageBitmap`で再デコードする本物のJPEGバイナリ破壊、②行単位ピクセルシフト、③チャンネル分離(色収差)、④スキャンライン置換、の固定4層スタックをリアルタイムに適用し、サイバーパンク調のデータベンディング・グリッチアートとして高解像度PNGに書き出せるツール。シェーダーでの疑似再現ではなく実バイト破壊を核に据えている点が既存カタログ（エディトリアル・和風・ダークラグジュアリー系の工芸/アーカイブ美学に偏重）との差別化点。3プリセット（VHS DECAY/DATAMOSH CORE/CHROMATIC FRACTURE）、シード変更のREROLL（非決定的でUndo対象外）、Before/After比較、失敗時のラボ風エラー表示とEXPORT無効化を実装。バックエンドなし、Vite+TypeScript（vanilla）、Canvas 2D + ArrayBuffer直接操作のみで完結。
+
+スタイル方向はネオブルータリズム×サイバーパンク・ラボ機器意匠。漆黒背景にネオングリーン・マゼンタ・シアンの3色に限定したアクセント（RGB色収差そのものをブランドカラーに転用）、角丸なしの太いソリッドボーダー、JetBrains Mono、見出しのグリッチジッターアニメーション、ボタン/スライダーのhover/focus時の色収差エコー。
+
+Concept段階で`ux-flow-reviewer`が「REROLLの非可逆性による喪失体験」を指摘したが、要件が意図的にUndoスコープ外とする非決定性の真正さを損なわないため、EXPORTボタンを常設固定位置に置く設計で補う形にとどめた（要件に明記済み）。Design QA 2体・Verifyともに1ラウンド目で合格（差し戻しなし）。実装中の自己検証でCORRUPTION BLOCK SIZEが小さいと再デコード失敗率が非常に高いことを実測し、プリセット・デフォルト値の見直しと解像度比に応じたスケーリング、初回読込/プリセット適用時のリトライ機構を追加済み（詳細はapps/glitch-print-lab/README.md参照）。
+
+**メインセッションによる独立検証待ち**: Workflow内のprototype-verifierによるnpm run build・Playwright実機操作（スライダー/REROLL/プリセット/EXPORT/Before-After切替）・`docker build --no-cache`〜起動〜HTTP 200・GitHub Pagesサブパス配信シミュレーションはいずれも合格報告済みだが、メインセッションでの再現確認はこの記載時点でまだ実施していない。`.gitignore`がprototype-builderの実装から漏れていたため、PROJECTS.md更新時に追加している。
+
+**採否待ち**: 採用するかどうかはユーザー判断待ち。採用する場合は`.claude/CLAUDE.md`の「プロトタイプ採用後の引き継ぎ」に従ってsdd-managerに本実装を依頼する。
+
 ### 金継ぎスタジオ（Kintsugi Mending Studio）（`apps/kintsugi-mending-studio/`）
 
 app-factoryパイプラインが自律生成したプロトタイプ（GitHub Actions無人実行、Ideate/Critiqueは実用ツール／ビジュアル・作品性／遊び心・実験の3レンズで計15案生成、2ラウンド目に進む前に金継ぎスタジオ（8点）が採用ラインに到達）。画面上の器（碗・皿・花瓶から選択、釉薬は青磁・白磁・黒漆・辰砂）をクリックして「割る」と、再帰的な分岐アルゴリズム（自前実装、真の物理破壊シミュレーションは不使用）で亀裂が最大4起点から枝分かれしながら走る。続けて「金で継ぐ」で亀裂をなぞる金線の発光アニメーションを見せ、器種・釉薬・亀裂数・日付入りの美術館キャプション風ポスターとしてPNG書き出しできる。金継ぎの美意識（欠けや傷を隠さず輝かせる）を体験させる作品性ツール。既存カタログに同種のWeb生成ツールは無かった。バックエンドなし、Vite + TypeScript + Canvas 2D。

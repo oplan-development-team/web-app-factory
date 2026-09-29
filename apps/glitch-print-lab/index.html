@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GLITCH PRINT LAB // Data-Bending Photo Terminal</title>
+    <meta
+      name="description"
+      content="本物のJPEGバイト破壊とピクセルグリッチをブラウザ内で適用し、サイバーパンクなデータベンディング・アートに仕上げるラボ型フォトツール。"
+    />
+  </head>
+  <body>
+    <div class="noise-overlay" aria-hidden="true"></div>
+    <div class="scanline-overlay" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="topbar__brand">
+        <h1 class="glitch-heading" id="mainHeading" data-text="GLITCH PRINT LAB">GLITCH PRINT LAB</h1>
+        <p class="topbar__subtitle">DATA-BENDING PHOTO TERMINAL // CLIENT-SIDE UNIT</p>
+      </div>
+      <div class="topbar__actions">
+        <div class="seed-display" title="現在の破壊シード値">
+          <span class="seed-display__label">SIGNAL SEED</span>
+          <span class="seed-display__value" id="seedValue">0x00000000</span>
+        </div>
+        <button id="rerollBtn" class="btn btn--warning btn--magenta" type="button">
+          <span class="btn__label">REROLL</span>
+        </button>
+        <button id="exportBtn" class="btn btn--warning btn--green" type="button">
+          <span class="btn__label">EXPORT PNG</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="preview-pane" aria-label="ライブプレビュー">
+        <div class="preview-pane__toolbar">
+          <div class="status-indicator" id="statusIndicator" data-state="ready">
+            <span class="status-indicator__dot" aria-hidden="true"></span>
+            <span id="statusText">READY</span>
+          </div>
+          <button id="compareToggle" class="btn btn--ghost" type="button" aria-pressed="true">
+            SHOW: <span id="compareLabel">AFTER</span>
+          </button>
+          <button id="loadImageBtn" class="btn btn--ghost" type="button">LOAD IMAGE</button>
+        </div>
+
+        <div class="canvas-frame" id="canvasFrame">
+          <canvas id="previewCanvas" width="800" height="600"></canvas>
+          <div class="dropzone" id="dropzone" tabindex="0" role="button"
+            aria-label="画像をドロップまたはクリックして選択">
+            <p class="dropzone__title">DROP IMAGE // CLICK TO SELECT</p>
+            <p class="dropzone__hint">JPG · PNG · WEBP — またはサンプルを使用</p>
+            <button class="btn btn--ghost" id="useSampleBtn" type="button">USE SAMPLE TARGET</button>
+          </div>
+        </div>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" hidden />
+
+        <div class="error-banner" id="errorBanner" role="alert" hidden>
+          <span class="error-banner__icon" aria-hidden="true">&#9888;</span>
+          <div class="error-banner__body">
+            <p class="error-banner__title" id="errorTitle">RE-DECODE FAILURE</p>
+            <p class="error-banner__desc" id="errorDesc"></p>
+          </div>
+        </div>
+
+        <div class="preview-pane__meta">
+          <span id="dimsReadout">— × — PX</span>
+          <span id="fileNameReadout">NO SOURCE LOADED</span>
+        </div>
+      </section>
+
+      <aside class="control-panel" aria-label="グリッチ・コントロールパネル">
+        <div class="control-block">
+          <h2 class="control-block__title">PRESET BANKS</h2>
+          <div class="preset-grid">
+            <button class="preset-btn" data-preset="vhs" type="button">
+              <span class="preset-btn__num">P1</span>
+              VHS DECAY
+            </button>
+            <button class="preset-btn" data-preset="datamosh" type="button">
+              <span class="preset-btn__num">P2</span>
+              DATAMOSH CORE
+            </button>
+            <button class="preset-btn" data-preset="chromatic" type="button">
+              <span class="preset-btn__num">P3</span>
+              CHROMATIC FRACTURE
+            </button>
+          </div>
+        </div>
+
+        <div id="layerStack" class="layer-stack"></div>
+
+        <div class="control-block control-panel__footer-note">
+          <p>
+            STACK ORDER IS FIXED: <strong>01 BYTE CORRUPT &rarr; 02 ROW SHIFT &rarr; 03 CHANNEL DRIFT &rarr; 04 SCAN
+            REPLACE.</strong>
+            REROLL生成物はUndo対象外です。気に入ったら即EXPORTしてください。
+          </p>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="statusbar">
+      <span>APERTURE-9 GLITCH LAB // 100% IN-BROWSER RENDER // NO UPLOAD</span>
+      <span id="engineReadout">ENGINE: IDLE</span>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
