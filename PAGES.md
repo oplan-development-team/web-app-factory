@@ -61,5 +61,6 @@
 | ふーっと消して、願いごと（Blow Out & Wish） | マイクに息を吹きかけてロウソクの炎を消す誕生日ミニゲーム。全本消灯すると一言の願いごとをダークラグジュアリーな演出でリビールする | [Pages](https://oplan-development-team.github.io/web-app-factory/blow-out-wish/) | プロトタイプ（採否待ち） | 2026-09-19 |
 | ブラックライト便箋（Invisible Ink Letter） | 暗室の便箋に打った秘密のメッセージを、カーソル＝懐中電灯でなぞるとネオン色に発光して浮かび上がり、やがてまた闇に溶けて消える一期一会の手紙アプリ | [Pages](https://oplan-development-team.github.io/web-app-factory/invisible-ink-letter/) | プロトタイプ（採否待ち） | 2026-09-22 |
 | オシロスコープ・サウンドアート（XYシンセ描画） | 円形スコープに描いた軌跡の座標をそのままステレオ波形としてリアルタイム合成・再生し、鳴っている音と同期したフォスファーグリーンの光跡を描き戻すオシロスコープ・ミュージック制作ツール | [Pages](https://oplan-development-team.github.io/web-app-factory/oscilloscope-synth/) | プロトタイプ（採否待ち） | 2026-09-24 |
+| 空気読みトレーニング（KY Trainer） | 日本語特有の「空気を読む」社会的シチュエーションをマンガのコマ形式で提示し、12秒以内に最も場が丸く収まる返答を4択から選ぶコメディクイズ | [Pages](https://oplan-development-team.github.io/web-app-factory/ky-trainer/) | プロトタイプ（採否待ち） | 2026-09-26 |
 
 タイピング心電図は `deploy.json` の `pages` が `false`（ビルドが`dist/`を生成しない構成のため、現状Pagesワークフローの対象外）。
